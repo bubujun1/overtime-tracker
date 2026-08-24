@@ -12,6 +12,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { spawn, execSync } = require('child_process');
 
 const APP_DIR = process.env.APP_DIR || path.join(__dirname, '..');
 const DATA_DIR = process.env.DATA_DIR || path.join(APP_DIR, 'data');
@@ -20,13 +21,13 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.1.2';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 const DEFAULT_DB = {
-  settings: { hourlyRate: 50, recurringFees: [] },
+  settings: { hourlyRate: 50, monthlyRates: {}, recurringFees: [] },
   records: []
 };
 
@@ -108,6 +109,19 @@ function recordSubtotal(rec, rate) {
   const base = (Number(rec.hours) || 0) * (Number(rate) || 0);
   const extra = (rec.items || []).reduce((s, it) => s + (Number(it.amount) || 0), 0);
   return round2(base + extra);
+}
+
+// 按记录日期查找当月加班费率：优先 monthlyRates[YYYY-MM]，没有则沿用上月，都没有用 hourlyRate
+function getMonthlyRate(dateStr) {
+  if (!dateStr) return db.settings.hourlyRate || 0;
+  const m = String(dateStr).slice(0, 7); // "2026-08"
+  const rates = (db.settings && db.settings.monthlyRates) ? db.settings.monthlyRates : {};
+  if (rates[m] !== undefined && rates[m] !== null) return Number(rates[m]) || 0;
+  // 没设定当月 → 向前找最近一个月的费率
+  const keys = Object.keys(rates).filter((k) => k < m).sort().reverse();
+  if (keys.length > 0) return Number(rates[keys[0]]) || 0;
+  // 兜底
+  return db.settings.hourlyRate || 0;
 }
 
 function serveStatic(res, urlPath) {
@@ -226,6 +240,45 @@ async function checkUpdate() {
   };
 }
 
+// 解析 fnOS 官方安装命令 appcenter-cli（记加班在 fnOS 以高权限运行，可直接用它安装/升级自身）
+function resolveInstallCmd() {
+  const abs = ['/usr/bin/appcenter-cli', '/usr/local/bin/appcenter-cli', '/bin/appcenter-cli', '/sbin/appcenter-cli'];
+  for (const p of abs) {
+    try { if (fs.existsSync(p)) return { bin: p, sudo: false }; } catch (e) {}
+  }
+  try {
+    const p = execSync('command -v appcenter-cli 2>/dev/null', { encoding: 'utf8' }).trim();
+    if (p) return { bin: p, sudo: false };
+  } catch (e) {}
+  try {
+    const sudo = execSync('command -v sudo 2>/dev/null', { encoding: 'utf8' }).trim();
+    if (sudo) return { bin: sudo, sudo: true };
+  } catch (e) {}
+  return null;
+}
+
+// 异步触发安装（detached，安装过程独立于本服务，即使本服务被重启也不影响）
+function runInstall(cmd, fpkPath) {
+  const args = cmd.sudo ? ['-n', 'appcenter-cli', 'install-fpk', fpkPath] : ['install-fpk', fpkPath];
+  const logPath = path.join(VAR_DIR, 'updates', 'install.log');
+  let log = null;
+  try { log = fs.createWriteStream(logPath, { flags: 'a' }); } catch (e) {}
+  const w = (s) => { if (log) try { log.write(s); } catch (e) {} };
+  w('\n=== install @ ' + new Date().toISOString() + ' ===\n');
+  w('bin=' + cmd.bin + ' sudo=' + cmd.sudo + ' args=' + JSON.stringify(args) + '\n');
+  try {
+    const child = spawn(cmd.bin, args, { detached: true, stdio: ['ignore', 'pipe', 'pipe'] });
+    if (child.stdout) child.stdout.on('data', (d) => w('[out] ' + d));
+    if (child.stderr) child.stderr.on('data', (d) => w('[err] ' + d));
+    child.on('error', (e) => w('spawn error: ' + e.message + '\n'));
+    child.on('exit', (code, sig) => { w('exit code=' + code + ' signal=' + sig + '\n'); if (log) log.end(); });
+    child.unref();
+  } catch (e) {
+    w('exception: ' + e.message + '\n');
+    if (log) log.end();
+  }
+}
+
 async function handleApi(req, res, apiPath, method) {
   const parts = apiPath.split('/').filter(Boolean);
   const head = parts[0];
@@ -239,7 +292,7 @@ async function handleApi(req, res, apiPath, method) {
     }
   }
 
-  // 一键更新：下载新版本 .fpk 并尝试触发 fnOS 覆盖安装（对齐 hermes-agent 的"直接更新覆盖"体验）
+  // 一键更新：下载新版本 .fpk，并用 fnOS 官方 appcenter-cli 直接覆盖安装（真·自动更新）
   if (head === 'update' && method === 'POST') {
     try {
       const info = await checkUpdate();
@@ -267,58 +320,75 @@ async function handleApi(req, res, apiPath, method) {
       fs.writeFileSync(fpkPath, buf);
       console.log('[update] downloaded', buf.length, 'bytes ->', fpkPath);
 
-      // 尝试调用 fnOS 应用中心 API 触发安装（最佳努力）
-      let installResult = null;
-      try {
-        // 方式1：尝试通过 trim_app_center 的 CGI 接口
-        const host = process.env.FNOS_HOST || '127.0.0.1';
-        const port = parseInt(process.env.FNOS_PORT || '8082', 10);
-        const installApi = 'http://' + host + ':' + port + '/cgi-bin/appcenter.cgi';
-        // 注意：此接口为内部接口，不同 fnOS 版本可能不同；失败不影响已下载的 fpk
-        const form = new URLSearchParams();
-        form.append('action', 'install');
-        form.append('file_path', fpkPath);
-        form.append('force_upgrade', '1');
-
-        const installRes = await fetch(installApi, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: form.toString(),
-          signal: AbortSignal.timeout(10000)
+      // 解析 fnOS 安装命令（appcenter-cli install-fpk <path>）
+      const cmd = resolveInstallCmd();
+      if (!cmd) {
+        // 系统无安装命令：仅完成下载，交前端提供「下载安装包」按钮（HTTP 流式下载绕过管理员目录限制）
+        return sendJSON(res, 200, {
+          ok: true,
+          phase: 'download-only',
+          version: info.latest,
+          fpkPath: fpkPath,
+          fpkSize: buf.length,
+          message: '已下载，但系统安装命令不可用，请点击下方按钮下载安装包后到飞牛应用中心手动覆盖'
         });
-        installResult = { status: installRes.status, ok: installRes.ok };
-        console.log('[update] install attempt:', installResult);
-      } catch (eInstall) {
-        installResult = { error: eInstall.message };
-        console.log('[update] install attempt failed (non-fatal):', eInstall.message);
       }
 
-      return sendJSON(res, 200, {
+      // 先回包，再延迟触发安装，确保本次响应送达（安装会重启本服务）
+      const resp = {
         ok: true,
-        phase: 'done',
+        phase: 'installing',
         version: info.latest,
         fpkPath: fpkPath,
         fpkSize: buf.length,
-        installAttempt: installResult,
-        message: '新版本 v' + info.latest + ' 已下载完成'
-      });
+        install: { bin: cmd.bin, sudo: cmd.sudo },
+        message: '已触发覆盖安装，应用将自动重启更新'
+      };
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify(resp));
+      setTimeout(() => { runInstall(cmd, fpkPath); }, 600);
+      return;
     } catch (e) {
       return sendJSON(res, 200, { ok: false, error: '更新失败: ' + e.message, phase: 'unknown' });
     }
   }
 
+  // 下载已缓存的 fpk 到浏览器（绕过飞牛文件选择器无法访问管理员目录的限制，作为自动安装失败时的兜底）
+  if (head === 'update-download' && method === 'GET') {
+    try {
+      const ver = parts[1] || null; // 形如 /api/update-download/1.1.2
+      let fpkPath = ver ? path.join(VAR_DIR, 'updates', 'overtime-tracker-' + ver + '.fpk') : null;
+      if (!fpkPath || !fs.existsSync(fpkPath)) {
+        const dir = path.join(VAR_DIR, 'updates');
+        if (fs.existsSync(dir)) {
+          const files = fs.readdirSync(dir).filter((f) => String(f).toLowerCase().endsWith('.fpk')).sort();
+          if (files.length) fpkPath = path.join(dir, files[files.length - 1]);
+        }
+      }
+      if (!fpkPath || !fs.existsSync(fpkPath)) {
+        return sendJSON(res, 404, { ok: false, error: '未找到已下载的安装包，请先点「立即更新覆盖」下载' });
+      }
+      const stat = fs.statSync(fpkPath);
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', 'attachment; filename="' + path.basename(fpkPath) + '"');
+      res.setHeader('Content-Length', stat.size);
+      fs.createReadStream(fpkPath).pipe(res);
+      return;
+    } catch (e) {
+      return sendJSON(res, 500, { ok: false, error: e.message });
+    }
+  }
+
   if (head === 'state' && method === 'GET') {
-    const rate = db.settings.hourlyRate;
-    const enriched = db.records.map((r) => ({ ...r, subtotal: recordSubtotal(r, rate) }));
+    const enriched = db.records.map((r) => ({ ...r, subtotal: recordSubtotal(r, getMonthlyRate(r.date)) }));
     return sendJSON(res, 200, { settings: db.settings, records: enriched });
   }
 
   if (head === 'summary' && method === 'GET') {
-    const rate = db.settings.hourlyRate || 0;
     let totalHours = 0, totalCost = 0;
     for (const r of db.records) {
       totalHours += Number(r.hours) || 0;
-      totalCost += recordSubtotal(r, rate);
+      totalCost += recordSubtotal(r, getMonthlyRate(r.date));
     }
     // 周期性固定费用：月费全额计入，季费折算为月（÷3）
     let monthlyRecurring = 0;
@@ -421,6 +491,19 @@ async function handleApi(req, res, apiPath, method) {
     try { patch = JSON.parse((await readBody(req)) || '{}'); }
     catch { return sendJSON(res, 400, { error: 'invalid json' }); }
     if (typeof patch.hourlyRate === 'number') db.settings.hourlyRate = round2(patch.hourlyRate);
+    // 月度加班费率（按 "YYYY-MM": rate 格式存储）
+    if (patch.monthlyRates && typeof patch.monthlyRates === 'object') {
+      if (!db.settings.monthlyRates) db.settings.monthlyRates = {};
+      const keys = Object.keys(patch.monthlyRates);
+      for (const k of keys) {
+        // 只接受 YYYY-MM 格式的 key
+        if (/^\d{4}-\d{2}$/.test(k)) {
+          const v = Number(patch.monthlyRates[k]);
+          if (!isNaN(v) && v >= 0) db.settings.monthlyRates[k] = round2(v);
+          else delete db.settings.monthlyRates[k]; // 设为 null/undefined 则删除
+        }
+      }
+    }
     // 周期性固定费用（月/季度）
     if (Array.isArray(patch.recurringFees)) {
       db.settings.recurringFees = patch.recurringFees
@@ -437,8 +520,7 @@ async function handleApi(req, res, apiPath, method) {
 
   if (head === 'records') {
     if (method === 'GET') {
-      const rate = db.settings.hourlyRate;
-      const enriched = db.records.map((r) => ({ ...r, subtotal: recordSubtotal(r, rate) }));
+      const enriched = db.records.map((r) => ({ ...r, subtotal: recordSubtotal(r, getMonthlyRate(r.date)) }));
       return sendJSON(res, 200, enriched);
     }
     if (method === 'POST') {
@@ -457,7 +539,7 @@ async function handleApi(req, res, apiPath, method) {
       };
       db.records.push(rec);
       saveDB();
-      return sendJSON(res, 201, { ...rec, subtotal: recordSubtotal(rec, db.settings.hourlyRate) });
+      return sendJSON(res, 201, { ...rec, subtotal: recordSubtotal(rec, getMonthlyRate(rec.date)) });
     }
     if ((method === 'PUT' || method === 'DELETE') && parts[1]) {
       const id = parts[1];
@@ -479,7 +561,85 @@ async function handleApi(req, res, apiPath, method) {
         rec.items = r.items.map((it) => ({ name: String(it.name || '').trim(), amount: round2(Number(it.amount) || 0) }));
       }
       saveDB();
-      return sendJSON(res, 200, { ...rec, subtotal: recordSubtotal(rec, db.settings.hourlyRate) });
+      return sendJSON(res, 200, { ...rec, subtotal: recordSubtotal(rec, getMonthlyRate(rec.date)) });
+    }
+  }
+
+  // ====== 备份管理 API ======
+
+  // GET /api/backups — 列出最近备份
+  if (head === 'backups' && method === 'GET') {
+    try {
+      const list = [];
+      if (fs.existsSync(BACKUP_DIR)) {
+        const files = fs.readdirSync(BACKUP_DIR)
+          .filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f))
+          .sort()
+          .reverse();
+        for (const f of files) {
+          const fp = path.join(BACKUP_DIR, f);
+          try {
+            const stat = fs.statSync(fp);
+            list.push({ name: f, size: stat.size, time: stat.mtime.toISOString(), date: f.replace('.json', '') });
+          } catch (e) { /* skip */ }
+        }
+      }
+      return sendJSON(res, 200, { ok: true, backups: list, keep: BACKUP_KEEP_DAYS });
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+
+  // POST /api/backup — 手动触发一次备份
+  if (head === 'backup' && method === 'POST') {
+    try {
+      runBackup();
+      return sendJSON(res, 200, { ok: true, message: '备份完成' });
+    } catch (e) {
+      return sendJSON(res, 500, { error: '备份失败: ' + e.message });
+    }
+  }
+
+  // GET /api/backup/:file — 下载指定备份文件
+  if (head === 'backup' && method === 'GET' && parts[1]) {
+    try {
+      const fname = parts[1];
+      // 安全检查：只允许日期命名的 JSON 文件
+      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(fname)) {
+        return sendJSON(res, 400, { error: '无效的文件名' });
+      }
+      const fp = path.join(BACKUP_DIR, fname);
+      if (!fs.existsSync(fp)) return sendJSON(res, 404, { error: '备份文件不存在' });
+      const stat = fs.statSync(fp);
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Disposition', 'attachment; filename="overtime-backup-' + fname);
+      res.setHeader('Content-Length', stat.size);
+      fs.createReadStream(fp).pipe(res);
+      return;
+    } catch (e) {
+      return sendJSON(res, 500, { error: e.message });
+    }
+  }
+
+  // POST /api/backup/:file/restore — 从备份恢复
+  if (head === 'backup' && method === 'POST' && parts[1] && parts[2] === 'restore') {
+    try {
+      const fname = parts[1];
+      if (!/^\d{4}-\d{2}-\d{2}\.json$/.test(fname)) {
+        return sendJSON(res, 400, { error: '无效的文件名' });
+      }
+      const fp = path.join(BACKUP_DIR, fname);
+      if (!fs.existsSync(fp)) return sendJSON(res, 404, { error: '备份文件不存在' });
+      const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      if (!data || !Array.isArray(data.records)) {
+        return sendJSON(res, 400, { error: '备份文件格式无效' });
+      }
+      db = data;
+      if (!db.settings) db.settings = JSON.parse(JSON.stringify(DEFAULT_DB.settings));
+      saveDB();
+      return sendJSON(res, 200, { ok: true, message: '已恢复到 ' + fname + ', 共 ' + db.records.length + ' 条记录', records: db.records.length });
+    } catch (e) {
+      return sendJSON(res, 500, { error: '恢复失败: ' + e.message });
     }
   }
 
@@ -515,7 +675,7 @@ process.on('SIGINT', () => {
   setTimeout(() => process.exit(0), 2000);
 });
 
-/* ====== 自动备份 ====== */
+/* ====== 自动备份（每日 06:00，数据变化时才备份，保留最近 3 份）====== */
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const BACKUP_KEEP_DAYS = 3;
 
@@ -524,16 +684,32 @@ function dateStamp(d) {
 }
 function pad2(n) { return String(n).length < 2 ? '0' + String(n) : String(n); }
 
-function runBackup() {
+// 计算数据哈希（用于判断是否需要备份）
+function dataHash() {
   try {
+    const s = JSON.stringify({ settings: db.settings, records: db.records });
+    return crypto.createHash('md5').update(s).digest('hex').slice(0, 16);
+  } catch (e) { return ''; }
+}
+let lastBackupHash = '';
+
+function runBackup(force) {
+  try {
+    // 数据没变且非强制 → 跳过
+    const hash = dataHash();
+    if (!force && hash && hash === lastBackupHash) {
+      console.log('[backup] skipped — data unchanged');
+      return;
+    }
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
     const stamp = dateStamp(new Date());
     const dest = path.join(BACKUP_DIR, stamp + '.json');
     if (fs.existsSync(DB_FILE)) {
       fs.copyFileSync(DB_FILE, dest);
     }
+    lastBackupHash = hash;
     cleanupBackups();
-    console.log('[backup] done ' + stamp);
+    console.log('[backup] done ' + stamp + (force ? ' (manual)' : ''));
   } catch (e) {
     console.error('[backup] error:', e.message);
   }
@@ -558,17 +734,17 @@ function cleanupBackups() {
 function scheduleDailyBackup() {
   // 立即清理一次，保证启动时无过期备份
   cleanupBackups();
-  // 计算到下一个凌晨 00:00 的毫秒数
+  // 计算到下一个凌晨 06:00 的毫秒数
   const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 5, 0);
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 5, 0);
   let delay = next.getTime() - now.getTime();
-  if (delay < 0) delay = 24 * 3600 * 1000;
+  if (delay < 0) delay += 24 * 3600 * 1000; // 已过今天6点 → 明天6点
   setTimeout(function tick() {
-    runBackup();
+    runBackup(false); // 非强制，数据没变则跳过
     // 每 24 小时执行一次
     setTimeout(tick, 24 * 3600 * 1000);
   }, delay);
-  console.log('[backup] scheduled, first run in ' + Math.round(delay / 1000) + 's');
+  console.log('[backup] scheduled at 06:00, first run in ' + Math.round(delay / 1000) + 's');
 }
 
 function start() {

@@ -4,96 +4,108 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>记加班</title>
-<script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
 /* ============================================================
-   记加班 — 对标参考设计：美观整洁、不易视觉疲劳
+   记加班 — 现代极简 · 毛玻璃质感 · 双端自适应
    ============================================================ */
 
-/* ---- CSS 变量（柔和护眼） ---- */
+/* ---- CSS 变量（低饱和 · 柔和护眼） ---- */
 :root {
-  --bg: #f5f7fa; --surface: #ffffff; --text: #1a1a2e;
-  --text-sec: #6b7280; --text-light: #9ca3af;
-  --border: #e8ecf1; --border-light: #f0f2f5;
-  --hdr-from: #667eea; --hdr-to: #764ba2;
-  --accent: #5b7fff; --accent-hover: #4a6cf7;
-  --success: #34d399; --danger: #ef4444; --warning: #f59e0b;
-  /* 日历色 — 对标参考截图 */
-  --cal-ho-bg: #fef3c7; --cal-ho-border: #f59e0b; --cal-ho-text: #b45309;
-  --cal-wd-bg: #fffbeb; --cal-wd-border: #fbbf24;
-  --cal-we-bg: #ecfdf5; --cal-we-border: #a7f3d0;
-  --cal-ot-bg: #eff6ff; --cal-ot-border: #93c5fd; --cal-ot-text: #2563eb;
-  --cal-today-ring: #f87171;
-  /* 统计卡片色 — 对标参考截图 */
+  --bg: #f0f2f5; --surface: rgba(255,255,255,.78); --surface-solid: #ffffff;
+  --text: #1d1d2e; --text-sec: #5c6370; --text-light: #a0a8b4;
+  --border: rgba(0,0,0,.06); --border-light: rgba(0,0,0,.04);
+  --hdr-from: #6366f1; --hdr-to: #8b5cf6;
+  --accent: #6366f1; --accent-hover: #4f46e5;
+  --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
+  /* 日历色 — 低饱和柔和 */
+  --cal-ho-bg: rgba(251,191,36,.12); --cal-ho-border: rgba(245,158,11,.35); --cal-ho-text: #b45309;
+  --cal-wd-bg: rgba(251,191,36,.08); --cal-wd-border: rgba(245,158,11,.28);
+  --cal-we-bg: rgba(34,197,94,.07); --cal-we-border: rgba(34,197,94,.22);
+  --cal-ot-bg: rgba(99,102,241,.08); --cal-ot-border: rgba(99,102,241,.30); --cal-ot-text: #4338ca;
+  --cal-wk-bg: rgba(99,102,241,.035); --cal-wk-border: rgba(99,102,241,.14);
+  --cal-today-ring: #f43f5e;
+  /* 统计卡片色 */
   --stat-teal: #14b8a6; --stat-blue: #3b82f6; --stat-amber: #f59e0b;
   --stat-grad-from: #7c3aed; --stat-grad-to: #a78bfa;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.06);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,.10);
-  --r-card: 14px; --r-input: 10px; --r-btn: 10px; --r-cell: 10px;
-  --page-pad: 16px; --card-gap: 12px;
+  /* 毛玻璃阴影体系 */
+  --glass-blur: blur(16px);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.02);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.03);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+  --shadow-glass: 0 8px 32px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.5);
+  --r-card: 20px; --r-input: 14px; --r-btn: 14px; --r-cell: 14px;
+  --page-pad: 18px; --card-gap: 16px;
 }
 [data-theme="dark"] {
-  --bg: #111318; --surface: #1c1f2a; --text: #e8eaed;
-  --text-sec: #9aa0b0; --text-light: #555c6a;
-  --border: #282c38; --border-light: #1f232e;
-  --hdr-from: #4a5bd1; --hdr-to: #6b3fa0;
-  --accent: #7c93ff; --accent-hover: #6980fc;
-  --success: #4ade80; --danger: #fb7185; --warning: #fbbf24;
-  --cal-ho-bg: #2d1f14; --cal-ho-border: #d97706; --cal-ho-text: #fbbf24;
-  --cal-wd-bg: #2a2510; --cal-wd-border: #d97706;
-  --cal-we-bg: #0d2818; --cal-we-border: #059669;
-  --cal-ot-bg: #172554; --cal-ot-border: #3b82f6; --cal-ot-text: #93c5fd;
-  --cal-today-ring: #ef4444;
+  --bg: #0f1117; --surface: rgba(26,29,40,.75); --surface-solid: #1a1d27;
+  --text: #e4e6ed; --text-sec: #8b92a5; --text-light: #4a5062;
+  --border: rgba(255,255,255,.06); --border-light: rgba(255,255,255,.03);
+  --hdr-from: #4f46e5; --hdr-to: #7c3aed;
+  --accent: #818cf8; --accent-hover: #6366f1;
+  --success: #34d399; --danger: #fb7185; --warning: #fbbf24;
+  --cal-ho-bg: rgba(245,158,11,.10); --cal-ho-border: rgba(251,191,36,.30); --cal-ho-text: #fbbf24;
+  --cal-wd-bg: rgba(245,158,11,.06); --cal-wd-border: rgba(251,191,36,.20);
+  --cal-we-bg: rgba(52,211,153,.06); --cal-we-border: rgba(52,211,153,.18);
+  --cal-ot-bg: rgba(129,140,248,.10); --cal-ot-border: rgba(129,140,248,.28); --cal-ot-text: #a5b4fc;
+  --cal-wk-bg: rgba(129,140,248,.04); --cal-wk-border: rgba(129,140,248,.12);
+  --cal-today-ring: #fb7185;
   --stat-teal: #2dd4bf; --stat-blue: #60a5fa; --stat-amber: #fbbf24;
   --stat-grad-from: #6d28d9; --stat-grad-to: #8b5cf6;
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.20);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.30);
-  --shadow-lg: 0 8px 30px rgba(0,0,0,.40);
+  --shadow-sm: 0 2px 12px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.15);
+  --shadow-md: 0 6px 24px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.20);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.25);
+  --shadow-glass: 0 8px 32px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow-x:hidden}
 body{
-  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
-  font-size:14.5px;line-height:1.6;color:var(--text);background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.65;color:var(--text);background:var(--bg);
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-  transition:background .3s,color .3s
+  transition:background .35s,color .35s
 }
 
 /* ---- App Shell ---- */
 .app-shell{display:flex;flex-direction:column;min-height:100vh;width:100%;background:var(--bg)}
 
-/* ---- 简洁头部 ---- */
+/* ---- 渐变头部（毛玻璃叠加） ---- */
 .app-header{
   background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));
-  padding:28px var(--page-pad) 18px;position:relative;overflow:hidden
+  padding:32px var(--page-pad) 22px;position:relative;overflow:hidden
 }
-.app-header::before{content:'';position:absolute;top:-40%;right:-20%;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.06)}
-.app-header::after{content:'';position:absolute;bottom:-30%;left:-10%;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.04)}
-.header-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1200px;margin:0 auto;width:100%}
-.header-brand{display:flex;align-items:center;gap:8px}
+.app-header::before{
+  content:'';position:absolute;top:-50%;right:-15%;width:220px;height:220px;border-radius:50%;
+  background:rgba(255,255,255,.07);filter:blur(60px)
+}
+.app-header::after{
+  content:'';position:absolute;bottom:-40%;left:-15%;width:180px;height:180px;border-radius:50%;
+  background:rgba(255,255,255,.05);filter:blur(50px)
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1440px;margin:0 auto;width:100%}
+.header-brand{display:flex;align-items:center;gap:10px}
 .header-icon{
-  width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.16);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:grid;place-items:center;flex-shrink:0
+  width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.18);
+  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  display:grid;place-items:center;flex-shrink:0;
+  border:1px solid rgba(255,255,255,.15)
 }
-.header-text h1{font-size:18px;font-weight:700;color:#fff;letter-spacing:.5px;line-height:1.2}
-.header-sub{font-size:11.5px;color:rgba(255,255,255,.7);margin-top:2px}
+.header-text h1{font-size:20px;font-weight:700;color:#fff;letter-spacing:.5px;line-height:1.2}
+.header-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:400}
 .hdr-btn{
-  width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:grid;place-items:center;
-  transition:background .2s,transform .15s;flex-shrink:0
+  width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.14);color:#fff;cursor:pointer;display:grid;place-items:center;
+  transition:all .2s ease;flex-shrink:0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
 }
-.hdr-btn:hover{background:rgba(255,255,255,.22)}
-.hdr-btn:active{transform:scale(.92)}
+.hdr-btn:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
+.hdr-btn:active{transform:scale(.90)}
 
 /* ---- 主内容区 ---- */
 .app-body{
-  flex:1;padding:0 var(--page-pad);margin-top:-12px;position:relative;z-index:2;
-  max-width:1200px;margin-left:auto;margin-right:auto;width:100%
+  flex:1;padding:0 var(--page-pad);margin-top:0;position:relative;z-index:2;
+  max-width:1440px;margin-left:auto;margin-right:auto;width:100%
 }
 .layout-desktop{
-  display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;padding-top:16px
+  display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;padding-top:20px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
 .layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
@@ -103,272 +115,489 @@ body{
 }
 
 /* ---- 页面标题行 ---- */
-.page-title-row{display:flex;align-items:center;gap:8px;padding:12px 2px 8px}
-.page-emoji{font-size:18px}
-.page-title{font-size:17px;font-weight:700;color:var(--text)}
+.page-title-row{display:flex;align-items:center;gap:10px;padding:16px 4px 10px}
+.page-emoji{font-size:20px}
+.page-title{font-size:18px;font-weight:700;color:var(--text)}
 
-/* ---- 卡片通用 ---- */
+/* ---- 卡片通用（毛玻璃） ---- */
 .card{
-  background:var(--surface);border-radius:var(--r-card);
-  box-shadow:var(--shadow-sm);padding:15px;
-  border:1px solid var(--border-light);transition:background .25s,border-color .25s
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-radius:var(--r-card);box-shadow:var(--shadow-glass);
+  padding:18px;border:1px solid var(--border-light);
+  transition:background .3s,border-color .3s,transform .2s
 }
+.card:hover{box-shadow:var(--shadow-md)}
 .hidden{display:none!important}
 
 /* ==================== 日历卡片 ==================== */
-.cal-card{padding:16px 14px}
-.cal-nav-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:12px}
+.cal-card{padding:18px 16px}
+.cal-nav-row{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px}
 .cal-arrow{
-  width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);
-  background:var(--surface);color:var(--text-sec);cursor:pointer;
-  display:grid;place-items:center;transition:all .18s;flex-shrink:0
+  width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);
+  background:var(--surface-solid);color:var(--text-sec);cursor:pointer;
+  display:grid;place-items:center;transition:all .2s ease;flex-shrink:0;
+  box-shadow:var(--shadow-sm)
 }
-.cal-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.05)}
-.cal-arrow:active{transform:scale(.9)}
-.cal-month{font-size:16px;font-weight:650;color:var(--text);min-width:100px;text-align:center}
+.cal-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.06);transform:scale(1.05)}
+.cal-arrow:active{transform:scale(.88)}
+.cal-month{font-size:17px;font-weight:650;color:var(--text);min-width:110px;text-align:center}
 
 /* 图例 */
-.cal-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;padding:0 2px}
-.legend-item{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-sec)}
-.dot{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}
+.cal-legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-bottom:14px;padding:0 2px}
+.legend-item{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);font-weight:500}
+.dot{width:12px;height:12px;border-radius:4px;display:inline-block;flex-shrink:0}
 .dot-ho{background:var(--cal-ho-bg);border:1.5px solid var(--cal-ho-border)}
 .dot-wd{background:var(--cal-wd-bg);border:1.5px solid var(--cal-wd-border)}
 .dot-we{background:var(--cal-we-bg);border:1.5px solid var(--cal-we-border)}
 .dot-ot{background:var(--cal-ot-bg);border:1.5px solid var(--cal-ot-border)}
 
 /* 星期头 */
-.cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px;padding:0 2px}
-.cal-week-hdr span{text-align:center;font-size:12px;font-weight:600;color:var(--text-light);padding:5px 0}
+.cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px;padding:0 2px}
+.cal-week-hdr span{text-align:center;font-size:12.5px;font-weight:600;color:var(--text-light);padding:6px 0;letter-spacing:.5px}
 
-/* 日历网格 —— 固定高度，不用 aspect-ratio */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+/* 日历网格 —— 修复手机跑偏：固定比例 + 自适应高度 */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;width:100%}
 .cal-cell{
-  position:relative;height:58px;min-height:58px;border-radius:var(--r-cell);
-  background:var(--surface);border:1.5px solid transparent;
-  padding:4px 3px 3px;cursor:pointer;overflow:hidden;
-  display:flex;flex-direction:column;justify-content:space-between;
-  transition:transform .15s,box-shadow .18s,border-color .15s
+  position:relative;aspect-ratio:1 / 1.1;min-height:52px;border-radius:var(--r-cell);
+  background:var(--surface-solid);border:1.5px solid var(--border-light);
+  padding:5px 4px 4px;cursor:pointer;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;
+  transition:transform .18s,box-shadow .2s,border-color .18s,background .2s
 }
-.cal-cell:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);z-index:2;border-color:var(--accent)}
+.cal-cell:hover{transform:translateY(-2px) scale(1.02);box-shadow:var(--shadow-md);z-index:2;border-color:var(--accent);background:var(--surface)}
 .cal-cell:active{transform:scale(.96)}
 
-/* 日期数字 —— 必须可见 */
-.cal-num{font-size:13.5px;font-weight:650;line-height:1.2;color:var(--text);display:block}
+/* 日期数字 — 居中置顶 */
+.cal-num{font-size:14px;font-weight:650;line-height:1.2;color:var(--text);display:block;text-align:center}
 /* 节假日名 */
-.cal-hname{font-size:9px;color:var(--cal-ho-text);line-height:1.2;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-/* 加班角标 — 对标参考（蓝色圆角标签） */
+.cal-hname{font-size:9.5px;color:var(--cal-ho-text);line-height:1.2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+/* 加班角标 — 居中置底 */
 .cal-ot-badge{
-  align-self:flex-start;font-size:9px;font-weight:700;color:#fff;
-  background:var(--cal-ot-border);padding:1px 5px;border-radius:6px;
-  line-height:1.4;margin-top:auto;min-height:0;display:inline-block
+  font-size:9px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--accent),#818cf8);padding:1.5px 6px;border-radius:8px;
+  line-height:1.4;min-height:0;display:inline-block;text-align:center;
+  box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
 }
 
 /* 单元格状态色 */
 .cal-cell.cal-ho{background:var(--cal-ho-bg);border-color:var(--cal-ho-border)}
 .cal-cell.cal-wd{background:var(--cal-wd-bg);border-color:var(--cal-wd-border)}
 .cal-cell.cal-we{background:var(--cal-we-bg);border-color:var(--cal-we-border)}
-.cal-cell.cal-ot{background:var(--cal-ot-bg);border-color:var(--cal-ot-border);border-width:1.8px}
-.cal-cell.cal-today{outline:2.5px solid var(--cal-today-ring);outline-offset:-1.5px;z-index:1}
-.cal-cell.cal-out{opacity:.28;cursor:default;background:transparent!important;border-color:transparent!important}
+.cal-cell.cal-ot{background:var(--cal-ot-bg);border-color:var(--cal-ot-border);border-width:2px}
+/* 普通工作日：淡色边框（非纯白） */
+.cal-cell.cal-wk{background:var(--cal-wk-bg);border-color:var(--cal-wk-border)}
+.cal-cell.cal-today{outline:2.5px solid var(--cal-today-ring);outline-offset:-2px;z-index:1;box-shadow:0 0 0 4px rgba(244,63,94,.10)}
+.cal-cell.cal-out{opacity:.22;cursor:default;background:transparent!important;border-color:transparent!important}
 .cal-cell.cal-out:hover{transform:none;box-shadow:none;border-color:transparent!important}
 
-@media(max-width:380px){
-  .cal-cell{height:48px;min-height:48px;padding:3px 2px 2px}
-  .cal-num{font-size:12.5px}.cal-hname{font-size:8px}
-  .cal-ot-badge{font-size:8.5px;padding:1px 4px;border-radius:5px}
-  .cal-grid{gap:3px}
+/* 手机端日历适配 —— 关键修复 */
+@media(max-width:420px){
+  .cal-cell{aspect-ratio:1 / 1;min-height:44px;padding:4px 3px 3px}
+  .cal-num{font-size:13px}.cal-hname{font-size:8.5px}
+  .cal-ot-badge{font-size:8px;padding:1px 5px;border-radius:6px}
+  .cal-grid{gap:4px}.cal-week-hdr{gap:4px}
+  .cal-card{padding:14px 10px}
+}
+@media(max-width:360px){
+  .cal-cell{min-height:38px;padding:3px 2px 2px}
+  .cal-num{font-size:12px}
 }
 
-/* ==================== 统计卡片 — 对标参考设计 ==================== */
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* ==================== 统计卡片 — 毛玻璃精致风 ==================== */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .stat-card{
-  background:var(--surface);border-radius:var(--r-card);padding:14px 13px;
-  box-shadow:var(--shadow-sm);border-left:4px solid transparent;
-  transition:transform .15s,box-shadow .18s
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-radius:var(--r-card);padding:16px 15px;
+  box-shadow:var(--shadow-glass);border:1px solid var(--border-light);
+  transition:transform .2s,box-shadow .25s;position:relative;overflow:hidden
 }
-.stat-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
-/* 左边框色 — 对标截图 */
-.stat-teal{border-left-color:var(--stat-teal)}
-.stat-blue{border-left-color:var(--stat-blue)}
-.stat-amber{border-left-color:var(--stat-amber)}
-/* 紫色渐变总费用卡（对标截图右下角） */
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  border-radius:var(--r-card) var(--r-card) 0 0;opacity:.8
+}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+/* 左边框渐变条 */
+.stat-teal::before{background:linear-gradient(90deg,var(--stat-teal),#2dd4bf)}
+.stat-blue::before{background:linear-gradient(90deg,var(--stat-blue),#60a5fa)}
+.stat-amber::before{background:linear-gradient(90deg,var(--stat-amber),#fbbf24)}
+/* 紫色渐变总费用卡 */
 .stat-gradient{
   background:linear-gradient(135deg,var(--stat-grad-from),var(--stat-grad-to));
-  border-left-color:transparent;
+  border:1px solid transparent;box-shadow:0 8px 28px rgba(124,58,237,.25)
 }
+.stat-gradient::before{display:none}
 .stat-gradient .stat-label,.stat-gradient .stat-val,.stat-gradient .stat-sub{color:#fff}
 .stat-gradient .stat-sub{opacity:.85}
-/* 周期性固定费用卡片 — 添加后才显示，默认隐藏 */
+/* 自定义费用卡片 — 添加后才显示，默认隐藏 */
 #statRecurringWrap.hidden{display:none}
-.stat-label{font-size:12px;color:var(--text-sec);font-weight:500;margin-bottom:6px}
-.stat-val{font-size:22px;font-weight:800;color:var(--text);line-height:1.2;letter-spacing:-.3px}
-.stat-unit{font-size:12px;font-weight:600;color:var(--text-sec);margin-left:2px}
-.stat-sub{font-size:11px;color:var(--text-light);margin-top:4px}
+.stat-label{font-size:12.5px;color:var(--text-sec);font-weight:550;margin-bottom:8px}
+.stat-val{font-size:24px;font-weight:800;color:var(--text);line-height:1.15;letter-spacing:-.5px}
+.stat-unit{font-size:13px;font-weight:600;color:var(--text-sec);margin-left:3px}
+.stat-sub{font-size:11.5px;color:var(--text-light);margin-top:5px;font-weight:400}
 
 /* 设置内数据管理按钮 */
-.data-btns{display:flex;gap:8px}
+.data-btns{display:flex;gap:10px}
 .data-btns .ghost-btn{flex:1}
 .ghost-btn{
-  flex:1;padding:8px 10px;font-size:12.5px;font-weight:600;cursor:pointer;
-  border:1.5px solid var(--border);border-radius:var(--r-btn);background:var(--surface);
-  color:var(--text-sec);transition:all .15s
+  flex:1;padding:10px 12px;font-size:13px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);border-radius:var(--r-btn);background:var(--surface-solid);
+  color:var(--text-sec);transition:all .2s ease
 }
-.ghost-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.04)}
+.ghost-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.05);transform:translateY(-1px)}
 .ghost-btn:active{transform:scale(.97)}
-.update-info{font-size:11.5px;color:var(--text-light);margin-top:7px;line-height:1.5;min-height:0}
+.update-info{font-size:12px;color:var(--text-light);margin-top:8px;line-height:1.55;min-height:0}
 .update-info a{color:var(--accent);text-decoration:none;word-break:break-all}
-.update-info .up-new{color:var(--success);font-weight:600}
+.update-info .up-new{color:var(--success);font-weight:650}
 .update-info .up-latest{color:var(--success);font-weight:600}
-.update-info .up-tip{display:inline-block;margin-top:2px}
-.update-info .up-code{display:inline-block;margin:5px 0;padding:3px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text-sec);word-break:break-all}
-.update-info .up-notes{margin:6px 0;padding:6px 8px;background:var(--bg);border-left:3px solid var(--accent);border-radius:6px;color:var(--text-sec);font-size:11px;word-break:break-word}
-.update-info .up-dl{display:inline-block;margin:6px 0 2px;padding:7px 12px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;text-decoration:none;word-break:break-all}
+.update-info .up-tip{display:block;margin-top:4px}
+.update-info .up-code{display:inline-block;margin:5px 0;padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--text-sec);word-break:break-all}
+.update-info .up-notes{margin:8px 0;padding:10px 12px;background:var(--bg);border-left:3.5px solid var(--accent);border-radius:10px;color:var(--text-sec);font-size:12px;word-break:break-word;line-height:1.5}
+.update-info .up-dl{display:inline-block;margin:8px 0 4px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;border-radius:999px;font-weight:700;text-decoration:none;word-break:break-all;box-shadow:0 4px 14px rgba(99,102,241,.30);transition:all .2s}
+.update-info .up-dl:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.40)}
 .update-info .up-err{color:#e5484d;font-weight:600}
 .update-info .up-loading{color:var(--text-light)}
-.update-info .up-progress{margin:6px 0;padding:8px 10px;background:var(--bg);border-radius:8px;font-size:12px}
+.update-info .up-progress{margin:8px 0;padding:10px 12px;background:var(--bg);border-radius:12px;font-size:12.5px;line-height:1.5}
 
-/* ==================== 弹窗对话框 ==================== */
+/* ==================== 弹窗对话框（毛玻璃） ==================== */
 .modal-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
   display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .22s ease;
-  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)
 }
 .modal-overlay.show{opacity:1;pointer-events:auto}
 .modal-dialog{
-  background:var(--surface);border-radius:var(--r-card);
-  box-shadow:var(--shadow-lg);width:92%;max-width:390px;
-  max-height:90vh;overflow-y:auto;padding:22px 18px 18px;
-  transform:translateY(16px) scale(.97);transition:transform .25s ease
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-radius:24px;box-shadow:var(--shadow-lg);width:94%;max-width:400px;
+  max-height:88vh;overflow-y:auto;padding:26px 22px 22px;
+  transform:translateY(20px) scale(.96);transition:transform .3s cubic-bezier(.16,1,.3,1);
+  border:1px solid var(--border-light)
 }
 .modal-overlay.show .modal-dialog{transform:translateY(0) scale(1)}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.modal-header h3{font-size:17px;font-weight:700;color:var(--text)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-header h3{font-size:18px;font-weight:700;color:var(--text)}
 .modal-close{
-  width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);
+  width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);
   color:var(--text-sec);cursor:pointer;display:grid;place-items:center;
-  font-size:18px;transition:all .15s
+  font-size:20px;transition:all .2s;font-weight:300
 }
-.modal-close:hover{background:var(--danger);color:#fff}
-.f-group{margin-bottom:14px}
-.f-label{display:block;font-size:12.5px;font-weight:600;color:var(--text-sec);margin-bottom:6px}
-.f-hint{font-weight:400;color:var(--text-light);font-size:11px}
+.modal-close:hover{background:var(--danger);color:#fff;transform:rotate(90deg)}
+.f-group{margin-bottom:16px}
+.f-label{display:block;font-size:13px;font-weight:600;color:var(--text-sec);margin-bottom:7px}
+.f-hint{font-weight:400;color:var(--text-light);font-size:11.5px}
 .f-input{
-  width:100%;padding:10px 12px;font-size:14.5px;border:1.5px solid var(--border);
+  width:100%;padding:11px 14px;font-size:15px;border:1.5px solid var(--border);
   border-radius:var(--r-input);background:var(--bg);color:var(--text);
-  transition:border-color .18s,box-shadow .18s;outline:none
+  transition:border-color .2s,box-shadow .2s,background .2s;outline:none
 }
 .f-input::placeholder{color:var(--text-light)}
-.f-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(91,127,255,.10)}
+.f-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(99,102,241,.10);background:var(--surface-solid)}
 input[type="date"]{color-scheme:light dark}
-.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
-.item-row{display:grid;grid-template-columns:1fr 80px 70px 28px;gap:6px;align-items:center}
-.item-row input{padding:7px 9px;font-size:13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+.item-list{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+.item-row{display:grid;grid-template-columns:1fr 85px 72px 30px;gap:7px;align-items:center}
+.item-row input{padding:8px 10px;font-size:13.5px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s}
 .item-row input:focus{border-color:var(--accent)}
-.item-row .del{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--danger);cursor:pointer;font-size:16px;display:grid;place-items:center;transition:all .15s;flex-shrink:0}
-.item-row .del:hover{background:#fef2f2;border-color:#fecaca}
-.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.chip{font-size:11.5px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);cursor:pointer;transition:all .15s;font-weight:500}
-.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.06)}
-.add-btn{font-size:12px;color:var(--accent);cursor:pointer;background:none;border:1.5px dashed var(--border);border-radius:var(--r-btn);padding:7px 12px;font-weight:500;transition:all .15s;width:100%}
-.add-btn:hover{border-color:var(--accent);background:rgba(91,127,255,.03)}
-.save-btn{display:block;width:100%;margin-top:12px;padding:9px 16px;font-size:13.5px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:var(--r-btn);cursor:pointer;transition:all .15s}
-.save-btn:hover{opacity:.88;transform:translateY(-1px)}
+.item-row .del{width:32px;height:32px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--danger);cursor:pointer;font-size:17px;display:grid;place-items:center;transition:all .2s;flex-shrink:0}
+.item-row .del:hover{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);transform:scale(1.08)}
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.chip{font-size:12px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);cursor:pointer;transition:all .2s;font-weight:550}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.06);transform:translateY(-1px)}
+.add-btn{font-size:12.5px;color:var(--accent);cursor:pointer;background:none;border:1.5px dashed var(--border);border-radius:var(--r-btn);padding:9px 14px;font-weight:550;transition:all .2s;width:100%}
+.add-btn:hover{border-color:var(--accent);background:rgba(99,102,241,.04);transform:translateY(-1px)}
+.save-btn{display:block;width:100%;margin-top:14px;padding:10px 18px;font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:var(--r-btn);cursor:pointer;transition:all .2s}
+.save-btn:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.30)}
 .save-btn:active{transform:translateY(0)}
-.cycle-select{padding:8px 10px;font-size:13px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s;min-width:0}
+/* 简洁文字保存按钮 */
+.save-text-btn{
+  display:inline-block;margin-top:12px;padding:7px 20px;font-size:13px;font-weight:650;
+  color:var(--accent);background:none;border:1.5px solid var(--accent);border-radius:999px;
+  cursor:pointer;transition:all .2s;letter-spacing:.3px
+}
+.save-text-btn:hover{background:rgba(99,102,241,.07);transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,.15)}
+.save-text-btn:active{transform:scale(.95)}
+.cycle-select{padding:9px 11px;font-size:13.5px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;min-width:0}
 .submit-btn{
-  width:100%;padding:11px 14px;font-size:14.5px;font-weight:700;border:none;
+  width:100%;padding:12px 16px;font-size:15px;font-weight:700;border:none;
   border-radius:var(--r-btn);cursor:pointer;
   background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;
-  letter-spacing:.3px;transition:opacity .18s,transform .12s,box-shadow .18s;
-  box-shadow:0 3px 10px rgba(91,127,255,.24);margin-top:4px
+  letter-spacing:.5px;transition:all .25s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 4px 14px rgba(99,102,241,.28);margin-top:6px
 }
-.submit-btn:hover{opacity:.92;box-shadow:0 5px 16px rgba(91,127,255,.32)}
-.submit-btn:active{transform:scale(.985)}
+.submit-btn:hover{opacity:.93;box-shadow:0 6px 22px rgba(99,102,241,.38);transform:translateY(-1px)}
+.submit-btn:active{transform:scale(.978)}
 
 /* ==================== 设置面板 ==================== */
 .settings-card{padding:0;overflow:hidden}
-.settings-summary{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;list-style:none;user-select:none;transition:background .15s}
+.settings-summary{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer;list-style:none;user-select:none;transition:background .18s}
 .settings-summary::-webkit-details-marker{display:none}
 .settings-summary:hover{background:rgba(0,0,0,.02)}[data-theme="dark"] .settings-summary:hover{background:rgba(255,255,255,.03)}
-.settings-sum-text{font-size:15px;font-weight:650}
-.chev{color:var(--text-light);transition:transform .25s}
+.settings-sum-text{font-size:16px;font-weight:650}
+.chev{color:var(--text-light);transition:transform .3s}
 .settings-card[open] .chev{transform:rotate(180deg)}
-.settings-body{padding:0 16px 16px;border-top:1px solid var(--border-light)}
+.settings-body{padding:0 18px 18px;border-top:1px solid var(--border-light)}
 
-/* ==================== 记录列表 ==================== */
-.list-section{}
-.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
-.list-header h3{font-size:15px;font-weight:700}
-.list-count{font-size:11.5px;color:var(--text-light);font-weight:500}
-.record-list{display:flex;flex-direction:column;gap:8px}
+/* ==================== 计费设置 ==================== */
+.rate-section{margin-top:18px}
+.rate-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
+.rate-header .lh-left{display:flex;flex-direction:column;gap:2px}
+.collapsible-btn{width:30px;height:30px;border:none;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:14px;line-height:1;color:var(--text-light);cursor:pointer;transition:background .18s,transform .18s}
+.collapsible-btn:hover{background:var(--border-light)}
+.collapsible-btn:active{transform:scale(.92)}
+.stage-row{display:flex;align-items:center;gap:10px;padding:8px 4px;flex-wrap:wrap}
+.stage-row+.stage-row{border-top:1px solid var(--border-light)}
+.stage-months{display:flex;align-items:center;gap:6px;flex:1 1 200px;min-width:180px}
+.stage-months input[type=month]{flex:1;min-width:0;padding:7px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-size:13px;font-family:inherit}
+.stage-sep{font-size:12px;color:var(--text-light);flex:0 0 auto}
+.stage-rate{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.stage-rate .rmb{font-size:13px;color:var(--text-light)}
+.stage-rate-in{width:74px;padding:7px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--text);font-size:13px;font-family:inherit}
+.stage-unit{font-size:12px;color:var(--text-light)}
+.stage-del{padding:6px 10px;border:none;background:transparent;color:#ef4444;font-size:13px;cursor:pointer;border-radius:8px}
+.stage-del:hover{background:rgba(239,68,68,.1)}
+.rate-empty{padding:4px 2px;font-size:12.5px;color:var(--text-light)}
+.rate-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(15,23,42,.05)}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px}
+.list-header h3{font-size:16px;font-weight:700}
+.list-count{font-size:12px;color:var(--text-light);font-weight:550}
+.record-list{display:flex;flex-direction:column;gap:10px}
 .record{
-  background:var(--surface);border-radius:var(--r-card);padding:12px 14px;
-  box-shadow:var(--shadow-sm);border:1px solid var(--border-light);
-  transition:transform .15s,box-shadow .18s
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-radius:var(--r-card);padding:14px 16px;
+  box-shadow:var(--shadow-glass);border:1px solid var(--border-light);
+  transition:transform .2s,box-shadow .25s
 }
-.record:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.record-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.record-date{font-size:14px;font-weight:650;color:var(--text)}
-.record-sub{font-size:17px;font-weight:800;color:var(--accent)}
-.record-note{font-size:12.5px;color:var(--text-sec);margin-top:3px;line-height:1.45}
-.record-base{font-size:11.5px;color:var(--text-light);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
-.record-items{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
-.record-items .ri{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-sec);padding:2px 0}
-.record-items .ri span:last-child{color:var(--text);font-weight:550}
-.record-actions{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
-.record-actions button{font-size:12.5px;padding:6px 12px;border-radius:9px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);font-weight:500;transition:all .15s}
-.record-actions .edit:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.06)}
-.record-actions .del:hover{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,.06)}
+.record:hover{transform:translateY(-1.5px);box-shadow:var(--shadow-md)}
+.record-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.record-date{font-size:14.5px;font-weight:650;color:var(--text)}
+.record-sub{font-size:18px;font-weight:800;color:var(--accent)}
+.record-note{font-size:13px;color:var(--text-sec);margin-top:4px;line-height:1.5}
+.record-base{font-size:12px;color:var(--text-light);margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.record-rate{color:var(--accent);font-weight:600}
+.record-items{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)}
+.record-items .ri{display:flex;justify-content:space-between;font-size:13px;color:var(--text-sec);padding:3px 0}
+.record-items .ri span:last-child{color:var(--text);font-weight:580}
+#jsonPasteArea{width:calc(100% - 32px);min-height:80px;margin:0 16px 12px;padding:10px 12px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);font-size:13px;font-family:ui-monospace,Menlo,monospace;outline:none;resize:vertical}
+#jsonPasteArea:focus{border-color:var(--accent)}
+.record-actions{display:flex;gap:8px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--border)}
+.record-actions button{font-size:13px;padding:7px 14px;border-radius:11px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);font-weight:550;transition:all .2s}
+.record-actions .edit:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.06);transform:translateY(-1px)}
+.record-actions .del:hover{border-color:var(--danger);color:var(--danger);background:rgba(239,68,68,.06);transform:translateY(-1px)}
 
 /* 空态/骨架屏 */
-.loading-skel{padding:16px 4px}
-.skel{height:13px;background:linear-gradient(90deg,var(--border-light) 25%,var(--border) 50%,var(--border-light) 75%);background-size:200% 100%;animation:skel-shimmer 1.5s infinite;border-radius:6px;margin-bottom:8px}
-.skel.short{width:60%}.skel.med{width:80%}
+.loading-skel{padding:18px 6px}
+.skel{height:14px;background:linear-gradient(90deg,var(--border-light) 25%,var(--border) 50%,var(--border-light) 75%);background-size:200% 100%;animation:skel-shimmer 1.8s infinite;border-radius:8px;margin-bottom:10px}
+.skel.short{width:55%}.skel.med{width:78%}
 @keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.empty-state{text-align:center;padding:36px 18px 30px}
-.empty-ico{color:var(--text-light);margin-bottom:10px;opacity:.5}
-.empty-state p{font-size:15px;font-weight:600;color:var(--text);margin-bottom:5px}
-.empty-hint{font-size:12.5px;color:var(--text-light)}
+.empty-state{text-align:center;padding:42px 20px 34px}
+.empty-ico{color:var(--text-light);margin-bottom:12px;opacity:.45}
+.empty-state p{font-size:16px;font-weight:650;color:var(--text);margin-bottom:6px}
+.empty-hint{font-size:13px;color:var(--text-light)}
 
-/* Toast */
+/* Toast —— 毛玻璃胶囊 */
 .toast{
-  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);
-  background:var(--text);color:var(--bg);padding:10px 20px;border-radius:999px;
-  font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;
-  pointer-events:none;transition:opacity .22s,transform .22s;z-index:300;
-  white-space:nowrap;max-width:85vw;overflow:hidden;text-overflow:ellipsis
+  position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(14px);
+  background:rgba(29,29,46,.88);color:#fff;padding:12px 24px;border-radius:999px;
+  font-size:14px;font-weight:550;box-shadow:var(--shadow-lg);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  opacity:0;pointer-events:none;transition:opacity .25s,transform .25s cubic-bezier(.16,1,.3,1);z-index:300;
+  white-space:nowrap;max-width:85vw;overflow:hidden;text-overflow:ellipsis;
+  border:1px solid rgba(255,255,255,.12)
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.bottom-spacer{height:36px}
+.bottom-spacer{height:44px}
 
-/* ==================== 响应式断点 ==================== */
+/* 左下角版本号 —— 毛玻璃胶囊 */
+.ver-badge{
+  position:fixed;left:16px;bottom:16px;z-index:150;
+  font-size:11.5px;color:var(--text-sec);font-weight:550;
+  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:1px solid var(--border);padding:4px 14px;border-radius:999px;
+  box-shadow:var(--shadow-sm);pointer-events:none;user-select:none;
+  opacity:.7;transition:opacity .25s
+}
+.ver-badge:hover{opacity:1}
+
+/* ==================== 主区域容器（双端布局） ==================== */
+.app-main{width:100%;max-width:1440px;margin:0 auto}
+
+/* ==================== 模块导航 ==================== */
+.tab-bar{
+  position:sticky;top:0;z-index:60;
+  display:flex;gap:8px;padding:12px var(--page-pad);
+  background:rgba(240,242,245,.82);
+  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--border-light);
+  max-width:1440px;margin:0 auto;width:100%
+}
+[data-theme="dark"] .tab-bar{background:rgba(15,17,23,.82)}
+.tab-item{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 14px;border-radius:14px;border:none;cursor:pointer;background:transparent;
+  color:var(--text-sec);font-size:14.5px;font-weight:600;font-family:inherit;
+  transition:background .22s,color .22s,box-shadow .22s,transform .15s;-webkit-tap-highlight-color:transparent
+}
+.tab-item svg{width:18px;height:18px;flex-shrink:0}
+.tab-item:active{transform:scale(.97)}
+.tab-item.active{background:var(--surface);color:var(--accent);box-shadow:var(--shadow-sm);font-weight:700}
+
+.tab-pane{display:none;animation:fadeIn .3s ease}
+.tab-pane.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ==================== 我的 — iOS 分组卡片风 ==================== */
+.mine-wrap{max-width:680px;margin:0 auto;padding:18px 0 8px}
+.group{margin-bottom:22px}
+.group-title{
+  font-size:12.5px;font-weight:600;color:var(--text-light);
+  margin:0 4px 8px;letter-spacing:.3px
+}
+.group-title .group-hint{font-weight:400;color:var(--text-light);font-size:11.5px;margin-left:4px}
+.group-card{
+  background:var(--surface-solid);border-radius:16px;overflow:hidden;
+  box-shadow:var(--shadow-sm);border:1px solid var(--border-light)
+}
+.row{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;min-height:54px;position:relative
+}
+.row-ico{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  display:grid;place-items:center;color:#fff
+}
+.row-ico svg{width:17px;height:17px}
+.ico-indigo{background:linear-gradient(135deg,#6366f1,#818cf8)}
+.ico-green{background:linear-gradient(135deg,#22c55e,#4ade80)}
+.ico-blue{background:linear-gradient(135deg,#3b82f6,#60a5fa)}
+.ico-violet{background:linear-gradient(135deg,#8b5cf6,#a78bfa)}
+.ico-gray{background:linear-gradient(135deg,#94a3b8,#cbd5e1)}
+.row-main{flex:1;min-width:0}
+.row-label{font-size:15px;font-weight:550;color:var(--text)}
+.row-value{font-size:14px;color:var(--text-sec);font-weight:500;flex-shrink:0}
+.row-chev{color:var(--text-light);font-size:22px;line-height:1;flex-shrink:0;font-weight:300}
+.row-input{
+  width:104px;flex-shrink:0;text-align:right;font-size:15px;font-weight:600;
+  border:none;background:transparent;color:var(--text);outline:none;font-family:inherit
+}
+.row-input::placeholder{color:var(--text-light);font-weight:400}
+.row-divider{height:1px;background:var(--border-light);margin-left:60px}
+.mine-fees{padding:4px 0}
+.mine-fees .item-row{
+  grid-template-columns:1fr 76px 68px 32px;gap:8px;
+  padding:10px 16px;border-bottom:1px solid var(--border-light);align-items:center
+}
+.mine-fees .item-row:last-child{border-bottom:none}
+.mine-fees .item-row input{
+  width:100%;padding:7px 9px;font-size:13.5px;border:1.5px solid var(--border);
+  border-radius:9px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s
+}
+.mine-fees .item-row input:focus{border-color:var(--accent)}
+.mine-fees .item-row .cycle-select{padding:7px 6px;font-size:13px}
+.mine-fees .item-row .del{
+  width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);
+  background:var(--bg);color:var(--danger);cursor:pointer;font-size:16px;
+  display:grid;place-items:center;transition:all .2s
+}
+.mine-fees .item-row .del:hover{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3)}
+.add-row{
+  display:block;width:100%;margin-top:8px;padding:13px;text-align:center;
+  font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;
+  background:var(--surface-solid);border:1px dashed var(--border);border-radius:14px;
+  transition:all .2s;-webkit-tap-highlight-color:transparent
+}
+.add-row:active{transform:scale(.99)}
+.add-row:hover{border-color:var(--accent);background:rgba(99,102,241,.04)}
+.mine-save{
+  display:block;width:100%;margin-top:6px;padding:14px;border:none;border-radius:16px;
+  font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;letter-spacing:.5px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+  box-shadow:0 6px 20px rgba(99,102,241,.28);transition:all .2s;-webkit-tap-highlight-color:transparent
+}
+.mine-save:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(99,102,241,.36)}
+.mine-save:active{transform:scale(.985)}
+.mine-update{margin:10px 4px 0}
+#exportBtn,#importBtn,#checkUpdateBtn{cursor:pointer;transition:background .18s}
+#exportBtn:hover,#importBtn:hover,#checkUpdateBtn:hover{background:var(--bg)}
+#exportBtn:active,#importBtn:active,#checkUpdateBtn:active{background:var(--border-light)}
+
+/* 备份开关 */
+.switch-wrap{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch-wrap input{opacity:0;width:0;height:0}
+.switch{
+  position:absolute;inset:0;background:var(--border);border-radius:24px;
+  cursor:pointer;transition:background .25s
+}
+.switch::before{
+  content:'';position:absolute;left:3px;top:3px;width:18px;height:18px;
+  background:#fff;border-radius:50%;transition:transform .25s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 1px 3px rgba(0,0,0,.2)
+}
+.switch-wrap input:checked+.switch{background:var(--accent)}
+.switch-wrap input:checked+.switch::before{transform:translateX(20px)}
+
+/* 备份列表项 */
+.bkp-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 16px;border-bottom:1px solid var(--border-light)
+}
+.bkp-item:last-child{border-bottom:none}
+.bkp-time{font-size:13.5px;font-weight:550;color:var(--text);flex:1}
+.bkp-size{font-size:12px;color:var(--text-light)}
+.bkp-btn{
+  padding:5px 12px;font-size:12px;font-weight:600;border-radius:999px;
+  border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);
+  cursor:pointer;transition:all .2s
+}
+.bkp-btn:hover{border-color:var(--accent);color:var(--accent)}
+.bkp-btn-del{border-color:rgba(239,68,68,.3);color:var(--danger)}
+.bkp-btn-del:hover{background:rgba(239,68,68,.06);border-color:var(--danger)}
+
+/* ==================== 响应式断点（双端自适应） ==================== */
 @media(min-width:640px){
-  :root{--page-pad:20px;--card-gap:14px}
-  .app-header{padding:32px var(--page-pad) 20px}
-  .cal-cell{height:62px;min-height:62px}
-  .stat-val{font-size:24px}
-  .layout-desktop{gap:20px}
+  :root{--page-pad:22px;--card-gap:18px}
+  .app-header{padding:36px var(--page-pad) 24px}
+  .cal-cell{min-height:56px}
+  .stat-val{font-size:26px}
+  .layout-desktop{gap:24px}
 }
 @media(min-width:960px){
-  :root{--page-pad:26px;--card-gap:16px}
-  .app-header{padding:36px var(--page_pad) 24px}
-  .header-text h1{font-size:20px}
-  .app-body{padding-top:18px}
-  .cal-cell{height:68px;min-height:68px}
-  .cal-num{font-size:14.5px}
-  .cal-ot-badge{font-size:10px;padding:2px 6px}
-  .stat-val{font-size:26px}
-  .modal-dialog{max-width:420px;padding:26px 24px 24px}
+  :root{--page-pad:28px;--card-gap:20px}
+  .app-header{padding:40px var(--page-pad) 28px}
+  .header-text h1{font-size:22px}
+  .cal-cell{min-height:64px}
+  .cal-num{font-size:15px}
+  .cal-ot-badge{font-size:10px;padding:2px 7px}
+  .stat-val{font-size:28px}
+  .modal-dialog{max-width:430px;padding:28px 26px 26px}
+  /* 桌面端：模块导航变左侧竖排 */
+  .app-main{display:flex;align-items:flex-start;gap:34px;padding:0 var(--page-pad)}
+  .app-body{max-width:none;margin:0;flex:1;min-width:0;padding:0}
+  .tab-bar{
+    position:sticky;top:26px;flex-direction:column;align-items:stretch;
+    width:216px;flex-shrink:0;gap:8px;
+    background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
+    border-bottom:none;padding:0;margin:0
+  }
+  .tab-item{flex:none;width:100%;justify-content:flex-start;padding:14px 18px;font-size:15px}
+  .tab-item svg{width:20px;height:20px}
+  .tab-item:hover{background:var(--bg)}
+  .tab-item.active{box-shadow:var(--shadow-glass)}
 }
 @media(min-width:1280px){
-  :root{--page-pad:30px}
-  .layout-desktop{grid-template-columns:1fr 380px;gap:24px}
-  .cal-cell{height:72px;min-height:72px}
-  .stat-val{font-size:28px}
+  :root{--page-pad:32px}
+  .layout-desktop{grid-template-columns:1fr 400px;gap:28px}
+  .cal-cell{min-height:70px}
+  .stat-val{font-size:30px}
+}
+@media(min-width:1536px){
+  :root{--page-pad:40px;--card-gap:24px}
+  .layout-desktop{grid-template-columns:1fr 460px;gap:36px}
+  .cal-cell{min-height:78px}
+  .stat-val{font-size:32px}
+  .rate-section .stage-months{flex:1 1 260px;min-width:240px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
+<script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
 <body>
 <div class="app-shell">
@@ -392,8 +621,24 @@ input[type="date"]{color-scheme:light dark}
     </div>
   </header>
 
+  <!-- 主区域：手机竖向（模块在顶）/ 桌面横向（模块在左） -->
+  <div class="app-main">
+  <!-- 模块导航 -->
+  <nav class="tab-bar" id="tabBar">
+    <button type="button" class="tab-item active" data-tab="overtime">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
+      <span>加班</span>
+    </button>
+    <button type="button" class="tab-item" data-tab="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>设置</span>
+    </button>
+  </nav>
+
   <!-- 主内容区 -->
   <main class="app-body">
+    <!-- 加班 -->
+    <section class="tab-pane active" id="paneOvertime">
     <div class="layout-desktop">
 
       <!-- 左栏：日历 -->
@@ -490,10 +735,10 @@ input[type="date"]{color-scheme:light dark}
 
       </div><!-- /.layout-left -->
 
-      <!-- 右栏：统计 + 设置 + 记录列表 -->
+      <!-- 右栏：统计 + 记录列表 -->
       <div class="layout-right">
 
-        <!-- 统计卡片 2×2（对标参考设计） -->
+        <!-- 统计卡片 2×2 -->
         <section class="stats-grid" id="statsGrid">
           <div class="stat-card stat-teal">
             <div class="stat-label">本月加班</div>
@@ -503,9 +748,9 @@ input[type="date"]{color-scheme:light dark}
             <div class="stat-label">本月加班费</div>
             <div class="stat-val" id="statCost">0.00</div>
           </div>
-          <!-- 周期性固定费用卡片：添加后才显示 -->
+          <!-- 自定义费用卡片：添加后才显示 -->
           <div class="stat-card stat-amber" id="statRecurringWrap">
-            <div class="stat-label" id="statRecurringLabel">固定费用</div>
+            <div class="stat-label" id="statRecurringLabel">自定义费用</div>
             <div class="stat-val" id="statRecurringVal">0.00</div>
           </div>
           <!-- 总费用（紫渐变） -->
@@ -516,57 +761,39 @@ input[type="date"]{color-scheme:light dark}
           </div>
         </section>
 
-        <details class="card settings-card" id="settingsCard">
-          <summary class="settings-summary">
-            <span class="settings-sum-text">&#x2699;&#xFE0F; 设置</span>
-            <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </summary>
-          <div class="settings-body">
-            <div class="f-group">
-              <label for="sRate" class="f-label">每小时加班费</label>
-              <input type="number" id="sRate" min="0" step="1" placeholder="50" class="f-input">
+        <!-- 计费设置（月度加班费率） -->
+        <section class="rate-section">
+          <div class="list-header rate-header">
+            <div class="lh-left">
+              <h3>计费设置</h3>
+              <span class="list-count">自定义月份阶段费率，相同费率自动整合</span>
             </div>
-            <div class="f-group">
-              <label class="f-label">周期性固定费用 <span class="f-hint">每月/每季度额外固定支出，自动计入总费用</span></label>
-              <div id="recurringList" class="item-list"></div>
-              <button type="button" id="addRecurring" class="add-btn">+ 添加固定费用</button>
-            </div>
-            <button type="button" id="saveSettings" class="save-btn">💾 保存设置</button>
+            <button type="button" id="rateToggle" class="collapsible-btn" aria-label="收起/展开月份阶段">▾</button>
           </div>
-        </details>
+          <div class="rate-card" id="rateCard">
+            <div class="row">
+              <div class="row-ico ico-indigo" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2c0-1.1 1-1.7 2.5-1.7s2.5.6 2.5 1.7-1 1.6-2.5 1.6-2.5.6-2.5 1.7 1 1.7 2.5 1.7 2.5-.6 2.5-1.7"/><line x1="9.5" y1="14.6" x2="14.5" y2="14.6"/></svg>
+              </div>
+              <div class="row-main">
+                <div class="row-label">默认每小时加班费</div>
+                <div id="currentMonthLabel" style="font-size:12px;color:var(--text-light)"></div>
+              </div>
+              <input type="number" id="sRate" class="row-input" min="0" step="1" placeholder="50">
+            </div>
+            <div class="row-divider"></div>
+            <div id="monthlyRatesList" style="padding:8px 0"></div>
+            <button type="button" id="addMonthRate" class="add-row">+ 添加月份阶段</button>
+            <div id="rateHint" style="padding:8px 16px 0;font-size:11.5px;color:var(--text-light);line-height:1.5">未设定阶段的月份沿用最近一个阶段费率，均无设定则使用上方默认值</div>
+          </div>
+          <button type="button" id="saveRateSettings" class="mine-save">保存计费设置</button>
 
-        <section class="card" id="dataCard">
-          <div class="f-group" style="margin-bottom:10px">
-            <label class="f-label">数据管理 <span class="f-hint">备份 / 恢复</span></label>
-            <div class="data-btns">
-              <button type="button" id="exportBtn" class="ghost-btn">&#x2193; 导出备份</button>
-              <button type="button" id="importBtn" class="ghost-btn">&#x2191; 导入恢复</button>
-            </div>
-            <input type="file" id="importFile" accept="application/json,.json" class="hidden">
-          </div>
-          <div class="f-group" style="margin-bottom:0">
-            <label class="f-label">关于 / 更新 <span class="f-hint" id="verBadge"></span></label>
-            <button type="button" id="checkUpdateBtn" class="ghost-btn" style="width:100%">&#x21BB; 检查更新</button>
-            <div id="updateInfo" class="update-info"></div>
-          </div>
-        </section>
-
-        <section class="list-section">
-          <div class="list-header">
-            <h3>加班记录</h3>
-            <span class="list-count" id="listCount"></span>
-          </div>
-          <div id="recordList" class="record-list">
-            <div class="loading-skel">
-              <div class="skel"></div><div class="skel short"></div><div class="skel med"></div>
-            </div>
-          </div>
-          <div id="emptyState" class="empty-state hidden">
-            <div class="empty-ico" aria-hidden="true">
-              <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="10" width="34" height="30" rx="4"/><path d="M14 10V7a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
-            </div>
-            <p>还没有加班记录</p>
-            <span class="empty-hint">点击日历日期添加第一条</span>
+          <!-- 自定义费用 -->
+          <div class="group" style="margin-top:18px">
+            <div class="group-title">自定义费用</div>
+            <div class="group-card mine-fees" id="recurringList"></div>
+            <button type="button" id="addRecurring" class="add-row">+ 添加自定义费用</button>
+            <button type="button" id="saveRecurringBtn" class="mine-save" style="margin-top:12px">保存自定义费用</button>
           </div>
         </section>
 
@@ -575,7 +802,88 @@ input[type="date"]{color-scheme:light dark}
       </div><!-- /.layout-right -->
 
     </div><!-- /.layout-desktop -->
+    </section><!-- /#paneOvertime -->
+
+    <!-- 设置 -->
+    <section class="tab-pane" id="paneSettings">
+      <div class="mine-wrap">
+
+        <!-- 自动备份 -->
+        <div class="group">
+          <div class="group-title">自动备份<span class="group-hint">每日 06:00，数据变化时备份，保留最近 3 份</span></div>
+          <div class="group-card">
+            <div class="row">
+              <div class="row-main"><div class="row-label">自动备份</div><div class="row-value" style="font-size:12px;color:var(--text-light)">每日 06:00，仅数据变化时备份</div></div>
+              <label class="switch-wrap"><input type="checkbox" id="autoBackupToggle" checked><span class="switch"></span></label>
+            </div>
+            <div id="backupLastTime" class="row-value" style="padding:10px 16px 0;font-size:12px;color:var(--text-light)"></div>
+
+            <!-- 备份列表 -->
+            <div id="backupList" style="padding:4px 0"></div>
+
+            <!-- 手动操作按钮 -->
+            <div style="padding:12px 16px;display:flex;gap:10px">
+              <button type="button" id="manualBackupBtn" class="ghost-btn" style="flex:1">立即备份</button>
+              <button type="button" id="restoreBackupBtn" class="ghost-btn" style="flex:1">恢复备份</button>
+            </div>
+            <div id="backupTip" style="padding:0 16px 12px;font-size:11.5px;color:var(--text-light);line-height:1.5">无法选择文件？<a href="#" id="jsonRestoreLink" style="color:var(--accent);text-decoration:none">点击粘贴 JSON 恢复</a></div>
+          </div>
+        </div>
+
+        <!-- 自定义费用 -->
+        <!-- 数据管理 -->
+        <div class="group">
+          <div class="group-title">数据管理</div>
+          <div class="group-card">
+            <div class="row" id="exportBtn">
+              <div class="row-ico ico-green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 21h14"/></svg>
+              </div>
+              <div class="row-main"><div class="row-label">导出备份</div></div>
+              <div class="row-chev" aria-hidden="true">›</div>
+            </div>
+            <div class="row-divider"></div>
+            <div class="row" id="importBtn">
+              <div class="row-ico ico-blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><polyline points="7 14 12 9 17 14"/><path d="M5 3h14"/></svg>
+              </div>
+              <div class="row-main"><div class="row-label">导入恢复</div></div>
+              <div class="row-chev" aria-hidden="true">›</div>
+            </div>
+          </div>
+          <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+        </div>
+
+        <!-- 关于 -->
+        <div class="group">
+          <div class="group-title">关于</div>
+          <div class="group-card">
+            <div class="row" id="checkUpdateBtn">
+              <div class="row-ico ico-violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
+              </div>
+              <div class="row-main"><div class="row-label">检查更新</div></div>
+              <div class="row-value" id="verInline">v1.1.1</div>
+            </div>
+            <div class="row-divider"></div>
+            <div class="row">
+              <div class="row-ico ico-gray" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></svg>
+              </div>
+              <div class="row-main"><div class="row-label">当前版本</div></div>
+              <div class="row-value">记加班 v1.1.1</div>
+            </div>
+          </div>
+          <div id="updateInfo" class="update-info mine-update"></div>
+        </div>
+
+        <button type="button" id="saveSettings" class="mine-save">保存设置</button>
+      </div>
+      <div class="bottom-spacer"></div>
+    </section>
+
   </main>
+  </div><!-- /.app-main -->
 
   <!-- 弹窗 -->
   <div class="modal-overlay" id="modalOverlay">
@@ -610,6 +918,8 @@ input[type="date"]{color-scheme:light dark}
 
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
+  <!-- 左下角版本号 -->
+  <div id="verBadgeFixed" class="ver-badge"></div>
 </div>
 <script>
 /* ====== 记加班 v5.1 — 全内联极致兼容版 ====== */
@@ -650,7 +960,8 @@ function $(id) { try { return document.getElementById(id); } catch(e) { return n
 
 /* 金额格式化：无币种符号，保留两位小数 */
 function money(n) {
-  return (Number(n) || 0).toFixed(2);
+  var v = Number(n) || 0;
+  return v % 1 === 0 ? String(v) : v.toFixed(2);
 }
 
 function toast(msg) {
@@ -751,6 +1062,8 @@ function renderCalendar() {
       if (!out && info.type === 'weekday') {
         hy = HOLIDAYS[String(y)];
         if (hy && hy.workdays) { for (var wi = 0; wi < hy.workdays.length; wi++) { if (hy.workdays[wi] === dateStr) { cls += ' cal-wd'; break; } } }
+        // 普通工作日加淡色框（非补班日）
+        if (cls.indexOf('cal-wd') === -1 && cls.indexOf('cal-ot') === -1) cls += ' cal-wk';
       }
       if (dateStr === today) cls += ' cal-today';
       hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
@@ -827,15 +1140,20 @@ function renderSummary() {
   el = $('statHours'); if (el) el.innerHTML = h + '<span class="stat-unit">h</span>';
   el = $('statCost'); if (el) el.textContent = money(cost);
 
-  // 周期性固定费用卡片：有数据才显示（对标要求）
+  // 自定义费用卡片：有数据才显示（对标要求）
   var recWrap = $('statRecurringWrap');
   var recVal = $('statRecurringVal');
   var recLabel = $('statRecurringLabel');
   var totalWrap = $('statTotalWrap');
+  // 动态构建费用名称标签
+  var fees = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
+  var feeNames = [];
+  for (var fi = 0; fi < fees.length; fi++) { if (fees[fi].name) feeNames.push(fees[fi].name); }
+  var displayLabel = feeNames.length > 0 ? feeNames.join(' / ') : '自定义费用';
   if (recurring > 0 && recWrap) {
     recWrap.className = 'stat-card stat-amber'; // 移除 .hidden
     if (recVal) recVal.textContent = money(recurring);
-    if (recLabel) recLabel.textContent = '固定费用';
+    if (recLabel) recLabel.textContent = displayLabel;
     // 有周期性费用时，总费用卡片不再跨列
     if (totalWrap) totalWrap.style.gridColumn = '';
   } else if (recWrap) {
@@ -849,32 +1167,9 @@ function renderSummary() {
   var subEl = $('statTotalSub');
   if (subEl) {
     var parts = ['加班费 ' + money(cost)];
-    if (recurring > 0) parts.push('固定费用 ' + money(recurring));
+    if (recurring > 0) parts.push('自定义费用 ' + money(recurring));
     subEl.textContent = parts.join(' + ');
   }
-}
-
-function renderRecords() {
-  var list = $('recordList'), empty = $('emptyState');
-  if (!list) return;
-  var sorted = [], i, r, rate, base, html, itemsHtml, j, it, note, itemsBlock;
-  if (state.records && state.records.length) {
-    sorted = state.records.slice().sort(function(a, b) { var da = (a.date||''), db = (b.date||''); if (da < db) return 1; if (da > db) return -1; return (b.createdAt||0) - (a.createdAt||0); });
-  }
-  if (sorted.length === 0) { list.innerHTML = ''; list.className = 'record-list hidden'; if (empty) empty.className = 'empty-state'; var lc = $('listCount'); if (lc) lc.textContent = ''; return; }
-  list.className = 'record-list'; if (empty) empty.className = 'empty-state hidden';
-  var lc2 = $('listCount'); if (lc2) lc2.textContent = '\u5171 ' + sorted.length + ' \u6761';
-  rate = (state.settings && state.settings.hourlyRate) ? state.settings.hourlyRate : 0;
-  html = '';
-  for (i = 0; i < sorted.length; i++) {
-    r = sorted[i]; base = (Number(r.hours)||0) * rate; itemsHtml = '';
-    if (r.items && r.items.length) { for (j = 0; j < r.items.length; j++) { it = r.items[j]; itemsHtml += '<div class="ri"><span>' + escHtml(it.name||'\u8D39\u7528') + '</span><span>' + money(it.amount) + '</span></div>'; } }
-    itemsBlock = itemsHtml ? '<div class="record-items">' + itemsHtml + '</div>' : '';
-    note = r.note ? '<div class="record-note">' + escHtml(r.note) + '</div>' : '';
-    var rid = escHtml(String(r.id));
-    html += '<div class="record" data-id="' + rid + '"><div class="record-top"><span class="record-date">' + escHtml(r.date||'') + '</span><span class="record-sub">' + money(r.subtotal) + '</span></div>' + note + '<div class="record-base">\u52A0\u73ED ' + (Number(r.hours)||0) + ' \u5C0F\u65F6 \u00D7 ' + money(rate) + ' = ' + money(base) + '</div>' + itemsBlock + '<div class="record-actions"><button type="button" class="edit" onclick="onEditRecord(\'' + rid + '\')">\u7F16\u8F91</button><button type="button" class="del" onclick="onDeleteRecord(\'' + rid + '\')">\u5220\u9664</button></div></div>';
-  }
-  list.innerHTML = html;
 }
 
 function findRecordById(id) {
@@ -928,7 +1223,179 @@ function resetForm() {
   var mt = $('modalTitle'); if (mt) mt.textContent = '\u6DFB\u52A0\u52A0\u73ED\u8BB0\u5F55';
   var sb = $('submitBtn'); if (sb) sb.textContent = '\u6DFB\u52A0\u8BB0\u5F55';
 }
-function syncSettingsInputs() { var sr = $('sRate'); if (sr && state.settings) sr.value = state.settings.hourlyRate || ''; }
+function syncSettingsInputs() {
+  var sr = $('sRate');
+  if (sr && state.settings) sr.value = state.settings.hourlyRate || '';
+  // 显示当月标签
+  var ml = $('currentMonthLabel');
+  if (ml) {
+    var now = new Date();
+    ml.textContent = now.getFullYear() + '-' + pad2(now.getMonth() + 1);
+  }
+  // 渲染月费率列表（从 settings 重建）
+  renderMonthlyRates(true);
+}
+
+/* ====== 月度费率管理（阶段化 + 整合 + 可收起） ====== */
+var stageData = []; // 当前编辑中的阶段数组 [{from,to,rate}]
+
+function monthDiff(a, b) { // b - a 的月数差
+  var ya = +a.slice(0,4), ma = +a.slice(5,7), yb = +b.slice(0,4), mb = +b.slice(5,7);
+  return (yb - ya) * 12 + (mb - ma);
+}
+function addMonth(ym) { // "YYYY-MM" + 1 个月
+  var y = +ym.slice(0,4), m = +ym.slice(5,7);
+  m += 1; if (m > 12) { m = 1; y += 1; }
+  return y + '-' + (m < 10 ? '0' + m : '' + m);
+}
+function curMonthStr() { return new Date().toISOString().slice(0,7); }
+
+// 把逐月 rates map 整合成按费率分组、连续段拆分的阶段数组
+function buildStageData() {
+  var rates = (state.settings && state.settings.monthlyRates) ? state.settings.monthlyRates : {};
+  var keys = Object.keys(rates).filter(function(k){ return rates[k] != null && !isNaN(rates[k]); }).sort();
+  var byRate = {}; // rate -> [months]
+  keys.forEach(function(k){ var v = rates[k]; (byRate[v] = byRate[v] || []).push(k); });
+  var stages = [];
+  Object.keys(byRate).forEach(function(rateStr) {
+    var months = byRate[rateStr].slice().sort();
+    var rate = parseFloat(rateStr);
+    var segs = [], cur = [months[0]];
+    for (var i = 1; i < months.length; i++) {
+      if (monthDiff(months[i-1], months[i]) === 1) cur.push(months[i]);
+      else { segs.push(cur); cur = [months[i]]; }
+    }
+    segs.push(cur);
+    segs.forEach(function(seg){ stages.push({ from: seg[0], to: seg[seg.length-1], rate: rate }); });
+  });
+  stages.sort(function(a, b){ return a.from < b.from ? -1 : (a.from > b.from ? 1 : 0); });
+  return stages;
+}
+
+// 把 stageData 展平成逐月 map 写回 settings
+function applyStagesToMonthlyRates() {
+  if (!state.settings) state.settings = {};
+  var newMap = {};
+  for (var i = 0; i < stageData.length; i++) {
+    var st = stageData[i];
+    var from = st.from, to = st.to;
+    if (!from || !to) continue;
+    if (monthDiff(from, to) < 0) { var t = from; from = to; to = t; } // 起止颠倒则交换
+    var rate = Math.round((parseFloat(st.rate) || 0) * 100) / 100;
+    var cur = from;
+    var guard = 0;
+    while (monthDiff(cur, to) >= 0 && guard < 600) { newMap[cur] = rate; cur = addMonth(cur); guard++; }
+  }
+  state.settings.monthlyRates = newMap;
+}
+
+function renderMonthlyRates(rebuild) {
+  var container = $('monthlyRatesList');
+  if (!container) return;
+  // rebuild=true 时从 settings 重建（初始加载/保存后）；false 时用当前 stageData 渲染（添加/编辑中）
+  if (rebuild) stageData = buildStageData();
+  var html = '', i, s;
+  if (stageData.length === 0) {
+    html = '<div class="rate-empty">尚未设定任何月份阶段，所有月份使用默认费率</div>';
+  } else {
+    for (i = 0; i < stageData.length; i++) {
+      s = stageData[i];
+      html += '<div class="stage-row">';
+      html += '<div class="stage-months"><input type="month" class="stage-from" data-si="' + i + '" value="' + escHtml(s.from) + '"><span class="stage-sep">至</span><input type="month" class="stage-to" data-si="' + i + '" value="' + escHtml(s.to) + '"></div>';
+      html += '<div class="stage-rate"><span class="rmb">¥</span><input type="number" class="stage-rate-in" data-si="' + i + '" value="' + s.rate + '" min="0" step="1"><span class="stage-unit">/时</span></div>';
+      html += '<button type="button" class="stage-del" data-si="' + i + '">删除</button>';
+      html += '</div>';
+    }
+  }
+  container.innerHTML = html;
+  if (!container._bound) {
+    container.onclick = function(e) {
+      var t = e.target;
+      if (t && t.getAttribute) {
+        var di = t.getAttribute('data-si');
+        if (di !== null && di !== undefined && t.className.indexOf('stage-del') !== -1) {
+          stageData.splice(+di, 1);
+          renderMonthlyRates(false);
+        }
+      }
+    };
+    container.onchange = function(e) {
+      var t = e.target;
+      if (t && t.getAttribute) {
+        var si = t.getAttribute('data-si');
+        if (si === null || si === undefined) return;
+        var idx = +si;
+        if (idx < 0 || idx >= stageData.length) return;
+        if (t.className.indexOf('stage-from') !== -1) stageData[idx].from = t.value || '';
+        else if (t.className.indexOf('stage-to') !== -1) stageData[idx].to = t.value || '';
+        else if (t.className.indexOf('stage-rate-in') !== -1) stageData[idx].rate = t.value;
+      }
+    };
+    container._bound = true;
+  }
+}
+
+function bindRateToggle() {
+  var btn = $('rateToggle');
+  if (!btn) return;
+  btn.onclick = function() {
+    var c = $('monthlyRatesList'), a = $('addMonthRate'), h = $('rateHint');
+    var hidden = (c && c.classList.contains('hidden'));
+    // 当前为展开 -> 收起
+    var willHide = hidden ? false : true;
+    if (c) c.classList.toggle('hidden', willHide);
+    if (a) a.classList.toggle('hidden', willHide);
+    if (h) h.classList.toggle('hidden', willHide);
+    btn.textContent = willHide ? '▸' : '▾';
+  };
+}
+
+/* ====== 备份管理 ====== */
+function loadBackupList() {
+  api('GET', '/api/backups').then(function(r) {
+    if (!r || !r.ok) return;
+    var container = $('backupList');
+    var lastEl = $('backupLastTime');
+    if (!container) return;
+    if (r.backups && r.backups.length > 0) {
+      var html = '', bi;
+      for (var i = 0; i < r.backups.length; i++) {
+        bi = r.backups[i];
+        html += '<div class="bkp-item">';
+        html += '<span class="bkp-time">' + escHtml(bi.date) + ' ' + (bi.time ? bi.time.slice(11,16) : '') + '</span>';
+        html += '<span class="bkp-size">' + Math.round((bi.size||0)/1024) + ' KB</span>';
+        html += '<button type="button" class="bkp-btn" data-bdl="' + escHtml(bi.name) + '">恢复</button>';
+        html += '<button type="button" class="bkp-btn" data-bde="' + escHtml(bi.name) + '">导出</button>';
+        html += '</div>';
+      }
+      container.innerHTML = html;
+      if (lastEl) lastEl.textContent = '上次自动备份：' + r.backups[0].date + ' ' + (r.backups[0].time ? r.backups[0].time.slice(11,16) : '') + '（保留最近 ' + (r.keep || 3) + ' 份）';
+      // 绑定恢复/导出按钮
+      container.onclick = function(e) {
+        var t = e.target;
+        if (t && t.getAttribute) {
+          var dlName = t.getAttribute('data-bde');
+          if (dlName) {
+            window.open(API_BASE + '/api/backup/' + encodeURIComponent(dlName), '_blank');
+            return;
+          }
+          var resName = t.getAttribute('data-bdl');
+          if (resName) {
+            if (!confirm('确定从 ' + resName + ' 恢复？当前数据将被覆盖！')) return;
+            api('POST', '/api/backup/' + encodeURIComponent(resName) + '/restore').then(function(rr) {
+              toast(rr && rr.message ? rr.message : '已恢复');
+              return refresh();
+            }).catch(function(err) { toast('恢复失败:' + (err.message || err)); });
+            return;
+          }
+        }
+      };
+    } else {
+      container.innerHTML = '<div style="padding:14px 16px;font-size:13px;color:var(--text-light)">暂无备份记录</div>';
+      if (lastEl) lastEl.textContent = '';
+    }
+  }).catch(function() {});
+}
 
 function bindEvents() {
   bindCalendarEvents();
@@ -971,12 +1438,56 @@ function bindEvents() {
   if (plist) plist.onclick = function() { /* legacy: no-op */ };
   var ss = $('saveSettings');
   if (ss) ss.onclick = function() {
-    var rateInput = $('sRate'), rate = rateInput?parseFloat(rateInput.value):NaN;
+    toast('\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();
+  };
+  var srb = $('saveRecurringBtn');
+  if (srb) srb.onclick = function() {
     var fees=[], rRows = $('recurringList')?$('recurringList').querySelectorAll('.item-row'):[], rr, rn, ra, rc, fname, fam, fcycle, i;
     for (i = 0; i < rRows.length; i++) { rr = rRows[i]; rn = rr.querySelector('input[data-rn]'); ra = rr.querySelector('input[data-ra]'); rc = rr.querySelector('select[data-rc]'); fname = rn?rn.value.trim():''; fam = ra?parseFloat(ra.value)||0:0; fcycle = rc?rc.value:'monthly'; if (fname) fees.push({name:fname,amount:Math.round(fam*100)/100,cycle:fcycle}); }
-    api('POST','/api/settings',{hourlyRate:isNaN(rate)?((state.settings&&state.settings.hourlyRate)?state.settings.hourlyRate:50):Math.round(rate*100)/100,recurringFees:fees}).then(function(){toast('\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
+    // 立即更新本地 state 以便 UI 即时响应
+    if (!state.settings) state.settings = {};
+    state.settings.recurringFees = fees;
+    renderSummary();
+    api('POST','/api/settings',{recurringFees:fees}).then(function(){toast('\u81EA\u5B9A\u4E49\u8D39\u7528\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
   };
+  var srs = $('saveRateSettings');
+  if (srs) srs.onclick = function() {
+    var rateInput = $('sRate'), rate = rateInput?parseFloat(rateInput.value):NaN;
+    var baseRate = isNaN(rate) ? ((state.settings&&state.settings.hourlyRate)?state.settings.hourlyRate:50) : Math.round(rate*100)/100;
+    if (!state.settings) state.settings = {};
+    state.settings.hourlyRate = baseRate;
+    applyStagesToMonthlyRates(); // 把阶段展平成逐月 map
+    api('POST','/api/settings',{hourlyRate:baseRate,monthlyRates:state.settings.monthlyRates||{}}).then(function(){toast('\u8BA1\u8D39\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
+  };
+  var amb = $('addMonthRate');
+  if (amb) amb.onclick = function() {
+    var cm = curMonthStr();
+    stageData.push({ from: cm, to: cm, rate: (state.settings&&state.settings.hourlyRate)?state.settings.hourlyRate:50 });
+    renderMonthlyRates(false);
+  };
+  bindRateToggle();
   bindDataButtons();
+}
+
+/* ============ 顶部 Tab 切换 ============ */
+function bindTabs() {
+  var bar = $('tabBar'); if (!bar) return;
+  var items = bar.querySelectorAll('.tab-item');
+  var i, k;
+  for (i = 0; i < items.length; i++) {
+    items[i].onclick = function() {
+      var t = this.getAttribute('data-tab');
+      var panes = document.querySelectorAll('.tab-pane');
+      for (var j = 0; j < panes.length; j++) panes[j].className = 'tab-pane';
+      var cap = t.charAt(0).toUpperCase() + t.slice(1);
+      var target = $('pane' + cap);
+      if (target) target.className = 'tab-pane active';
+      for (k = 0; k < items.length; k++) items[k].className = 'tab-item';
+      this.className = 'tab-item active';
+      if (t === 'settings') { loadBackupList(); renderRecurring(); }
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
+    };
+  }
 }
 
 /* ============ 数据导入 / 导出 / 更新 ============ */
@@ -1040,9 +1551,10 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.1.0';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.1.2';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
-(function(){ var vb = $('verBadge'); if (vb) vb.textContent = 'v' + APP_VERSION; })();
+(function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
+(function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, function(c) {
@@ -1063,16 +1575,15 @@ function checkForUpdate() {
       return;
     }
     if (!r.hasUpdate) {
-      info.innerHTML = '<span class="up-latest">✓ 已是最新版本 v' + escapeHtml(r.current) + '</span>'
-        + '<div class="up-tip">如需飞牛内一键更新，请在 <b>设置 → 应用中心 → 社区源</b> 添加源：<br><code class="up-code">' + UPDATE_SOURCE + '</code></div>';
+      info.innerHTML = '<span class="up-latest">✓ 已是最新版本 v' + escapeHtml(r.current) + '</span>';
       return;
     }
     // 发现新版本 — 显示更新内容 + 立即更新按钮（对齐 hermes-agent 一键升级）
     var html = '<span class="up-new">发现新版本 v' + escapeHtml(r.latest) + (r.publishedAt ? '（' + escapeHtml(r.publishedAt.slice(0, 10)) + '）' : '') + '</span>';
     if (r.notes) html += '<div class="up-notes">' + escapeHtml(r.notes).replace(/\n/g, '<br>') + '</div>';
-    html += '<button type="button" id="doUpdateBtn" class="up-dl" onclick="doAppUpdate()">⬇ 立即更新</button>';
+    html += '<button type="button" id="doUpdateBtn" class="up-dl" onclick="doAppUpdate()">🔄 立即更新覆盖</button>';
     html += '<div id="updateProgress" class="up-progress"></div>';
-    html += '<div class="up-tip">点击后将自动下载并尝试覆盖安装（对齐 hermes-agent 直接更新）</div>';
+    html += '<div class="up-tip">点击后将自动下载并覆盖安装，无需手动操作</div>';
     info.innerHTML = html;
   }).catch(function(err) {
     info.innerHTML = '<span class="up-err">检查失败：' + escapeHtml(err.message || String(err)) + '</span>';
@@ -1092,18 +1603,19 @@ function doAppUpdate() {
       if (btn) { btn.disabled = false; btn.textContent = '⬇ 重试'; }
       return;
     }
-    // 下载成功
-    var msg = '✅ v' + escapeHtml(r.version) + ' 已下载（' + Math.round((r.fpkSize||0)/1024) + ' KB）';
-    if (r.installAttempt && r.installAttempt.ok) {
-      msg += '<br>✅ 已触发系统安装，应用将自动重启';
-      if (prog) prog.innerHTML = '<span class="up-latest">' + msg + '</span>';
-      if (btn) { btn.style.display = 'none'; }
+    var kb = Math.round((r.fpkSize||0)/1024);
+    var msg = '✅ v' + escapeHtml(r.version) + ' 已下载（' + kb + ' KB）';
+    if (r.phase === 'installing') {
+      msg += '<br>🔧 已触发系统覆盖安装，应用即将自动重启更新…'
+           + '<br><span class="up-tip">若 1 分钟内未自动重启，请手动刷新或重开应用；也可下载安装包手动覆盖</span>';
     } else {
-      // 自动安装未成功（fnOS 内部接口可能不可用），提示手动操作
-      msg += '<br><span class="up-tip">请前往 <b>飞牛应用中心 → 手动安装</b>，选择已下载的文件完成覆盖。<br>文件位置：' + escapeHtml(r.fpkPath || '') + '</span>';
-      if (prog) prog.innerHTML = '<span class="up-latest">' + msg + '</span>';
-      if (btn) { btn.disabled = false; btn.textContent = '✓ 下载完成，请手动安装'; }
+      // download-only：系统安装命令不可用，引导下载后手动覆盖
+      msg += '<br><span class="up-tip">系统安装命令不可用，请下载安装包后到 <b>飞牛应用中心 → 手动安装</b> 上传覆盖</span>';
     }
+    // 无论自动安装与否，都提供「下载安装包」兜底按钮（HTTP 下载绕过管理员目录限制）
+    msg += '<br><a class="up-dl" href="' + API_BASE + '/api/update-download/' + escapeHtml(r.version) + '" download>⬇ 下载安装包（备用）</a>';
+    if (prog) prog.innerHTML = '<span class="up-latest">' + msg + '</span>';
+    if (btn) { btn.style.display = 'none'; }
   }).catch(function(err) {
     if (prog) prog.innerHTML = '<span class="up-err">更新异常：' + escapeHtml(err.message || String(err)) + '</span>';
     if (btn) { btn.disabled = false; btn.textContent = '⬇ 重试'; }
@@ -1117,17 +1629,16 @@ function refresh() {
     return api('GET','/api/summary');
   }).then(function(sum) {
     if (sum) state.summary = sum;
-    syncSettingsInputs(); renderRecurring(); renderSummary(); renderRecords(); renderCalendar();
+    syncSettingsInputs(); renderRecurring(); renderSummary(); renderCalendar();
   }).catch(function(err) {
-    var rl = $('recordList');
-    if (rl) rl.innerHTML = '<div style="padding:24px;text-align:center;color:#999;font-size:14px;">\u52A0\u8F7D\u5931\u8D25:'+escHtml((err&&err.message)?err.message:String(err))+'</div>';
+    toast('\u52A0\u8F7D\u5931\u8D25:' + ((err&&err.message)?err.message:String(err)));
   });
 }
 
 function init() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark', tt = $('themeToggle'), moon, sun;
   if (tt) { moon = tt.querySelector('.ico-moon'); sun = tt.querySelector('.ico-sun'); if (moon) moon.style.display = isDark?'none':''; if (sun) sun.style.display = isDark?'':'none'; }
-  bindEvents(); resetForm(); refresh();
+  bindEvents(); bindTabs(); resetForm(); refresh();
 }
 
 if (document.addEventListener) document.addEventListener('DOMContentLoaded', init);
