@@ -1,0 +1,9 @@
+# 本地运行时数据（飞牛上在 @apphome，不进仓库）
+data/
+*.log
+fnpack.exe
+fnpack
+
+# 系统/临时
+.DS_Store
+*.tmp

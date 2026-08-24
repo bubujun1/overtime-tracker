@@ -1,0 +1,18 @@
+{
+  "overtime-tracker": {
+    "display_name": "记加班",
+    "desc": "飞牛 NAS 上的加班记录与费用核算工具。\n• 日历视图，加班/周末/节假日分色标记，点击日期记录加班\n• 自定义每小时加班费，自动核算加班工资\n• 自由添加费用组成条目（餐补、交通、夜班补贴等）\n• 实时汇总总时长与总费用\n• 数据导入/导出备份，支持覆盖安装，卸载保留数据",
+    "labels": "工具,效率,记账",
+    "version": "1.1.0",
+    "author": "bubujun1",
+    "author_url": "https://github.com/bubujun1/overtime-tracker",
+    "bug_report_url": "https://github.com/bubujun1/overtime-tracker/issues",
+    "install_type": "存储空间",
+    "size": "43",
+    "icon_url": "https://github.com/bubujun1/overtime-tracker/raw/main/ICON_256.PNG",
+    "download_url": "https://github.com/bubujun1/overtime-tracker/releases/download/v1.1.0/overtime-tracker.fpk",
+    "history": {
+      "v1.1.0": "日历分色标记+点击日期弹窗记录；导入/导出备份；卸载保留数据；支持飞牛应用中心一键更新"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+#!/bin/bash
+# 安装后回调：创建数据与运行时目录
+APPNAME="overtime-tracker"
+TRIM_PKGHOME="${TRIM_PKGHOME:-/vol1/@apphome/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+mkdir -p "${TRIM_PKGHOME}/data" "${TRIM_PKGVAR}" 2>/dev/null
+echo "$(date '+%Y-%m-%d %H:%M:%S') - [install_callback] ready" >> "${TRIM_PKGVAR}/info.log" 2>/dev/null || true
+exit 0

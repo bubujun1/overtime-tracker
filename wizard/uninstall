@@ -1,0 +1,11 @@
+[
+    {
+        "stepTitle": "卸载确认",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "卸载将移除应用及其运行文件。应用产生的加班数据保存在 @apphome/overtime-tracker，将一并清除，卸载前请自行备份。"
+            }
+        ]
+    }
+]

@@ -1,0 +1,7 @@
+#!/bin/bash
+# 卸载后回调：清理用户数据与运行时数据
+APPNAME="overtime-tracker"
+TRIM_PKGHOME="${TRIM_PKGHOME:-/vol1/@apphome/${APPNAME}}"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+rm -rf "${TRIM_PKGHOME}" "${TRIM_PKGVAR}" 2>/dev/null || true
+exit 0

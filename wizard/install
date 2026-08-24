@@ -1,0 +1,15 @@
+[
+    {
+        "stepTitle": "安装说明",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "<b>记加班</b><br>飞牛 NAS 上的加班记录与费用核算工具，纯本地运行，数据不上云。"
+            },
+            {
+                "type": "tips",
+                "helpText": "<br>安装完成后，打开「记加班」即可开始记录加班、设置每小时加班费并自由添加费用组成条目。<br><br>若页面无法打开，可访问诊断页：http://Nas_ip/app/overtime-tracker/debug 查看运行日志。"
+            }
+        ]
+    }
+]

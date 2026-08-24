@@ -1,0 +1,10 @@
+#!/bin/bash
+# 安装前回调：清理残留进程，避免文件句柄占用导致权限设置失败
+APPNAME="overtime-tracker"
+TRIM_PKGVAR="${TRIM_PKGVAR:-/vol1/@appdata/${APPNAME}}"
+mkdir -p "${TRIM_PKGVAR}" 2>/dev/null
+echo "$(date '+%Y-%m-%d %H:%M:%S') - [install_init] start" >> "${TRIM_PKGVAR}/info.log" 2>/dev/null || true
+pkill -TERM -f "${APPNAME}.*server\.js" 2>/dev/null || true
+sleep 1
+pkill -9 -f "${APPNAME}.*server\.js" 2>/dev/null || true
+exit 0

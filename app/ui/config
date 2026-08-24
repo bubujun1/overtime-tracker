@@ -1,0 +1,18 @@
+{
+    ".url": {
+        "overtime-tracker.Application": {
+            "title": "记加班",
+            "icon": "images/{0}.png",
+            "type": "iframe",
+            "protocol": "http",
+            "gatewaySocket": "overtime-tracker.sock",
+            "gatewayPrefix": "/app/overtime-tracker",
+            "port": "",
+            "url": "/app/overtime-tracker",
+            "allUsers": false,
+            "control": {
+                "accessPerm": "readonly"
+            }
+        }
+    }
+}

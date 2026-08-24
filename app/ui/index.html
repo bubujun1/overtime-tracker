@@ -1,0 +1,1029 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>记加班</title>
+<script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+/* ============================================================
+   记加班 v5 — 日历SSR内联 + 极致兼容
+   ============================================================ */
+
+/* ---- CSS 变量 ---- */
+:root {
+  --bg: #f0f2f5; --surface: #ffffff; --text: #1a1a2e;
+  --text-sec: #6b7280; --text-light: #9ca3af;
+  --border: #e5e7eb; --border-light: #f0f0f0;
+  --hdr-from: #667eea; --hdr-to: #764ba2;
+  --accent: #5b7fff; --accent-hover: #4a6cf7;
+  --success: #34d399; --danger: #f87171; --warning: #fbbf24;
+  --cal-ho-bg: #fff3e0; --cal-ho-border: #ffab40; --cal-ho-text: #e65100;
+  --cal-wd-bg: #fffde7; --cal-wd-border: #ffd54f;
+  --cal-we-bg: #e8f5e9; --cal-we-border: #81c784;
+  --cal-ot-bg: #e8f0fe; --cal-ot-border: #5b7fff; --cal-ot-text: #3958cc;
+  --cal-today-ring: #ef4444;
+  --stat-teal: #26a69a; --stat-blue: #42a5f5;
+  --stat-grad-from: #667eea; --stat-grad-to: #764ba2;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.07);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,.12);
+  --r-card: 16px; --r-input: 12px; --r-btn: 12px; --r-cell: 10px;
+  --page-pad: 16px; --card-gap: 14px;
+}
+[data-theme="dark"] {
+  --bg: #0f1117; --surface: #1a1d27; --text: #e8eaed;
+  --text-sec: #9aa0b0; --text-light: #555c6a;
+  --border: #282c38; --border-light: #1f232e;
+  --hdr-from: #4a5bd1; --hdr-to: #6b3fa0;
+  --accent: #7c93ff; --accent-hover: #6980fc;
+  --success: #4ade80; --danger: #fb7185; --warning: #facc15;
+  --cal-ho-bg: #2d1f14; --cal-ho-border: #cc7a00; --cal-ho-text: #ffb74d;
+  --cal-wd-bg: #2a2510; --cal-wd-border: #c9a000;
+  --cal-we-bg: #122618; --cal-we-border: #43a047;
+  --cal-ot-bg: #151e35; --cal-ot-border: #5b7fff; --cal-ot-text: #8ea8ff;
+  --cal-today-ring: #dc2626;
+  --stat-teal: #2dd4bf; --stat-blue: #60a5fa;
+  --stat-grad-from: #4a5bd1; --stat-grad-to: #6b3fa0;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.25);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.35);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,.45);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow-x:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:15px;line-height:1.55;color:var(--text);background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  transition:background .3s,color .3s
+}
+
+/* ---- App Shell ---- */
+.app-shell{display:flex;flex-direction:column;min-height:100vh;width:100%;background:var(--bg)}
+
+/* ---- 渐变头部 ---- */
+.app-header{
+  background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));
+  padding:40px var(--page-pad) 20px;position:relative;overflow:hidden
+}
+.app-header::before{content:'';position:absolute;top:-40%;right:-20%;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07)}
+.app-header::after{content:'';position:absolute;bottom:-30%;left:-10%;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05)}
+.header-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1200px;margin:0 auto;width:100%}
+.header-brand{display:flex;align-items:center;gap:10px}
+.header-icon{
+  width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  display:grid;place-items:center;flex-shrink:0
+}
+.header-text h1{font-size:20px;font-weight:750;color:#fff;letter-spacing:.5px;line-height:1.2}
+.header-sub{font-size:12px;color:rgba(255,255,255,.72);margin-top:2px}
+.hdr-btn{
+  width:36px;height:36px;border-radius:10px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.12);color:#fff;cursor:pointer;display:grid;place-items:center;
+  transition:background .2s,transform .15s;flex-shrink:0
+}
+.hdr-btn:hover{background:rgba(255,255,255,.22)}
+.hdr-btn:active{transform:scale(.92)}
+
+/* ---- 主内容区 ---- */
+.app-body{
+  flex:1;padding:0 var(--page-pad);margin-top:-12px;position:relative;z-index:2;
+  max-width:1200px;margin-left:auto;margin-right:auto;width:100%
+}
+.layout-desktop{
+  display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start;padding-top:16px
+}
+.layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
+.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
+@media(max-width:959px){
+  .layout-desktop{display:block}
+  .layout-right{margin-top:var(--card-gap)}
+}
+
+/* ---- 页面标题行 ---- */
+.page-title-row{display:flex;align-items:center;gap:8px;padding:14px 2px 10px}
+.page-emoji{font-size:20px}
+.page-title{font-size:18px;font-weight:700;color:var(--text)}
+
+/* ---- 卡片通用 ---- */
+.card{
+  background:var(--surface);border-radius:var(--r-card);
+  box-shadow:var(--shadow-md);padding:16px;
+  border:1px solid var(--border-light);transition:background .25s,border-color .25s
+}
+.hidden{display:none!important}
+
+/* ==================== 日历卡片 ==================== */
+.cal-card{padding:16px 14px}
+.cal-nav-row{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:12px}
+.cal-arrow{
+  width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);
+  background:var(--surface);color:var(--text-sec);cursor:pointer;
+  display:grid;place-items:center;transition:all .18s;flex-shrink:0
+}
+.cal-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.05)}
+.cal-arrow:active{transform:scale(.9)}
+.cal-month{font-size:16px;font-weight:650;color:var(--text);min-width:100px;text-align:center}
+
+/* 图例 */
+.cal-legend{display:flex;flex-wrap:wrap;gap:8px 14px;margin-bottom:12px;padding:0 2px}
+.legend-item{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-sec)}
+.dot{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}
+.dot-ho{background:var(--cal-ho-bg);border:1.5px solid var(--cal-ho-border)}
+.dot-wd{background:var(--cal-wd-bg);border:1.5px solid var(--cal-wd-border)}
+.dot-we{background:var(--cal-we-bg);border:1.5px solid var(--cal-we-border)}
+.dot-ot{background:var(--cal-ot-bg);border:1.5px solid var(--cal-ot-border)}
+
+/* 星期头 */
+.cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:5px;padding:0 2px}
+.cal-week-hdr span{text-align:center;font-size:12px;font-weight:600;color:var(--text-light);padding:5px 0}
+
+/* 日历网格 —— 固定高度，不用 aspect-ratio */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-cell{
+  position:relative;height:58px;min-height:58px;border-radius:var(--r-cell);
+  background:var(--surface);border:1.5px solid transparent;
+  padding:4px 3px 3px;cursor:pointer;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:space-between;
+  transition:transform .15s,box-shadow .18s,border-color .15s
+}
+.cal-cell:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);z-index:2;border-color:var(--accent)}
+.cal-cell:active{transform:scale(.96)}
+
+/* 日期数字 —— 必须可见 */
+.cal-num{font-size:13.5px;font-weight:650;line-height:1.2;color:var(--text);display:block}
+/* 节假日名 */
+.cal-hname{font-size:9px;color:var(--cal-ho-text);line-height:1.2;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+/* 加班角标 */
+.cal-ot-badge{
+  align-self:flex-start;font-size:9.5px;font-weight:700;color:#fff;
+  background:var(--cal-ot-border);padding:1px 5px;border-radius:6px;
+  line-height:1.4;margin-top:auto;min-height:0;display:inline-block
+}
+
+/* 单元格状态色 */
+.cal-cell.cal-ho{background:var(--cal-ho-bg);border-color:var(--cal-ho-border)}
+.cal-cell.cal-wd{background:var(--cal-wd-bg);border-color:var(--cal-wd-border)}
+.cal-cell.cal-we{background:var(--cal-we-bg);border-color:var(--cal-we-border)}
+.cal-cell.cal-ot{background:var(--cal-ot-bg);border-color:var(--cal-ot-border);border-width:1.8px}
+.cal-cell.cal-today{outline:2.5px solid var(--cal-today-ring);outline-offset:-1.5px;z-index:1}
+.cal-cell.cal-out{opacity:.28;cursor:default;background:transparent!important;border-color:transparent!important}
+.cal-cell.cal-out:hover{transform:none;box-shadow:none;border-color:transparent!important}
+
+@media(max-width:380px){
+  .cal-cell{height:48px;min-height:48px;padding:3px 2px 2px}
+  .cal-num{font-size:12.5px}.cal-hname{font-size:8px}
+  .cal-ot-badge{font-size:8.5px;padding:1px 4px;border-radius:5px}
+  .cal-grid{gap:3px}
+}
+
+/* ==================== 统计卡片 ==================== */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{
+  background:var(--surface);border-radius:var(--r-card);padding:14px 12px;
+  box-shadow:var(--shadow-sm);border-left:4px solid transparent;
+  transition:transform .15s,box-shadow .18s
+}
+.stat-card:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.stat-teal{border-left-color:var(--stat-teal)}.stat-blue{border-left-color:var(--stat-blue)}
+.stat-gradient{
+  background:linear-gradient(135deg,var(--stat-grad-from),var(--stat-grad-to));
+  border-left-color:transparent;grid-column:span 2
+}
+.stat-gradient .stat-label,.stat-gradient .stat-val,.stat-gradient .stat-sub{color:#fff}
+.stat-gradient .stat-sub{opacity:.82}
+.stat-label{font-size:12px;color:var(--text-sec);font-weight:500;margin-bottom:5px}
+.stat-val{font-size:23px;font-weight:800;color:var(--text);line-height:1.15;letter-spacing:-.3px}
+.stat-unit{font-size:12px;font-weight:600;color:var(--text-sec);margin-left:2px}
+.stat-sub{font-size:11px;color:var(--text-light);margin-top:3px}
+
+/* 设置内数据管理按钮 */
+.data-btns{display:flex;gap:8px}
+.data-btns .ghost-btn{flex:1}
+.ghost-btn{
+  flex:1;padding:9px 10px;font-size:13px;font-weight:600;cursor:pointer;
+  border:1.5px solid var(--border);border-radius:var(--r-btn);background:var(--bg);
+  color:var(--text-sec);transition:all .15s
+}
+.ghost-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.05)}
+.ghost-btn:active{transform:scale(.97)}
+.update-info{font-size:11.5px;color:var(--text-light);margin-top:7px;line-height:1.5;min-height:0}
+.update-info a{color:var(--accent);text-decoration:none;word-break:break-all}
+.update-info .up-new{color:var(--success);font-weight:600}
+.update-info .up-latest{color:var(--success);font-weight:600}
+.update-info .up-tip{display:inline-block;margin-top:2px}
+.update-info .up-code{display:inline-block;margin:5px 0;padding:3px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:var(--text-sec);word-break:break-all}
+
+/* ==================== 弹窗对话框 ==================== */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .22s ease;
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)
+}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal-dialog{
+  background:var(--surface);border-radius:var(--r-card);
+  box-shadow:var(--shadow-lg);width:92%;max-width:400px;
+  max-height:90vh;overflow-y:auto;padding:24px 20px 20px;
+  transform:translateY(16px) scale(.97);transition:transform .25s ease
+}
+.modal-overlay.show .modal-dialog{transform:translateY(0) scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-header h3{font-size:17px;font-weight:700;color:var(--text)}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);
+  color:var(--text-sec);cursor:pointer;display:grid;place-items:center;
+  font-size:18px;transition:all .15s
+}
+.modal-close:hover{background:var(--danger);color:#fff}
+.f-group{margin-bottom:14px}
+.f-label{display:block;font-size:13px;font-weight:600;color:var(--text-sec);margin-bottom:6px}
+.f-hint{font-weight:400;color:var(--text-light);font-size:11.5px}
+.f-input{
+  width:100%;padding:11px 13px;font-size:15px;border:1.5px solid var(--border);
+  border-radius:var(--r-input);background:var(--bg);color:var(--text);
+  transition:border-color .18s,box-shadow .18s;outline:none
+}
+.f-input::placeholder{color:var(--text-light)}
+.f-input:focus{border-color:var(--accent);box-shadow:0 0 0 3.5px rgba(91,127,255,.12)}
+input[type="date"]{color-scheme:light dark}
+.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.item-row{display:grid;grid-template-columns:1fr 90px 30px;gap:6px;align-items:center}
+.item-row input{padding:8px 10px;font-size:13.5px;border:1.5px solid var(--border);border-radius:9px;background:var(--bg);color:var(--text);outline:none;transition:border-color .15s}
+.item-row input:focus{border-color:var(--accent)}
+.item-row .del{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg);color:var(--danger);cursor:pointer;font-size:16px;display:grid;place-items:center;transition:all .15s;flex-shrink:0}
+.item-row .del:hover{background:#fef2f2;border-color:#fecaca}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.chip{font-size:11.5px;padding:4px 10px;border-radius:999px;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);cursor:pointer;transition:all .15s;font-weight:500}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.06)}
+.add-btn{font-size:12.5px;color:var(--accent);cursor:pointer;background:none;border:1.5px dashed var(--border);border-radius:var(--r-btn);padding:8px 12px;font-weight:500;transition:all .15s;width:100%}
+.add-btn:hover{border-color:var(--accent);background:rgba(91,127,255,.04)}
+.submit-btn{
+  width:100%;padding:12px 15px;font-size:15px;font-weight:700;border:none;
+  border-radius:var(--r-btn);cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;
+  letter-spacing:.3px;transition:opacity .18s,transform .12s,box-shadow .18s;
+  box-shadow:0 4px 14px rgba(91,127,255,.28);margin-top:4px
+}
+.submit-btn:hover{opacity:.92;box-shadow:0 6px 20px rgba(91,127,255,.38)}
+.submit-btn:active{transform:scale(.985)}
+
+/* ==================== 设置面板 ==================== */
+.settings-card{padding:0;overflow:hidden}
+.settings-summary{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;list-style:none;user-select:none;transition:background .15s}
+.settings-summary::-webkit-details-marker{display:none}
+.settings-summary:hover{background:rgba(0,0,0,.02)}[data-theme="dark"] .settings-summary:hover{background:rgba(255,255,255,.03)}
+.settings-sum-text{font-size:15px;font-weight:650}
+.chev{color:var(--text-light);transition:transform .25s}
+.settings-card[open] .chev{transform:rotate(180deg)}
+.settings-body{padding:0 16px 16px;border-top:1px solid var(--border-light)}
+
+/* ==================== 记录列表 ==================== */
+.list-section{}
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.list-header h3{font-size:16px;font-weight:700}
+.list-count{font-size:12px;color:var(--text-light);font-weight:500}
+.record-list{display:flex;flex-direction:column;gap:10px}
+.record{
+  background:var(--surface);border-radius:var(--r-card);padding:14px 15px;
+  box-shadow:var(--shadow-sm);border:1px solid var(--border-light);
+  transition:transform .15s,box-shadow .18s
+}
+.record:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.record-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.record-date{font-size:14px;font-weight:650;color:var(--text)}
+.record-sub{font-size:17px;font-weight:800;color:var(--accent)}
+.record-note{font-size:12.5px;color:var(--text-sec);margin-top:3px;line-height:1.45}
+.record-base{font-size:11.5px;color:var(--text-light);margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
+.record-items{margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
+.record-items .ri{display:flex;justify-content:space-between;font-size:12.5px;color:var(--text-sec);padding:2px 0}
+.record-items .ri span:last-child{color:var(--text);font-weight:550}
+.record-actions{display:flex;gap:6px;margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
+.record-actions button{font-size:12.5px;padding:6px 12px;border-radius:9px;cursor:pointer;border:1.5px solid var(--border);background:var(--bg);color:var(--text-sec);font-weight:500;transition:all .15s}
+.record-actions .edit:hover{border-color:var(--accent);color:var(--accent);background:rgba(91,127,255,.06)}
+.record-actions .del:hover{border-color:var(--danger);color:var(--danger);background:rgba(248,113,113,.06)}
+
+/* 空态/骨架屏 */
+.loading-skel{padding:16px 4px}
+.skel{height:13px;background:linear-gradient(90deg,var(--border-light) 25%,var(--border) 50%,var(--border-light) 75%);background-size:200% 100%;animation:skel-shimmer 1.5s infinite;border-radius:6px;margin-bottom:8px}
+.skel.short{width:60%}.skel.med{width:80%}
+@keyframes skel-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.empty-state{text-align:center;padding:36px 18px 30px}
+.empty-ico{color:var(--text-light);margin-bottom:10px;opacity:.5}
+.empty-state p{font-size:15px;font-weight:600;color:var(--text);margin-bottom:5px}
+.empty-hint{font-size:12.5px;color:var(--text-light)}
+
+/* Toast */
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);
+  background:var(--text);color:var(--bg);padding:10px 20px;border-radius:999px;
+  font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;
+  pointer-events:none;transition:opacity .22s,transform .22s;z-index:300;
+  white-space:nowrap;max-width:85vw;overflow:hidden;text-overflow:ellipsis
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.bottom-spacer{height:36px}
+
+/* ==================== 响应式断点 ==================== */
+@media(min-width:640px){
+  :root{--page-pad:22px;--card-gap:16px}
+  .app-header{padding:46px var(--page-pad) 24px}
+  .cal-cell{height:62px;min-height:62px}
+  .stat-val{font-size:26px}
+  .layout-desktop{gap:24px}
+}
+@media(min-width:960px){
+  :root{--page-pad:28px;--card-gap:18px}
+  .app-header{padding:52px var(--page-pad) 28px}
+  .header-text h1{font-size:24px}
+  .app-body{padding-top:20px}
+  .cal-cell{height:68px;min-height:68px}
+  .cal-num{font-size:14.5px}
+  .cal-ot-badge{font-size:10px;padding:2px 6px}
+  .stat-val{font-size:28px}
+  .modal-dialog{max-width:420px;padding:28px 24px 24px}
+}
+@media(min-width:1280px){
+  :root{--page-pad:32px}
+  .layout-desktop{grid-template-columns:1fr 400px;gap:28px}
+  .cal-cell{height:74px;min-height:74px}
+  .stat-val{font-size:32px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- 渐变头部 -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="header-icon" aria-hidden="true">
+          <svg viewBox="0 0 28 28" width="26" height="26" fill="none"><circle cx="14" cy="14" r="13" fill="rgba(255,255,255,.22)"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">加</text></svg>
+        </div>
+        <div class="header-text">
+          <h1>记加班</h1>
+          <p class="header-sub">本地 · 隐私 · 离线可用</p>
+        </div>
+      </div>
+      <button id="themeToggle" class="hdr-btn" title="切换主题" aria-label="切换主题">
+        <svg class="ico-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="ico-sun hidden" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主内容区 -->
+  <main class="app-body">
+    <div class="layout-desktop">
+
+      <!-- 左栏：日历 -->
+      <div class="layout-left">
+
+        <div class="page-title-row">
+          <span class="page-emoji" aria-hidden="true">&#x1F4B0;</span>
+          <h2 class="page-title">加班记录</h2>
+        </div>
+
+        <!-- 日历卡片 -->
+        <section class="card cal-card" id="calCard">
+          <div class="cal-nav-row">
+            <button type="button" id="calPrev" class="cal-arrow" aria-label="上个月">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span id="calTitle" class="cal-month">2026年8月</span>
+            <button type="button" id="calNext" class="cal-arrow" aria-label="下个月">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+          </div>
+
+          <div class="cal-legend">
+            <span class="legend-item"><span class="dot dot-ho"></span>法定节假日</span>
+            <span class="legend-item"><span class="dot dot-wd"></span>补班日</span>
+            <span class="legend-item"><span class="dot dot-we"></span>周末</span>
+            <span class="legend-item"><span class="dot dot-ot"></span>有加班</span>
+          </div>
+
+          <div class="cal-week-hdr">
+            <span>&#19968;</span><span>&#20108;</span><span>&#19977;</span><span>&#22235;</span><span>&#20116;</span><span>&#20845;</span><span>&#26085;</span>
+          </div>
+
+          <!-- ====== SSR 日历网格（2026年8月）====== -->
+          <!-- 8/1=周六 → startOffset=5, 上月末(7月)=31天 -->
+          <div id="calDays" class="cal-grid" role="grid" aria-label="加班日历">
+
+<!-- Row 1: 7/27-7/31, 8/1-8/2 -->
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-07-27" title="2026-07-27"><span class="cal-num">27</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-07-28" title="2026-07-28"><span class="cal-num">28</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-07-29" title="2026-07-29"><span class="cal-num">29</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-07-30" title="2026-07-30"><span class="cal-num">30</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-07-31" title="2026-07-31"><span class="cal-num">31</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-01" title="2026-08-01"><span class="cal-num">1</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-02" title="2026-08-02"><span class="cal-num">2</span></div>
+
+<!-- Row 2: 8/3-8/9 -->
+<div class="cal-cell" role="gridcell" data-date="2026-08-03" title="2026-08-03"><span class="cal-num">3</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-04" title="2026-08-04"><span class="cal-num">4</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-05" title="2026-08-05"><span class="cal-num">5</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-06" title="2026-08-06"><span class="cal-num">6</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-07" title="2026-08-07"><span class="cal-num">7</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-08" title="2026-08-08"><span class="cal-num">8</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-09" title="2026-08-09"><span class="cal-num">9</span></div>
+
+<!-- Row 3: 8/10-8/16 -->
+<div class="cal-cell" role="gridcell" data-date="2026-08-10" title="2026-08-10"><span class="cal-num">10</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-11" title="2026-08-11"><span class="cal-num">11</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-12" title="2026-08-12"><span class="cal-num">12</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-13" title="2026-08-13"><span class="cal-num">13</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-14" title="2026-08-14"><span class="cal-num">14</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-15" title="2026-08-15"><span class="cal-num">15</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-16" title="2026-08-16"><span class="cal-num">16</span></div>
+
+<!-- Row 4: 8/17-8/23 -->
+<div class="cal-cell" role="gridcell" data-date="2026-08-17" title="2026-08-17"><span class="cal-num">17</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-18" title="2026-08-18"><span class="cal-num">18</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-19" title="2026-08-19"><span class="cal-num">19</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-20" title="2026-08-20"><span class="cal-num">20</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-21" title="2026-08-21"><span class="cal-num">21</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-22" title="2026-08-22"><span class="cal-num">22</span></div>
+<div class="cal-cell cal-we cal-today" role="gridcell" data-date="2026-08-23" title="2026-08-23"><span class="cal-num">23</span></div>
+
+<!-- Row 5: 8/24-8/30 -->
+<div class="cal-cell" role="gridcell" data-date="2026-08-24" title="2026-08-24"><span class="cal-num">24</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-25" title="2026-08-25"><span class="cal-num">25</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-26" title="2026-08-26"><span class="cal-num">26</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-27" title="2026-08-27"><span class="cal-num">27</span></div>
+<div class="cal-cell" role="gridcell" data-date="2026-08-28" title="2026-08-28"><span class="cal-num">28</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-29" title="2026-08-29"><span class="cal-num">29</span></div>
+<div class="cal-cell cal-we" role="gridcell" data-date="2026-08-30" title="2026-08-30"><span class="cal-num">30</span></div>
+
+<!-- Row 6: 8/31, 9/1-9/6 -->
+<div class="cal-cell" role="gridcell" data-date="2026-08-31" title="2026-08-31"><span class="cal-num">31</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-09-01" title="2026-09-01"><span class="cal-num">1</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-09-02" title="2026-09-02"><span class="cal-num">2</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-09-03" title="2026-09-03"><span class="cal-num">3</span></div>
+<div class="cal-cell cal-out" role="gridcell" data-date="2026-09-04" title="2026-09-04"><span class="cal-num">4</span></div>
+<div class="cal-cell cal-out cal-we" role="gridcell" data-date="2026-09-05" title="2026-09-05"><span class="cal-num">5</span></div>
+<div class="cal-cell cal-out cal-we" role="gridcell" data-date="2026-09-06" title="2026-09-06"><span class="cal-num">6</span></div>
+
+          </div>
+        </section>
+
+      </div><!-- /.layout-left -->
+
+      <!-- 右栏：统计 + 设置 + 记录列表 -->
+      <div class="layout-right">
+
+        <!-- 统计卡片 2×2 → 简化为 2 主卡 + 1 总费卡（无币种符号） -->
+        <section class="stats-grid" id="statsGrid">
+          <div class="stat-card stat-teal">
+            <div class="stat-label">本月加班</div>
+            <div class="stat-val" id="statHours">0<span class="stat-unit">h</span></div>
+          </div>
+          <div class="stat-card stat-blue">
+            <div class="stat-label">本月加班费</div>
+            <div class="stat-val" id="statCost">0.00</div>
+          </div>
+          <div class="stat-card stat-gradient">
+            <div class="stat-label">累计总费用</div>
+            <div class="stat-val" id="statTotal">0.00</div>
+            <div class="stat-sub">加班费 + 额外费用</div>
+          </div>
+        </section>
+
+        <details class="card settings-card" id="settingsCard">
+          <summary class="settings-summary">
+            <span class="settings-sum-text">&#x2699;&#xFE0F; 设置</span>
+            <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="settings-body">
+            <div class="f-group">
+              <label for="sRate" class="f-label">每小时加班费</label>
+              <input type="number" id="sRate" min="0" step="1" placeholder="50" class="f-input">
+            </div>
+            <div class="f-group">
+              <label class="f-label">快捷费用项 <span class="f-hint">记录时可一键选用</span></label>
+              <div id="presetList" class="item-list"></div>
+              <button type="button" id="addPreset" class="add-btn">+ 添加快捷项</button>
+            </div>
+          </div>
+        </details>
+
+        <section class="card" id="dataCard">
+          <div class="f-group" style="margin-bottom:10px">
+            <label class="f-label">数据管理 <span class="f-hint">备份 / 恢复</span></label>
+            <div class="data-btns">
+              <button type="button" id="exportBtn" class="ghost-btn">&#x2193; 导出备份</button>
+              <button type="button" id="importBtn" class="ghost-btn">&#x2191; 导入恢复</button>
+            </div>
+            <input type="file" id="importFile" accept="application/json,.json" class="hidden">
+          </div>
+          <div class="f-group" style="margin-bottom:0">
+            <label class="f-label">关于 / 更新 <span class="f-hint" id="verBadge"></span></label>
+            <button type="button" id="checkUpdateBtn" class="ghost-btn" style="width:100%">&#x21BB; 如何更新</button>
+            <div id="updateInfo" class="update-info"></div>
+          </div>
+        </section>
+
+        <section class="list-section">
+          <div class="list-header">
+            <h3>加班记录</h3>
+            <span class="list-count" id="listCount"></span>
+          </div>
+          <div id="recordList" class="record-list">
+            <div class="loading-skel">
+              <div class="skel"></div><div class="skel short"></div><div class="skel med"></div>
+            </div>
+          </div>
+          <div id="emptyState" class="empty-state hidden">
+            <div class="empty-ico" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="10" width="34" height="30" rx="4"/><path d="M14 10V7a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3"/><line x1="14" y1="20" x2="34" y2="20"/><line x1="14" y1="27" x2="26" y2="27"/></svg>
+            </div>
+            <p>还没有加班记录</p>
+            <span class="empty-hint">点击日历日期添加第一条</span>
+          </div>
+        </section>
+
+        <div class="bottom-spacer"></div>
+
+      </div><!-- /.layout-right -->
+
+    </div><!-- /.layout-desktop -->
+  </main>
+
+  <!-- 弹窗 -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 id="modalTitle">添加加班记录</h3>
+        <button type="button" id="modalClose" class="modal-close" aria-label="close">&times;</button>
+      </div>
+      <form id="recordForm" autocomplete="off">
+        <div class="f-group">
+          <label for="fDate" class="f-label">日期</label>
+          <input type="date" id="fDate" required class="f-input">
+        </div>
+        <div class="f-group">
+          <label for="fHours" class="f-label">加班时长（小时）</label>
+          <input type="number" id="fHours" min="0" step="0.5" inputmode="decimal" placeholder="例如 3.5" required class="f-input">
+        </div>
+        <div class="f-group">
+          <label for="fNote" class="f-label">备注 <span class="f-hint">可选</span></label>
+          <input type="text" id="fNote" maxlength="60" placeholder="例如 项目上线支持" class="f-input">
+        </div>
+        <div class="f-group">
+          <label class="f-label">费用组成条目 <span class="f-hint">自由添加</span></label>
+          <div id="itemList" class="item-list"></div>
+          <div id="presetQuick" class="chip-row"></div>
+          <button type="button" id="addItem" class="add-btn">+ 添加费用条目</button>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">添加记录</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+</div>
+<script>
+/* ====== 记加班 v5.1 — 全内联极致兼容版 ====== */
+
+/* 中国法定节假日 */
+var HOLIDAYS = {
+  '2026': {
+    ranges: [
+      ['2026-01-01', '2026-01-03'], ['2026-02-15', '2026-02-23'],
+      ['2026-04-04', '2026-04-06'], ['2026-05-01', '2026-05-05'],
+      ['2026-06-19', '2026-06-21'], ['2026-09-25', '2026-09-27'],
+      ['2026-10-01', '2026-10-07']
+    ],
+    names: {
+      '2026-01-01': '\u5143\u65E6', '2026-02-15': '\u6625\u8282',
+      '2026-04-04': '\u6E05\u660E', '2026-05-01': '\u52B3\u52A8\u8282',
+      '2026-06-19': '\u7AEF\u5348', '2026-09-25': '\u4E2D\u79CB',
+      '2026-10-01': '\u56FD\u5E86'
+    },
+    workdays: ['2026-01-04', '2026-02-14', '2026-02-28', '2026-05-09', '2026-09-20', '2026-10-10']
+  }
+};
+
+var state = {
+  settings: { hourlyRate: 50, presets: [] },
+  records: [],
+  editingId: null
+};
+var calState = { year: 0, month: 0 };
+
+var API_BASE = (function() {
+  var p = location.pathname;
+  var m = p.match(/^(\/app\/[^\/]+)/);
+  return m ? m[1] : '';
+})();
+
+function $(id) { try { return document.getElementById(id); } catch(e) { return null; } }
+
+/* 金额格式化：无币种符号，保留两位小数 */
+function money(n) {
+  return (Number(n) || 0).toFixed(2);
+}
+
+function toast(msg) {
+  var t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'toast show';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function() {
+    t.className = 'toast';
+    setTimeout(function() { t.className = 'toast hidden'; }, 220);
+  }, 1800);
+}
+
+function pad2(n) { var s = String(n); return s.length < 2 ? '0' + s : s; }
+
+function toISO(y, m, d) { return String(y) + '-' + pad2(m + 1) + '-' + pad2(d); }
+
+function getDayInfo(dateStr) {
+  var d, dow, y, h, i, r, type, name;
+  try { d = new Date(dateStr + 'T00:00:00'); } catch(e) { return { type: 'weekday', name: '', dow: 0 }; }
+  dow = d.getDay();
+  y = String(d.getFullYear());
+  h = HOLIDAYS[y];
+  type = 'weekday';
+  name = '';
+  if (h) {
+    if (h.workdays) {
+      for (i = 0; i < h.workdays.length; i++) {
+        if (h.workdays[i] === dateStr) return { type: 'weekday', name: '', dow: dow };
+      }
+    }
+    if (h.ranges) {
+      for (i = 0; i < h.ranges.length; i++) {
+        r = h.ranges[i];
+        if (dateStr >= r[0] && dateStr <= r[1]) { type = 'holiday'; break; }
+      }
+    }
+    if (h.names && h.names[dateStr]) name = h.names[dateStr];
+  }
+  if (type === 'weekday' && (dow === 0 || dow === 6)) type = 'weekend';
+  return { type: type, name: name, dow: dow };
+}
+
+function buildDayMap() {
+  var map = {}, i, r, d;
+  if (!state.records) return map;
+  for (i = 0; i < state.records.length; i++) {
+    r = state.records[i];
+    d = (r && r.date) ? r.date : '';
+    if (!d) continue;
+    if (!map[d]) map[d] = { hours: 0, count: 0 };
+    map[d].hours += Number(r.hours) || 0;
+    map[d].count += 1;
+  }
+  return map;
+}
+
+function todayISO() {
+  var t = new Date();
+  return toISO(t.getFullYear(), t.getMonth(), t.getDate());
+}
+
+function escHtml(s) {
+  if (s === null || s === undefined) s = '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function renderCalendar() {
+  var now, y, m, firstDow, daysInMonth, daysInPrev, today, dayMap;
+  var titleEl, daysEl, cells, startOffset, i, dateObj, out, dateStr, info, rec, cls, hname, otBadge, hy;
+  try {
+    now = new Date();
+    if (!calState.year || calState.year === 0) { calState.year = now.getFullYear(); calState.month = now.getMonth(); }
+    y = calState.year; m = calState.month;
+    firstDow = new Date(y, m, 1).getDay();
+    daysInMonth = new Date(y, m + 1, 0).getDate();
+    daysInPrev = new Date(y, m, 0).getDate();
+    today = todayISO();
+    dayMap = buildDayMap();
+    titleEl = $('calTitle');
+    if (titleEl) titleEl.textContent = y + '\u5E74' + (m + 1) + '\u6708';
+    cells = [];
+    startOffset = (firstDow === 0) ? 6 : (firstDow - 1);
+    for (i = 0; i < 42; i++) {
+      out = false;
+      if (i < startOffset) { dateObj = new Date(y, m - 1, daysInPrev - startOffset + 1 + i); out = true; }
+      else if (i >= startOffset + daysInMonth) { dateObj = new Date(y, m + 1, i - startOffset - daysInMonth + 1); out = true; }
+      else { dateObj = new Date(y, m, i - startOffset + 1); }
+      dateStr = toISO(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
+      info = getDayInfo(dateStr);
+      rec = dayMap[dateStr] || null;
+      cls = 'cal-cell';
+      if (out) cls += ' cal-out';
+      else if (info.type === 'holiday') cls += ' cal-ho';
+      else if (info.type === 'weekend') cls += ' cal-we';
+      if (rec && (rec.hours > 0 || rec.count > 0)) cls += ' cal-ot';
+      if (!out && info.type === 'weekday') {
+        hy = HOLIDAYS[String(y)];
+        if (hy && hy.workdays) { for (var wi = 0; wi < hy.workdays.length; wi++) { if (hy.workdays[wi] === dateStr) { cls += ' cal-wd'; break; } } }
+      }
+      if (dateStr === today) cls += ' cal-today';
+      hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
+      otBadge = (rec && rec.hours > 0) ? '<span class="cal-ot-badge">' + (Math.round(rec.hours * 100) / 100) + 'h</span>' : '';
+      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + otBadge + '</div>');
+    }
+    daysEl = $('calDays');
+    if (daysEl) daysEl.innerHTML = cells.join('');
+  } catch(err) { try { console.error('renderCalendar:', err.message); } catch(e) {} }
+}
+
+function openModal(dateStr, existingRecord) {
+  resetForm();
+  var fd = $('fDate'); if (fd && dateStr) fd.value = dateStr;
+  if (existingRecord) {
+    state.editingId = existingRecord.id;
+    if (fd) fd.value = existingRecord.date || '';
+    var fh = $('fHours'); if (fh) fh.value = existingRecord.hours || 0;
+    var fn = $('fNote'); if (fn) fn.value = existingRecord.note || '';
+    var il = $('itemList'); if (il) il.innerHTML = '';
+    var items = existingRecord.items || [];
+    for (var j = 0; j < items.length; j++) addItemRow(items[j].name, items[j].amount);
+    var mt = $('modalTitle'); if (mt) mt.textContent = '\u7F16\u8F91\u52A0\u73ED\u8BB0\u5F55';
+    var sb = $('submitBtn'); if (sb) sb.textContent = '\u4FDD\u5B58\u4FEE\u6539';
+  } else {
+    var mt2 = $('modalTitle'); if (mt2) mt2.textContent = '\u6DFB\u52A0\u52A0\u73ED\u8BB0\u5F55';
+    var sb2 = $('submitBtn'); if (sb2) sb2.textContent = '\u6DFB\u52A0\u8BB0\u5F55';
+  }
+  var mo = $('modalOverlay'); if (mo) mo.className = 'modal-overlay show';
+  var fh2 = $('fHours'); if (fh2) try { fh2.focus(); } catch(e) {}
+}
+function closeModal() { var mo = $('modalOverlay'); if (mo) mo.className = 'modal-overlay'; setTimeout(function() { resetForm(); }, 250); }
+function pickDate(dateStr) { var existing = null, i; if (state.records) { for (i = 0; i < state.records.length; i++) { if (state.records[i].date === dateStr) { existing = state.records[i]; break; } } } openModal(dateStr, existing); }
+function shiftMonth(delta) { var m = calState.month + delta, y = calState.year; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; } calState.year = y; calState.month = m; renderCalendar(); }
+
+function bindCalendarEvents() {
+  var prevBtn = $('calPrev'); if (prevBtn) prevBtn.onclick = function() { shiftMonth(-1); };
+  var nextBtn = $('calNext'); if (nextBtn) nextBtn.onclick = function() { shiftMonth(1); };
+  var daysEl = $('calDays');
+  if (daysEl) {
+    daysEl.onclick = function(e) {
+      var cell = null, target = e.target;
+      while (target && target !== daysEl) {
+        if (target.className && typeof target.className === 'string' && target.className.indexOf('cal-cell') !== -1) { cell = target; break; }
+        target = target.parentNode;
+      }
+      if (!cell) return;
+      if (cell.className.indexOf('cal-out') !== -1) return;
+      var dateStr = cell.getAttribute ? cell.getAttribute('data-date') : '';
+      if (!dateStr) return;
+      var parts = dateStr.split('-');
+      var py = parseInt(parts[0], 10), pm = parseInt(parts[1], 10) - 1;
+      if (py !== calState.year || pm !== calState.month) { calState.year = py; calState.month = pm; renderCalendar(); }
+      pickDate(dateStr);
+    };
+  }
+  var closeBtn = $('modalClose'); if (closeBtn) closeBtn.onclick = closeModal;
+  var overlay = $('modalOverlay');
+  if (overlay) overlay.onclick = function(e) { if (e.target === overlay) closeModal(); };
+  document.onkeydown = function(e) { e = e || window.event; var key = e.key || e.keyCode; if (key === 'Escape' || key === 27) { var ol = $('modalOverlay'); if (ol && ol.className.indexOf('show') !== -1) closeModal(); } };
+}
+
+function renderSummary() {
+  var hours = 0, cost = 0, i, r, el, h;
+  if (state.records) { for (i = 0; i < state.records.length; i++) { r = state.records[i]; hours += Number(r.hours) || 0; cost += Number(r.subtotal) || 0; } }
+  h = Math.round(hours * 100) / 100;
+  el = $('statHours'); if (el) el.innerHTML = h + '<span class="stat-unit">h</span>';
+  el = $('statCost'); if (el) el.textContent = money(cost);
+  el = $('statTotal'); if (el) el.textContent = money(cost);
+}
+
+function renderRecords() {
+  var list = $('recordList'), empty = $('emptyState');
+  if (!list) return;
+  var sorted = [], i, r, rate, base, html, itemsHtml, j, it, note, itemsBlock;
+  if (state.records && state.records.length) {
+    sorted = state.records.slice().sort(function(a, b) { var da = (a.date||''), db = (b.date||''); if (da < db) return 1; if (da > db) return -1; return (b.createdAt||0) - (a.createdAt||0); });
+  }
+  if (sorted.length === 0) { list.innerHTML = ''; list.className = 'record-list hidden'; if (empty) empty.className = 'empty-state'; var lc = $('listCount'); if (lc) lc.textContent = ''; return; }
+  list.className = 'record-list'; if (empty) empty.className = 'empty-state hidden';
+  var lc2 = $('listCount'); if (lc2) lc2.textContent = '\u5171 ' + sorted.length + ' \u6761';
+  rate = (state.settings && state.settings.hourlyRate) ? state.settings.hourlyRate : 0;
+  html = '';
+  for (i = 0; i < sorted.length; i++) {
+    r = sorted[i]; base = (Number(r.hours)||0) * rate; itemsHtml = '';
+    if (r.items && r.items.length) { for (j = 0; j < r.items.length; j++) { it = r.items[j]; itemsHtml += '<div class="ri"><span>' + escHtml(it.name||'\u8D39\u7528') + '</span><span>' + money(it.amount) + '</span></div>'; } }
+    itemsBlock = itemsHtml ? '<div class="record-items">' + itemsHtml + '</div>' : '';
+    note = r.note ? '<div class="record-note">' + escHtml(r.note) + '</div>' : '';
+    var rid = escHtml(String(r.id));
+    html += '<div class="record" data-id="' + rid + '"><div class="record-top"><span class="record-date">' + escHtml(r.date||'') + '</span><span class="record-sub">' + money(r.subtotal) + '</span></div>' + note + '<div class="record-base">\u52A0\u73ED ' + (Number(r.hours)||0) + ' \u5C0F\u65F6 \u00D7 ' + money(rate) + ' = ' + money(base) + '</div>' + itemsBlock + '<div class="record-actions"><button type="button" class="edit" onclick="onEditRecord(\'' + rid + '\')">\u7F16\u8F91</button><button type="button" class="del" onclick="onDeleteRecord(\'' + rid + '\')">\u5220\u9664</button></div></div>';
+  }
+  list.innerHTML = html;
+}
+
+function findRecordById(id) {
+  var i, r;
+  if (!state.records) return null;
+  for (i = 0; i < state.records.length; i++) {
+    if (String(state.records[i].id) === String(id)) { r = state.records[i]; break; }
+  }
+  return r || null;
+}
+function onEditRecord(id) {
+  var r = findRecordById(id);
+  if (r) openModal(r.date, r);
+}
+function onDeleteRecord(id) {
+  if (!confirm('\u786E\u5B9A\u5220\u9664\u8FD9\u6761\u8BB0\u5F55?')) return;
+  api('DELETE', '/api/records/' + id).then(function() {
+    toast('\u5DF2\u5220\u9664');
+    if (state.editingId === id) resetForm();
+    return refresh();
+  }).catch(function(err) { toast('\u5220\u9664\u5931\u8D25:' + (err.message || err)); });
+}
+
+function renderPresets() {
+  var pl = $('presetList'), q = $('presetQuick');
+  var presets = (state.settings && state.settings.presets) ? state.settings.presets : [];
+  var html = '', qhtml = '', i, p;
+  if (!pl) return;
+  for (i = 0; i < presets.length; i++) { p = presets[i]; html += '<div class="item-row"><input type="text" data-pn="' + i + '" value="' + escHtml(p.name) + '" placeholder="\u540D\u79F0"><input type="number" data-pa="' + i + '" value="' + p.amount + '" min="0" step="0.5" placeholder="\u91D1\u989D"><button type="button" class="del" data-pd="' + i + '">\u00D7</button></div>'; }
+  pl.innerHTML = html;
+  if (!q) return;
+  if (presets.length > 0) { qhtml = ''; for (i = 0; i < presets.length; i++) { p = presets[i]; qhtml += '<button type="button" class="chip" data-q="' + i + '">+ ' + escHtml(p.name) + ' ' + money(p.amount) + '</button>'; } q.innerHTML = qhtml; }
+  else q.innerHTML = '';
+}
+
+function addItemRow(name, amount) {
+  var list = $('itemList'); if (!list) return;
+  var row = document.createElement('div'); row.className = 'item-row';
+  row.innerHTML = '<input type="text" class="it-name" placeholder="\u8D39\u7528\u540D\u79F0" value="' + escHtml(name||'') + '"><input type="number" class="it-amt" min="0" step="0.5" placeholder="\u91D1\u989D" value="' + (amount!=null?amount:'') + '"><button type="button" class="del" title="\u5220\u9664">\u00D7</button>';
+  var delBtn = row.querySelector('.del');
+  if (delBtn) delBtn.onclick = function() { row.parentNode.removeChild(row); };
+  list.appendChild(row);
+}
+function collectItems() {
+  var rows = $('itemList') ? $('itemList').querySelectorAll('.item-row') : [], items = [], i, r, nameInput, amtInput, name, amt;
+  for (i = 0; i < rows.length; i++) { r = rows[i]; nameInput = r.querySelector('.it-name'); amtInput = r.querySelector('.it-amt'); name = nameInput ? nameInput.value.trim() : ''; amt = amtInput ? parseFloat(amtInput.value) : NaN; if (name || !isNaN(amt)) items.push({ name: name||'\u8D39\u7528', amount: isNaN(amt)?0:Math.round(amt*100)/100 }); }
+  return items;
+}
+function resetForm() {
+  state.editingId = null;
+  var form = $('recordForm'); if (form) form.reset();
+  var fd = $('fDate'); if (fd) fd.value = new Date().toISOString().slice(0, 10);
+  var il = $('itemList'); if (il) il.innerHTML = '';
+  var mt = $('modalTitle'); if (mt) mt.textContent = '\u6DFB\u52A0\u52A0\u73ED\u8BB0\u5F55';
+  var sb = $('submitBtn'); if (sb) sb.textContent = '\u6DFB\u52A0\u8BB0\u5F55';
+}
+function syncSettingsInputs() { var sr = $('sRate'); if (sr && state.settings) sr.value = state.settings.hourlyRate || ''; }
+
+function bindEvents() {
+  bindCalendarEvents();
+  var tt = $('themeToggle');
+  if (tt) tt.onclick = function() {
+    var cur = document.documentElement.getAttribute('data-theme'), next = (cur==='dark')?'light':'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('jb-theme', next); } catch(e) {}
+    var moon = tt.querySelector('.ico-moon'), sun = tt.querySelector('.ico-sun');
+    if (moon) moon.style.display = (next==='dark')?'none':'';
+    if (sun) sun.style.display = (next==='dark')?'':'none';
+  };
+  var ai = $('addItem'); if (ai) ai.onclick = function() { addItemRow('', ''); };
+  var pq = $('presetQuick');
+  if (pq) pq.onclick = function(e) {
+    var btn = null, t = e.target;
+    while (t && t !== pq) { if (t.className && t.className.indexOf && t.className.indexOf('chip') !== -1) { btn = t; break; } t = t.parentNode; }
+    if (!btn) return;
+    var qi = btn.getAttribute('data-q'); if (qi === null) return;
+    var p = (state.settings && state.settings.presets) ? state.settings.presets[+qi] : null;
+    if (p) addItemRow(p.name, p.amount);
+  };
+  var rf = $('recordForm');
+  if (rf) rf.onsubmit = function(e) {
+    e.preventDefault();
+    var fDateEl = $('fDate'), fHoursEl = $('fHours'), fNoteEl = $('fNote');
+    var date = fDateEl ? fDateEl.value : '', hours = parseFloat(fHoursEl ? fHoursEl.value : '0');
+    if (!date || isNaN(hours) || hours < 0) { toast('\u8BF7\u586B\u5199\u6709\u6548\u7684\u65E5\u671F\u4E0E\u65F6\u957F'); return; }
+    var payload = { date: date, hours: Math.round(hours*100)/100, note: fNoteEl?fNoteEl.value.trim():'', items: collectItems() };
+    var submitFn = function() {
+      if (state.editingId) return api('PUT','/api/records/'+state.editingId,payload).then(function(){toast('\u5DF2\u66F4\u65B0\u8BB0\u5F55');});
+      else return api('POST','/api/records',payload).then(function(){toast('\u5DF2\u6DFB\u52A0\u8BB0\u5F55');});
+    };
+    submitFn().then(function(){ closeModal(); return refresh(); }).catch(function(err){ toast('\u64CD\u4F5C\u5931\u8D25:'+(err.message||err)); });
+  };
+  var ap = $('addPreset');
+  if (ap) ap.onclick = function() { if (!state.settings) state.settings = {}; if (!state.settings.presets) state.settings.presets = []; state.settings.presets.push({name:'',amount:0}); renderPresets(); };
+  var plist = $('presetList');
+  if (plist) plist.onclick = function(e) {
+    var btn2 = null, t3 = e.target;
+    while (t3 && t3 !== plist) { if (t3.tagName === 'BUTTON' && t3.getAttribute && t3.getAttribute('data-pd')) { btn2 = t3; break; } t3 = t3.parentNode; }
+    if (!btn2) return;
+    var pd = btn2.getAttribute('data-pd');
+    if (pd !== null && state.settings && state.settings.presets) { state.settings.presets.splice(+pd, 1); renderPresets(); }
+  };
+  var ss = $('saveSettings');
+  if (ss) ss.onclick = function() {
+    var rateInput = $('sRate'), rate = rateInput?parseFloat(rateInput.value):NaN, presets=[], presetRows = $('presetList')?$('presetList').querySelectorAll('.item-row'):[], pr, pn, pa, name, amt, i;
+    for (i = 0; i < presetRows.length; i++) { pr = presetRows[i]; pn = pr.querySelector('input[data-pn]'); pa = pr.querySelector('input[data-pa]'); name = pn?pn.value.trim():''; amt = pa?parseFloat(pa.value)||0:0; if (name) presets.push({name:name,amount:Math.round(amt*100)/100}); }
+    api('POST','/api/settings',{hourlyRate:isNaN(rate)?((state.settings&&state.settings.hourlyRate)?state.settings.hourlyRate:50):Math.round(rate*100)/100,presets:presets}).then(function(){toast('\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
+  };
+  bindDataButtons();
+}
+
+/* ============ 数据导入 / 导出 / 更新 ============ */
+function bindDataButtons() {
+  var exp = $('exportBtn');
+  if (exp) exp.onclick = function() {
+    var url = API_BASE + '/api/export';
+    try {
+      var a = document.createElement('a');
+      a.href = url; a.download = 'overtime-backup.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast('\u5F00\u59CB\u4E0B\u8F7D\u5907\u4EFD\u2026');
+    } catch(e) {
+      window.open(url, '_blank');
+    }
+  };
+  var imp = $('importBtn'), file = $('importFile');
+  if (imp && file) imp.onclick = function() { try { file.click(); } catch(e) { toast('\u5BFC\u5165\u5931\u8D25:' + e.message); } };
+  if (file) file.onchange = function() {
+    if (!file.files || !file.files.length) return;
+    var f = file.files[0];
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      var text = ev.target ? ev.target.result : '';
+      doImport(text);
+    };
+    reader.onerror = function() { toast('\u8BFB\u53D6\u6587\u4EF6\u5931\u8D25'); };
+    reader.readAsText(f);
+    file.value = '';
+  };
+  var cu = $('checkUpdateBtn');
+  if (cu) cu.onclick = checkForUpdate;
+}
+
+function doImport(text) {
+  var data;
+  try { data = JSON.parse(text); } catch(e) { toast('\u6587\u4EF6\u683C\u5F0F\u9519\u8BEF\uff0c\u9700\u4E3A JSON'); return; }
+  if (!confirm('\u5BFC\u5165\u5C06\u8986\u76D6\u5F53\u524D\u6240\u6709\u6570\u636E\uff0c\u662F\u5426\u7EE7\u7EED\uff1F\n\u70B9\u51FB\u201C\u53D6\u6D88\u201D\u53EF\u6539\u4E3A\u5408\u5E76\u6A21\u5F0F\u3002')) {
+    // 用户取消覆盖 → 合并模式
+    api('POST','/api/import',data,'merge').then(function(res){ toast('\u5DF2\u5408\u5E76\u5BFC\u5165 ' + (res&&res.records?res.records:0) + ' \u6761'); return refresh(); }).catch(function(err){ toast('\u5BFC\u5165\u5931\u8D25:'+(err.message||err)); });
+    return;
+  }
+  api('POST','/api/import',data,'replace').then(function(res){ toast('\u5DF2\u5BFC\u5165 ' + (res&&res.records?res.records:0) + ' \u6761'); return refresh(); }).catch(function(err){ toast('\u5BFC\u5165\u5931\u8D25:'+(err.message||err)); });
+}
+
+/* 覆盖 api() 以支持自定义请求头（导入模式） */
+function apiRaw(method, url, body, mode) {
+  var fullUrl = API_BASE + url;
+  var opt = { method: method };
+  opt.headers = { 'Content-Type': 'application/json' };
+  if (mode) opt.headers['X-Import-Mode'] = mode;
+  opt.body = JSON.stringify(body);
+  return fetch(fullUrl, opt).then(function(res) {
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return res.json();
+  });
+}
+function api(method, url, body, mode) {
+  if (mode) return apiRaw(method, url, body, mode);
+  return apiRaw(method, url, body, null);
+}
+
+var APP_VERSION = '1.1.0';   // 当前版本
+var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
+(function(){ var vb = $('verBadge'); if (vb) vb.textContent = 'v' + APP_VERSION; })();
+
+function checkForUpdate() {
+  var info = $('updateInfo');
+  if (info) {
+    info.innerHTML = '当前版本 v' + APP_VERSION + ' <span class="up-latest">✓</span><br>' +
+      '<span class="up-tip">飞牛应用中心「添加第三方源」并填入本仓库地址即可一键更新：</span><br>' +
+      '<code class="up-code">' + UPDATE_SOURCE + '</code><br>' +
+      '<a href="' + UPDATE_SOURCE + '" target="_blank" rel="noopener">查看仓库 / 发布页</a>';
+  }
+}
+
+
+function refresh() {
+  return api('GET','/api/state').then(function(data) {
+    if (data) { if (data.settings) state.settings = data.settings; if (data.records) state.records = data.records; }
+    syncSettingsInputs(); renderPresets(); renderSummary(); renderRecords(); renderCalendar();
+  }).catch(function(err) {
+    var rl = $('recordList');
+    if (rl) rl.innerHTML = '<div style="padding:24px;text-align:center;color:#999;font-size:14px;">\u52A0\u8F7D\u5931\u8D25:'+escHtml((err&&err.message)?err.message:String(err))+'</div>';
+  });
+}
+
+function init() {
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark', tt = $('themeToggle'), moon, sun;
+  if (tt) { moon = tt.querySelector('.ico-moon'); sun = tt.querySelector('.ico-sun'); if (moon) moon.style.display = isDark?'none':''; if (sun) sun.style.display = isDark?'':'none'; }
+  bindEvents(); resetForm(); refresh();
+}
+
+if (document.addEventListener) document.addEventListener('DOMContentLoaded', init);
+else if (document.attachEvent) document.attachEvent('onreadystatechange', function() { if (document.readyState === 'complete') init(); });
+else setTimeout(init, 0);
+</script>
+</body>
+</html>
