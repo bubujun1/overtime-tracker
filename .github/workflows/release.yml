@@ -1,5 +1,8 @@
 name: Build and Release fpk
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
