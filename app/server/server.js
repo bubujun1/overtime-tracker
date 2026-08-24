@@ -20,12 +20,13 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
+const APP_VERSION = '1.1.1';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
 const DEFAULT_DB = {
-  settings: { hourlyRate: 50, presets: [] },
+  settings: { hourlyRate: 50, recurringFees: [] },
   records: []
 };
 
@@ -160,9 +161,151 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
+function compareVersion(a, b) {
+  const pa = String(a || '').replace(/^v/i, '').split('.').map((x) => parseInt(x, 10) || 0);
+  const pb = String(b || '').replace(/^v/i, '').split('.').map((x) => parseInt(x, 10) || 0);
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const x = pa[i] || 0, y = pb[i] || 0;
+    if (x > y) return 1;
+    if (x < y) return -1;
+  }
+  return 0;
+}
+
+// 检查 GitHub 上的最新版本（对齐 fnos-hermes-agent 的「更新页自动拉取版本对比」）
+// 优先读 fnpack.json（第三方源索引，无 API 限流），失败再退回 GitHub Releases API
+async function checkUpdate() {
+  const current = APP_VERSION;
+  const REPO = 'bubujun1/overtime-tracker';
+  const sources = [
+    { url: 'https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
+    { url: 'https://api.github.com/repos/' + REPO + '/releases/latest', type: 'github' }
+  ];
+  let latest = null, downloadUrl = null, publishedAt = null, notes = '';
+  for (const s of sources) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const r = await fetch(s.url, {
+        signal: ctrl.signal,
+        headers: { 'User-Agent': 'overtime-tracker', 'Accept': 'application/json' }
+      });
+      clearTimeout(timer);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (s.type === 'fnpack') {
+        const app = j['overtime-tracker'] || (j.apps && j.apps['overtime-tracker']) || j;
+        latest = app.version;
+        downloadUrl = app.download_url || null;
+        const hist = app.history || {};
+        notes = hist['v' + app.version] || Object.values(hist).join('\n') || '';
+      } else {
+        latest = j.tag_name;
+        publishedAt = j.published_at || null;
+        notes = j.body || '';
+        const asset = (j.assets || []).find((a) => String(a.name).toLowerCase().endsWith('.fpk'));
+        downloadUrl = asset ? asset.browser_download_url : null;
+      }
+      if (latest) break;
+    } catch (e) {
+      console.error('[check-update] source failed:', s.url, e.message);
+    }
+  }
+  if (!latest) {
+    return { ok: false, error: '无法连接更新服务器，请检查网络后重试', current };
+  }
+  return {
+    ok: true,
+    current,
+    latest,
+    hasUpdate: compareVersion(latest, current) > 0,
+    downloadUrl: downloadUrl || null,
+    publishedAt: publishedAt || null,
+    notes: String(notes || '').slice(0, 600)
+  };
+}
+
 async function handleApi(req, res, apiPath, method) {
   const parts = apiPath.split('/').filter(Boolean);
   const head = parts[0];
+
+  if (head === 'check-update' && method === 'GET') {
+    try {
+      const r = await checkUpdate();
+      return sendJSON(res, 200, r);
+    } catch (e) {
+      return sendJSON(res, 200, { ok: false, error: '检查更新失败: ' + e.message, current: APP_VERSION });
+    }
+  }
+
+  // 一键更新：下载新版本 .fpk 并尝试触发 fnOS 覆盖安装（对齐 hermes-agent 的"直接更新覆盖"体验）
+  if (head === 'update' && method === 'POST') {
+    try {
+      const info = await checkUpdate();
+      if (!info.ok) return sendJSON(res, 200, { ok: false, error: info.error, phase: 'check' });
+      if (!info.hasUpdate) return sendJSON(res, 200, { ok: false, error: '当前已是最新版本 v' + info.current, phase: 'check' });
+      if (!info.downloadUrl) return sendJSON(res, 200, { ok: false, error: '未获取到下载地址', phase: 'check' });
+
+      const updateDir = path.join(VAR_DIR, 'updates');
+      fs.mkdirSync(updateDir, { recursive: true });
+      const fpkPath = path.join(updateDir, 'overtime-tracker-' + info.latest + '.fpk');
+
+      console.log('[update] downloading', info.downloadUrl, '->', fpkPath);
+      const dlCtrl = new AbortController();
+      const dlTimer = setTimeout(() => dlCtrl.abort(), 120000); // 2 分钟超时
+      const dlRes = await fetch(info.downloadUrl, {
+        signal: dlCtrl.signal,
+        headers: { 'User-Agent': 'overtime-tracker-updater' }
+      });
+      clearTimeout(dlTimer);
+      if (!dlRes.ok || !dlRes.body) {
+        return sendJSON(res, 200, { ok: false, error: '下载失败: HTTP ' + dlRes.status, phase: 'download' });
+      }
+
+      const buf = Buffer.from(await dlRes.arrayBuffer());
+      fs.writeFileSync(fpkPath, buf);
+      console.log('[update] downloaded', buf.length, 'bytes ->', fpkPath);
+
+      // 尝试调用 fnOS 应用中心 API 触发安装（最佳努力）
+      let installResult = null;
+      try {
+        // 方式1：尝试通过 trim_app_center 的 CGI 接口
+        const host = process.env.FNOS_HOST || '127.0.0.1';
+        const port = parseInt(process.env.FNOS_PORT || '8082', 10);
+        const installApi = 'http://' + host + ':' + port + '/cgi-bin/appcenter.cgi';
+        // 注意：此接口为内部接口，不同 fnOS 版本可能不同；失败不影响已下载的 fpk
+        const form = new URLSearchParams();
+        form.append('action', 'install');
+        form.append('file_path', fpkPath);
+        form.append('force_upgrade', '1');
+
+        const installRes = await fetch(installApi, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: form.toString(),
+          signal: AbortSignal.timeout(10000)
+        });
+        installResult = { status: installRes.status, ok: installRes.ok };
+        console.log('[update] install attempt:', installResult);
+      } catch (eInstall) {
+        installResult = { error: eInstall.message };
+        console.log('[update] install attempt failed (non-fatal):', eInstall.message);
+      }
+
+      return sendJSON(res, 200, {
+        ok: true,
+        phase: 'done',
+        version: info.latest,
+        fpkPath: fpkPath,
+        fpkSize: buf.length,
+        installAttempt: installResult,
+        message: '新版本 v' + info.latest + ' 已下载完成'
+      });
+    } catch (e) {
+      return sendJSON(res, 200, { ok: false, error: '更新失败: ' + e.message, phase: 'unknown' });
+    }
+  }
 
   if (head === 'state' && method === 'GET') {
     const rate = db.settings.hourlyRate;
@@ -177,9 +320,19 @@ async function handleApi(req, res, apiPath, method) {
       totalHours += Number(r.hours) || 0;
       totalCost += recordSubtotal(r, rate);
     }
+    // 周期性固定费用：月费全额计入，季费折算为月（÷3）
+    let monthlyRecurring = 0;
+    const fees = (db.settings && db.settings.recurringFees) || [];
+    for (const f of fees) {
+      const amt = Number(f.amount) || 0;
+      if (f.cycle === 'quarterly') monthlyRecurring += amt / 3;
+      else monthlyRecurring += amt;
+    }
     return sendJSON(res, 200, {
       totalHours: round2(totalHours),
       totalCost: round2(totalCost),
+      monthlyRecurring: round2(monthlyRecurring),
+      grandTotal: round2(totalCost + monthlyRecurring),
       recordCount: db.records.length
     });
   }
@@ -268,10 +421,15 @@ async function handleApi(req, res, apiPath, method) {
     try { patch = JSON.parse((await readBody(req)) || '{}'); }
     catch { return sendJSON(res, 400, { error: 'invalid json' }); }
     if (typeof patch.hourlyRate === 'number') db.settings.hourlyRate = round2(patch.hourlyRate);
-    if (Array.isArray(patch.presets)) {
-      db.settings.presets = patch.presets
-        .filter((p) => p && typeof p.name === 'string')
-        .map((p) => ({ name: String(p.name).trim(), amount: round2(Number(p.amount) || 0) }));
+    // 周期性固定费用（月/季度）
+    if (Array.isArray(patch.recurringFees)) {
+      db.settings.recurringFees = patch.recurringFees
+        .filter((f) => f && typeof f.name === 'string')
+        .map((f) => ({
+          name: String(f.name).trim(),
+          amount: round2(Number(f.amount) || 0),
+          cycle: (f.cycle === 'quarterly') ? 'quarterly' : 'monthly'
+        }));
     }
     saveDB();
     return sendJSON(res, 200, db.settings);

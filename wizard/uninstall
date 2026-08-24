@@ -1,11 +1,1 @@
-[
-    {
-        "stepTitle": "卸载确认",
-        "items": [
-            {
-                "type": "tips",
-                "helpText": "卸载将移除应用及其运行文件。应用产生的加班数据保存在 @apphome/overtime-tracker，将一并清除，卸载前请自行备份。"
-            }
-        ]
-    }
-]
+[{"stepTitle": "卸载记加班", "items": [{"type": "tips", "helpText": "请选择数据清理方式。"}, {"type": "radio", "field": "wizard_data_action", "label": "数据保留选项", "initValue": "keep", "options": [{"label": "保留数据（推荐 — 下次安装时可继续使用）", "value": "keep"}, {"label": "完全删除（包括加班记录、设置和配置）", "value": "delete"}], "rules": [{"required": true, "message": "请选择数据清理方式"}]}]}]
