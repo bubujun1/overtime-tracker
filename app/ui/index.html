@@ -1079,6 +1079,23 @@ var API_BASE = (function() {
   return m ? m[1] : '';
 })();
 
+// 跨 WebView 安全的文件下载（避免 window.open 被弹窗拦截导致“没反应”）
+function safeDownload(url, filename) {
+  try {
+    var a = document.createElement('a');
+    a.href = url;
+    if (filename) a.download = filename;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
+    toast('已开始下载，请到下载目录查看');
+    return;
+  } catch (e) { /* 继续兜底 */ }
+  // 兜底：直接导航以触发 WebView 下载管理器
+  try { window.location.href = url; } catch (e2) {}
+}
+
 function $(id) { try { return document.getElementById(id); } catch(e) { return null; } }
 
 /* 金额格式化：无币种符号，保留两位小数 */
@@ -1644,7 +1661,7 @@ function loadBackupList() {
         if (t && t.getAttribute) {
           var dlName = t.getAttribute('data-bde');
           if (dlName) {
-            window.open(API_BASE + '/api/backup/' + encodeURIComponent(dlName), '_blank');
+            safeDownload(API_BASE + '/api/backup/' + encodeURIComponent(dlName), 'overtime-backup-' + dlName);
             return;
           }
           var resName = t.getAttribute('data-bdl');
@@ -1876,14 +1893,13 @@ function bindDataButtons() {
   var exp = $('exportBtn');
   if (exp) exp.onclick = function() {
     var url = API_BASE + '/api/export';
+    safeDownload(url, 'overtime-backup.json');
+    // 兜底：复制 JSON 到剪贴板（部分 WebView 下载被拦截时仍可拿到数据）
     try {
-      var a = document.createElement('a');
-      a.href = url; a.download = 'overtime-backup.json';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      toast('\u5F00\u59CB\u4E0B\u8F7D\u5907\u4EFD\u2026');
-    } catch(e) {
-      window.open(url, '_blank');
-    }
+      fetch(url).then(function(r){ return r.text(); }).then(function(t){
+        try { if (navigator.clipboard) navigator.clipboard.writeText(t); } catch(e){}
+      }).catch(function(){});
+    } catch(e){}
   };
   var imp = $('importBtn'), file = $('importFile');
   if (imp && file) imp.onclick = function() { try { file.click(); } catch(e) { toast('\u5BFC\u5165\u5931\u8D25:' + e.message); } };
@@ -1932,7 +1948,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.1.3';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.1.6';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var cv = $('curVerInline'); if (cv) cv.textContent = '记加班 v' + APP_VERSION; })();
@@ -1977,7 +1993,7 @@ function doAppUpdate() {
   var btn = $('doUpdateBtn');
   var prog = $('updateProgress');
   if (btn) { btn.disabled = true; btn.textContent = '正在下载…'; }
-  if (prog) prog.innerHTML = '<span class="up-loading">正在从 GitHub 下载新版本，请稍候…</span>';
+  if (prog) prog.innerHTML = '<span class="up-loading">正在下载新版本（直连 / ghproxy 镜像自动择优），请稍候…</span>';
 
   api('POST', '/api/update').then(function(r) {
     if (!r || !r.ok) {

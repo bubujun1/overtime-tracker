@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.1.3';
+const APP_VERSION = '1.1.6';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -187,12 +187,25 @@ function compareVersion(a, b) {
   return 0;
 }
 
+// 构建下载镜像候选：GitHub 直连 + ghproxy 加速，哪个通走哪个
+function mirrorCandidates(url) {
+  if (!url) return [];
+  const proxied = 'https://ghproxy.net/' + url;
+  if (url.indexOf('ghproxy.net') >= 0) {
+    // 已是镜像地址 -> 兜底回退到直连
+    return [url, url.replace('https://ghproxy.net/', '')];
+  }
+  return [url, proxied];
+}
+
 // 检查 GitHub 上的最新版本（对齐 fnos-hermes-agent 的「更新页自动拉取版本对比」）
 // 优先读 fnpack.json（第三方源索引，无 API 限流），失败再退回 GitHub Releases API
 async function checkUpdate() {
   const current = APP_VERSION;
   const REPO = 'bubujun1/overtime-tracker';
   const sources = [
+    { url: 'https://cdn.jsdelivr.net/gh/' + REPO + '@main/fnpack.json', type: 'fnpack' },
+    { url: 'https://ghproxy.net/https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
     { url: 'https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
     { url: 'https://api.github.com/repos/' + REPO + '/releases/latest', type: 'github' }
   ];
@@ -304,21 +317,30 @@ async function handleApi(req, res, apiPath, method) {
       fs.mkdirSync(updateDir, { recursive: true });
       const fpkPath = path.join(updateDir, 'overtime-tracker-' + info.latest + '.fpk');
 
-      console.log('[update] downloading', info.downloadUrl, '->', fpkPath);
-      const dlCtrl = new AbortController();
-      const dlTimer = setTimeout(() => dlCtrl.abort(), 120000); // 2 分钟超时
-      const dlRes = await fetch(info.downloadUrl, {
-        signal: dlCtrl.signal,
-        headers: { 'User-Agent': 'overtime-tracker-updater' }
-      });
-      clearTimeout(dlTimer);
-      if (!dlRes.ok || !dlRes.body) {
-        return sendJSON(res, 200, { ok: false, error: '下载失败: HTTP ' + dlRes.status, phase: 'download' });
+      const candidates = mirrorCandidates(info.downloadUrl);
+      console.log('[update] download candidates:', candidates);
+      let buf = null, usedUrl = null, lastErr = null;
+      for (const cand of candidates) {
+        try {
+          const dlCtrl = new AbortController();
+          const dlTimer = setTimeout(() => dlCtrl.abort(), 120000); // 2 分钟超时
+          const dlRes = await fetch(cand, {
+            signal: dlCtrl.signal,
+            headers: { 'User-Agent': 'overtime-tracker-updater' }
+          });
+          clearTimeout(dlTimer);
+          if (!dlRes.ok || !dlRes.body) { lastErr = 'HTTP ' + dlRes.status; continue; }
+          buf = Buffer.from(await dlRes.arrayBuffer());
+          usedUrl = cand;
+          break;
+        } catch (e) { lastErr = e.message; }
+      }
+      if (!buf) {
+        return sendJSON(res, 200, { ok: false, error: '下载失败（已尝试直连与 ghproxy 镜像）：' + (lastErr || '未知'), phase: 'download' });
       }
 
-      const buf = Buffer.from(await dlRes.arrayBuffer());
       fs.writeFileSync(fpkPath, buf);
-      console.log('[update] downloaded', buf.length, 'bytes ->', fpkPath);
+      console.log('[update] downloaded via', usedUrl, buf.length, 'bytes ->', fpkPath);
 
       // 解析 fnOS 安装命令（appcenter-cli install-fpk <path>）
       const cmd = resolveInstallCmd();
