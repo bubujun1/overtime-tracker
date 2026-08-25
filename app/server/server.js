@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.1.6';
+const APP_VERSION = '1.1.7';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -203,11 +203,13 @@ function mirrorCandidates(url) {
 async function checkUpdate() {
   const current = APP_VERSION;
   const REPO = 'bubujun1/overtime-tracker';
+  // NAS 网络实测：raw.githubusercontent 与 api.github.com 可达；jsdelivr/ghproxy 不稳定或被拦截。
+  // 故优先走 NAS 可达源，镜像仅作最后兜底，避免每次「检查更新」先空等两个 8s 超时。
   const sources = [
-    { url: 'https://cdn.jsdelivr.net/gh/' + REPO + '@main/fnpack.json', type: 'fnpack' },
-    { url: 'https://ghproxy.net/https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
     { url: 'https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
-    { url: 'https://api.github.com/repos/' + REPO + '/releases/latest', type: 'github' }
+    { url: 'https://api.github.com/repos/' + REPO + '/releases/latest', type: 'github' },
+    { url: 'https://ghproxy.net/https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
+    { url: 'https://cdn.jsdelivr.net/gh/' + REPO + '@main/fnpack.json', type: 'fnpack' }
   ];
   let latest = null, downloadUrl = null, publishedAt = null, notes = '';
   for (const s of sources) {
