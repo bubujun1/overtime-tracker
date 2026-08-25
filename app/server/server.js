@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.1.9';
+const APP_VERSION = '1.2.0';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -60,6 +60,302 @@ function saveDB() {
 }
 
 let db = loadDB();
+
+/* =========================================================================
+ * 签到模块（自动签到引擎，移植自便阅记 checkin，独立命名空间，不污染 overtime 数据）
+ * 数据存 DATA_DIR/checkin.json；路由前缀 /api/checkin/*；函数加 ck 前缀避免与现有冲突。
+ * 参考：便阅记《签到功能说明》+ QD(qiandao) 自动签到项目。Cookie 采用手动粘贴（本地零依赖）。
+ * ========================================================================= */
+const CHECKIN_FILE = path.join(DATA_DIR, 'checkin.json');
+
+/* 站点模板（参照 GitHub 自动签到项目的真实接口） */
+const ckTemplates = [
+  { key: 'custom', name: '自定义（手动配置）', emoji: '🌐', type: 'api', method: 'GET', url: '', baseHeaders: {}, success: null, keyword: '', note: '手动填请求地址 / 方法 / 请求头 / 成功关键词。适合任何开放接口的站点。' },
+  { key: 'bilibili-live', name: 'B站直播签到', emoji: '📺', type: 'api', method: 'GET', url: 'https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign', baseHeaders: { 'Referer': 'https://live.bilibili.com/', 'Origin': 'https://live.bilibili.com' }, csrf: { cookieKey: 'bili_jct', queryKeys: ['csrf_token', 'csrf'] }, body: '', success: { type: 'json', path: 'code', equals: [0, 101104] }, note: '需登录 Cookie（含 SESSDATA 和 bili_jct）。把浏览器里的 Cookie 整串粘贴到「登录凭证 Cookie」即可，引擎自动提取 bili_jct 作为 csrf 注入查询参数。成功返回 code=0，今日已签返回 101104。' },
+  { key: 'discuz', name: 'Discuz 论坛签到（通用）', emoji: '🏷️', type: 'formSign', method: 'POST', url: 'https://{host}/forum.php?mod=taskworker&id=1&item=1', getUrl: 'https://{host}/forum.php', baseHeaders: { 'Referer': 'https://{host}/' }, successKeyword: '成功', note: '把 {host} 换成你的论坛域名（如 www.hostloc.com）。需登录 Cookie。先抓页面 formhash 再 POST 完成签到，多数 Discuz 论坛通用。' },
+  { key: 'tieba', name: '百度贴吧签到', emoji: '🔥', type: 'tiebaOneClick', method: 'POST', url: 'https://tieba.baidu.com/sign/add', baseHeaders: { 'Referer': 'https://tieba.baidu.com/' }, note: '一键签到所有关注的吧（复刻贴吧网页版「一键签到」）。需登录 Cookie（含 BDUSS）。把浏览器里的 Cookie 整串粘贴到「登录凭证 Cookie」即可。引擎会先校验登录态，再逐个吧签到，返回每个吧的结果。' }
+];
+
+function ckDefaultState() {
+  return {
+    v: 2, daily: {}, sites: [], siteLogs: {}, scheduleLog: {},
+    settings: { theme: 'light', autoRun: true, proxy: '', autoDaily: '09:00', notify: false, backupThreshold: 20 },
+    meta: { createdAt: Date.now(), lastBackupAt: null, additionsSinceBackup: 0, cleared: false }
+  };
+}
+function ckUid() { return 'id_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8); }
+function ckDs(d) { d = d || new Date(); const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), da = String(d.getDate()).padStart(2, '0'); return y + '-' + m + '-' + da; }
+function ckNowHM() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function ckGetPath(obj, p) { return p.split('.').reduce((o, k) => (o == null ? o : o[k]), obj); }
+function ckSafeJson(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+function ckSetFormField(body, k, v) {
+  const enc = encodeURIComponent(v);
+  if (!body) return k + '=' + enc;
+  if (typeof body === 'string') return body + (body.indexOf('=') >= 0 ? '&' : '') + k + '=' + enc;
+  if (typeof body === 'object') { body[k] = v; return body; }
+  return body;
+}
+function ckAppendQuery(url, k, v) { const sep = url.indexOf('?') >= 0 ? '&' : '?'; return url + sep + encodeURIComponent(k) + '=' + encodeURIComponent(v); }
+function ckNormalizeSchedule(v) {
+  if (!v) return null;
+  if (typeof v === 'string') return /^\d{2}:\d{2}$/.test(v) ? v : null;
+  if (Array.isArray(v)) { const arr = v.filter(x => typeof x === 'string' && /^\d{2}:\d{2}$/.test(x)); if (arr.length === 0) return null; if (arr.length === 1) return arr[0]; return arr; }
+  return null;
+}
+function ckToSlots(schedule) { if (!schedule) return []; if (Array.isArray(schedule)) return schedule.filter(x => /^\d{2}:\d{2}$/.test(x)); return [schedule]; }
+function ckDemoSites() {
+  return [
+    { id: ckUid(), name: '百度贴吧签到', emoji: '🔥', group: '社区', schedule: '09:00', enabled: true, demo: true, tpl: null, note: '一键签到所有关注的吧。需登录 Cookie（含 BDUSS）：粘贴到「登录凭证 Cookie」。引擎先校验登录态，再逐个吧签到，返回每个吧的结果。', req: { url: 'https://tieba.baidu.com/sign/add', method: 'POST', headers: '{"Referer":"https://tieba.baidu.com/"}', type: 'tiebaOneClick' } },
+    { id: ckUid(), name: '示例论坛签到', emoji: '🏷️', group: '论坛', schedule: '21:00', enabled: true, demo: true, tpl: null, note: 'Discuz 类论坛，把 host 和 Cookie 换成你自己的', req: { type: 'formSign', url: 'https://www.hostloc.com/forum.php?mod=taskworker&id=1&item=1', getUrl: 'https://www.hostloc.com/forum.php', method: 'POST', headers: '{"Cookie":"你的论坛 Cookie","Referer":"https://www.hostloc.com/"}', body: '' } }
+  ];
+}
+function ckExpandTemplate(site) {
+  const t = site.tpl ? ckTemplates.find(x => x.key === site.tpl) : null;
+  if (!t) return site;
+  const req = site.req || {};
+  if (!req.url) req.url = t.url;
+  if (!req.method) req.method = t.method || 'GET';
+  if (!req.headers && t.baseHeaders) req.headers = JSON.stringify(t.baseHeaders, null, 0);
+  if (t.getUrl && !req.getUrl) req.getUrl = t.getUrl;
+  if (t.type && !req.type) req.type = t.type;
+  if (t.success) req.success = t.success;
+  if (t.keyword && !req.keyword) req.keyword = t.keyword;
+  if (site.tpl === 'bilibili-live' && !req.body && t.csrf) req.body = (t.csrf.formKeys || []).map(k => k + '=你的' + t.csrf.cookieKey).join('&');
+  if (!site.note && t.note) site.note = t.note;
+  site.req = req; site.tpl = null;
+  return site;
+}
+function ckNormalize(s) {
+  if (!s || typeof s !== 'object') throw new Error('格式不正确');
+  const d = ckDefaultState();
+  if (s.daily && typeof s.daily === 'object') { for (const k in s.daily) if (typeof s.daily[k] === 'number') d.daily[k] = s.daily[k]; }
+  if (Array.isArray(s.sites)) {
+    d.sites = s.sites.filter(x => x && typeof x === 'object' && x.name).map(x => ({
+      id: x.id || ckUid(), name: String(x.name), emoji: String(x.emoji || ''), group: String(x.group || ''),
+      schedule: ckNormalizeSchedule(x.schedule), enabled: x.enabled !== false, demo: !!x.demo, tpl: typeof x.tpl === 'string' ? x.tpl : null,
+      cookie: String(x.cookie || ''), req: (x.req && typeof x.req === 'object') ? x.req : {},
+      lastRun: x.lastRun || null, lastResult: (x.lastResult && typeof x.lastResult === 'object') ? x.lastResult : null
+    }));
+  }
+  if (s.siteLogs && typeof s.siteLogs === 'object') {
+    for (const sid in s.siteLogs) if (s.siteLogs[sid] && typeof s.siteLogs[sid] === 'object') {
+      const m = {}; for (const dt in s.siteLogs[sid]) if (typeof s.siteLogs[sid][dt] === 'number') m[dt] = s.siteLogs[sid][dt];
+      d.siteLogs[sid] = m;
+    }
+  }
+  if (s.scheduleLog && typeof s.scheduleLog === 'object') {
+    const sl = {};
+    for (const dt in s.scheduleLog) {
+      if (typeof s.scheduleLog[dt] !== 'object' || !s.scheduleLog[dt]) continue;
+      const m = {};
+      for (const sid in s.scheduleLog[dt]) if (Array.isArray(s.scheduleLog[dt][sid])) m[sid] = s.scheduleLog[dt][sid].filter(t => typeof t === 'string' && /^\d{2}:\d{2}$/.test(t));
+      sl[dt] = m;
+    }
+    d.scheduleLog = sl;
+  }
+  if (s.settings && typeof s.settings === 'object') {
+    const st = s.settings;
+    d.settings.theme = st.theme === 'dark' ? 'dark' : 'light';
+    d.settings.autoRun = !!st.autoRun;
+    d.settings.proxy = typeof st.proxy === 'string' ? st.proxy : '';
+    d.settings.autoDaily = (typeof st.autoDaily === 'string' && /^\d{2}:\d{2}$/.test(st.autoDaily)) ? st.autoDaily : '09:00';
+    d.settings.notify = !!st.notify;
+    d.settings.backupThreshold = (typeof st.backupThreshold === 'number' && st.backupThreshold > 0) ? st.backupThreshold : 20;
+  }
+  if (s.meta && typeof s.meta === 'object') {
+    d.meta.createdAt = s.meta.createdAt || Date.now();
+    d.meta.lastBackupAt = s.meta.lastBackupAt || null;
+    d.meta.additionsSinceBackup = (typeof s.meta.additionsSinceBackup === 'number') ? s.meta.additionsSinceBackup : 0;
+    d.meta.cleared = !!s.meta.cleared;
+  }
+  return d;
+}
+
+let ck = ckDefaultState();
+function ckLoad() {
+  let raw = null;
+  try { raw = fs.readFileSync(CHECKIN_FILE, 'utf8'); } catch (e) { raw = null; }
+  if (raw === null) { ck = ckDefaultState(); ck.sites = ckDemoSites(); ckSave(); return; }
+  try {
+    ck = ckNormalize(JSON.parse(raw));
+    ck.sites = ck.sites.map(s => (s.tpl ? ckExpandTemplate(s) : s));
+    if (ck.sites.length === 0 && !ck.meta.cleared) { ck.sites = ckDemoSites(); ckSave(); }
+  } catch (e) {
+    console.error('[checkin] 数据损坏，已重置：', e.message);
+    ck = ckDefaultState(); ck.meta.corrupted = true; ckSave();
+  }
+}
+function ckSave() { try { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(CHECKIN_FILE, JSON.stringify(ck, null, 2), 'utf8'); } catch (e) { console.error('[checkin] 保存失败：', e.message); } }
+
+function ckResolveCfg(site) {
+  const t = site.tpl ? ckTemplates.find(x => x.key === site.tpl) : null;
+  const base = t ? JSON.parse(JSON.stringify(t)) : { type: 'api', method: 'GET', baseHeaders: {}, success: null, keyword: '' };
+  const req = site.req || {};
+  const cfg = Object.assign({}, base);
+  if (req.url) cfg.url = req.url;
+  if (req.getUrl) cfg.getUrl = req.getUrl;
+  if (req.method) cfg.method = req.method;
+  if (req.headers) cfg.baseHeaders = Object.assign({}, cfg.baseHeaders, (ckSafeJson(req.headers) || {}));
+  if (req.body !== undefined) cfg.body = req.body;
+  if (req.keyword) cfg.keyword = req.keyword;
+  if (req.success) cfg.success = req.success;
+  if (req.csrf) cfg.csrf = req.csrf;
+  if (req.token) cfg.token = req.token;
+  if (req.type) cfg.type = req.type;
+  cfg.cookie = site.cookie || req.cookie || '';
+  return cfg;
+}
+
+async function ckRun(site) {
+  const cfg = ckResolveCfg(site);
+  if (!cfg.url) return { ok: false, reason: '未配置请求地址' };
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (compatible; checkin-app/1.0)';
+  const headers = Object.assign({ 'User-Agent': UA }, cfg.baseHeaders || {});
+  if (!headers['Cookie'] && !headers['cookie'] && site.cookie) headers['Cookie'] = site.cookie;
+  const cookie = (headers['Cookie'] || headers['cookie'] || site.cookie || '').trim();
+  if (cfg.type === 'tiebaOneClick' || (cfg.url && cfg.url.indexOf('tieba.baidu.com/sign/add') >= 0)) return await ckTieba(cookie);
+  const method = (cfg.method || 'GET').toUpperCase();
+  const rawUrl = cfg.url;
+  const proxy = ck.settings.proxy ? ck.settings.proxy.trim() : '';
+  let target = proxy ? (proxy.indexOf('{url}') >= 0 ? proxy.replace('{url}', encodeURIComponent(rawUrl)) : proxy + encodeURIComponent(rawUrl)) : rawUrl;
+  let body = cfg.body != null ? cfg.body : null;
+  if (cfg.csrf && cookie) {
+    const m = cookie.match(new RegExp(cfg.csrf.cookieKey + '=([^;]+)'));
+    if (m) {
+      (cfg.csrf.formKeys || []).forEach(k => { if (body != null) body = ckSetFormField(body, k, m[1]); });
+      (cfg.csrf.queryKeys || []).forEach(k => { target = ckAppendQuery(target, k, m[1]); });
+    }
+  }
+  if (cfg.token && cookie) {
+    try {
+      const tkRes = await fetch(cfg.token.url, { headers: { 'Cookie': cookie, 'User-Agent': UA } });
+      const tkJson = await tkRes.json();
+      const tk = ckGetPath(tkJson, cfg.token.jsonPath);
+      if (tk) {
+        if (cfg.token.formKey && body != null) body = ckSetFormField(body, cfg.token.formKey, tk);
+        if (cfg.token.queryKey) target = ckAppendQuery(target, cfg.token.queryKey, tk);
+      }
+    } catch (e) { /* 取 token 失败则继续 */ }
+  }
+  try {
+    let text, status;
+    if (cfg.type === 'formSign') {
+      const pageRes = await fetch(cfg.getUrl || rawUrl, { headers: { 'Cookie': cookie, 'User-Agent': UA } });
+      const pageText = await pageRes.text();
+      const fm = pageText.match(/name="formhash"[^>]*value="([a-f0-9]{6,})"|formhash=([a-f0-9]{6,})|FORMHASH["']?\s*:\s*"([a-f0-9]{6,})"/i);
+      const formhash = fm ? (fm[1] || fm[2] || fm[3]) : null;
+      if (!formhash) return { ok: false, reason: '未能提取 formhash（Cookie 失效或页面改版）' };
+      let fb = (cfg.formBody || 'formhash=' + formhash);
+      if (cfg.csrf && cookie) { const m = cookie.match(new RegExp(cfg.csrf.cookieKey + '=([^;]+)')); if (m) (cfg.csrf.formKeys || []).forEach(k => fb += '&' + k + '=' + encodeURIComponent(m[1])); }
+      const r = await fetch(target, { method, headers: Object.assign({}, headers, { 'Content-Type': 'application/x-www-form-urlencoded' }), body: fb });
+      text = await r.text(); status = r.status;
+    } else {
+      const isForm = (typeof body === 'string') && body.trim().charAt(0) !== '{';
+      const sendHeaders = Object.assign({}, headers);
+      if (isForm) sendHeaders['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+      const r = await fetch(target, { method, headers: sendHeaders, body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined });
+      text = await r.text(); status = r.status;
+    }
+    let ok = (status >= 200 && status < 300);
+    if (cfg.success && cfg.success.type === 'json') {
+      try {
+        const j = JSON.parse(text);
+        const v = ckGetPath(j, cfg.success.path);
+        if (cfg.success.notEquals !== undefined) ok = (v !== cfg.success.notEquals);
+        else if (Array.isArray(cfg.success.equals)) ok = (cfg.success.equals.indexOf(v) >= 0);
+        else ok = (v === cfg.success.equals);
+      } catch (e) { ok = false; }
+    } else if (cfg.success && cfg.success.type === 'text') {
+      ok = text.indexOf(cfg.success.contains) >= 0;
+    } else if (cfg.keyword) {
+      ok = text.indexOf(cfg.keyword) >= 0;
+    } else {
+      const j = ckSafeJson(text);
+      if (j && typeof j === 'object') {
+        if (j.result === 'error' || j.result === 'fail' || j.success === false ||
+            (typeof j.code === 'number' && j.code < 0) || j.errcode || j.errno ||
+            (j.error && j.error !== 0 && j.error !== '0') || j.errMsg || j.errmsg) ok = false;
+      }
+    }
+    let reason = null;
+    if (!ok) {
+      if (status < 200 || status >= 300) reason = 'HTTP ' + status + '（请求被拒或服务不可用）';
+      else {
+        const j = ckSafeJson(text);
+        const msg = j && (j.msg || j.message || j.reason || (j.data && j.data.msg));
+        reason = '接口已响应，但未签到成功' + (msg ? '（' + msg + '）' : '（可能需验证码 / 今日已签过 / 参数不对）');
+      }
+    }
+    return { ok, status, reason, snippet: text.slice(0, 220) };
+  } catch (e) { return { ok: false, reason: String(e && e.message || e) }; }
+}
+
+function ckSleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+async function ckTieba(cookie) {
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (compatible; checkin-app/1.0)';
+  if (!cookie) return { ok: false, reason: '未配置 Cookie。请在「登录凭证 Cookie」粘贴贴吧登录态（含 BDUSS）。' };
+  let mo;
+  try {
+    const r = await fetch('https://tieba.baidu.com/mo/q/newmoindex?', { headers: { 'Cookie': cookie, 'User-Agent': UA, 'Referer': 'https://tieba.baidu.com/' } });
+    mo = await r.json();
+  } catch (e) { return { ok: false, reason: '获取贴吧登录态失败（网络异常）：' + (e && e.message || e) }; }
+  if (!mo || mo.no !== 0 || !mo.data || !mo.data.uid || !Array.isArray(mo.data.like_forum)) {
+    return { ok: false, status: 200, reason: 'Cookie 未登录或已失效（请重新登录贴吧后再试）。', snippet: JSON.stringify(mo || {}).slice(0, 220) };
+  }
+  const tbs = mo.data.tbs;
+  const forums = (mo.data.like_forum || []).map(f => (f && (f.forum_name || f.name))).filter(Boolean);
+  if (!forums.length) return { ok: false, reason: '未获取到关注的吧（请先在贴吧关注一些吧，或重新登录后重试）。' };
+  let success = 0, already = 0, needCaptcha = [], failed = [], skipped = [];
+  const details = [];
+  for (let i = 0; i < forums.length; i++) {
+    const name = forums[i];
+    const body = 'ie=utf-8&kw=' + encodeURIComponent(name) + '&tbs=' + encodeURIComponent(tbs);
+    try {
+      const r = await fetch('https://tieba.baidu.com/sign/add', { method: 'POST', headers: { 'Cookie': cookie, 'User-Agent': UA, 'Referer': 'https://tieba.baidu.com/', 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }, body });
+      const j = await r.json();
+      const no = j && j.no;
+      if (no === 0) { success++; details.push('✓ ' + name); }
+      else if (no === 1101 || no === 110021) { already++; details.push('· ' + name + '（今日已签）'); }
+      else if (no === 2150040) { needCaptcha.push(name); details.push('⚠ ' + name + '（需验证码）'); }
+      else if (no === 1011) { skipped.push(name); details.push('· ' + name + '（未加入/等级不足，跳过）'); }
+      else { failed.push(name); details.push('✗ ' + name + '（' + ((j && (j.error || j.msg)) || no) + '）'); }
+    } catch (e) { failed.push(name); details.push('✗ ' + name + '（请求异常）'); }
+    if (i < forums.length - 1) await ckSleep(400);
+  }
+  const total = forums.length;
+  const signedOk = (failed.length === 0 && needCaptcha.length === 0 && (success + already + skipped.length) > 0);
+  let reason;
+  if (signedOk) reason = '一键签到完成：新签 ' + success + ' 个，今日已签 ' + already + ' 个，跳过 ' + skipped.length + ' 个，共 ' + total + ' 个吧。';
+  else reason = '一键签到未完全成功：新签 ' + success + '，已签 ' + already + '，需验证码 ' + needCaptcha.length + ' 个，跳过 ' + skipped.length + ' 个，失败 ' + failed.length + ' 个。';
+  return { ok: signedOk, status: 200, reason, details, snippet: details.slice(0, 40).join(' | ') };
+}
+
+function ckSiteDoneToday(id) { const l = ck.siteLogs[id]; return !!(l && l[ckDs()]); }
+function ckMarkDone(id) { const l = ck.siteLogs[id] || {}; l[ckDs()] = Date.now(); ck.siteLogs[id] = l; }
+function ckSlotDone(id, date, slot) { const d = ck.scheduleLog && ck.scheduleLog[date]; return !!(d && d[id] && d[id].indexOf(slot) >= 0); }
+function ckPruneScheduleLog(today) { const sl = ck.scheduleLog; if (!sl) return; for (const dt in sl) if (dt < today) delete sl[dt]; }
+function ckMarkSlot(id, date, slot) { ck.scheduleLog = ck.scheduleLog || {}; const d = ck.scheduleLog[date] || (ck.scheduleLog[date] = {}); const arr = d[id] || (d[id] = []); if (arr.indexOf(slot) < 0) arr.push(slot); ckPruneScheduleLog(date); ckSave(); }
+function ckBump() { ck.meta.additionsSinceBackup = (ck.meta.additionsSinceBackup || 0) + 1; ckSave(); }
+function ckLog(id, res) { const s = ck.sites.find(x => x.id === id); if (!s) return; s.lastResult = res; s.lastRun = ckDs(); if (res.ok) ckMarkDone(id); ckSave(); }
+async function ckCheckinSite(id) { const s = ck.sites.find(x => x.id === id); if (!s) return { ok: false, reason: '站点不存在' }; const res = await ckRun(s); ckLog(id, res); return res; }
+async function ckCheckinAll() { const targets = ck.sites.filter(s => s.enabled && !ckSiteDoneToday(s.id)); const out = { ok: 0, fail: 0, list: [] }; for (const s of targets) { const res = await ckRun(s); ckLog(s.id, res); if (res.ok) out.ok++; else out.fail++; out.list.push({ name: s.name, ok: res.ok, reason: res.reason || ('HTTP ' + res.status) }); await new Promise(r => setTimeout(r, 600)); } return out; }
+async function ckCheckinAutoDaily() { const targets = ck.sites.filter(s => s.enabled && !s.schedule && !ckSiteDoneToday(s.id)); const out = { ok: 0, fail: 0, list: [] }; for (const s of targets) { const res = await ckRun(s); ckLog(s.id, res); if (res.ok) out.ok++; else out.fail++; out.list.push({ name: s.name, ok: res.ok, reason: res.reason || ('HTTP ' + res.status) }); await new Promise(r => setTimeout(r, 600)); } return out; }
+function ckDaily() { const t = ckDs(); if (ck.daily[t]) { delete ck.daily[t]; ckSave(); return { ok: true, undone: true }; } ck.daily[t] = Date.now(); ckBump(); ckSave(); return { ok: true, done: true }; }
+
+let ckLastAutoRun = '';
+let ckAutoRunning = false;
+function ckTick() {
+  const today = ckDs(), hm = ckNowHM();
+  if (!ck.settings.autoRun) return;
+  const autoTime = ck.settings.autoDaily || '09:00';
+  if (hm >= autoTime && ckLastAutoRun !== today && !ckAutoRunning) { ckLastAutoRun = today; ckAutoRunning = true; ckCheckinAutoDaily().finally(() => { ckAutoRunning = false; }); }
+  for (const s of ck.sites) {
+    if (!s.enabled || !s.schedule) continue;
+    const slots = ckToSlots(s.schedule);
+    for (const slot of slots) { if (hm >= slot && !ckSlotDone(s.id, today, slot)) { ckMarkSlot(s.id, today, slot); ckCheckinSite(s.id); } }
+  }
+}
+function startCheckinScheduler() { ckLoad(); setInterval(ckTick, 30000); setInterval(ckSave, 60000); console.log('[checkin] scheduler started (30s, auto=' + ck.settings.autoRun + ')'); }
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -667,6 +963,75 @@ async function handleApi(req, res, apiPath, method) {
     }
   }
 
+  // ====== 签到模块 API（命名空间 /api/checkin）======
+  if (head === 'checkin') {
+    const sub = parts.slice(1);
+    const sp = sub[0] || '';
+    if (sp === 'state' && method === 'GET') {
+      const pub = Object.assign({}, ck, { _localOnly: true });
+      return sendJSON(res, 200, { state: pub, templates: ckTemplates });
+    }
+    if (sp === 'export' && method === 'GET') {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Content-Disposition': 'attachment; filename="checkin-backup-' + ckDs() + '.json"' });
+      res.end(JSON.stringify({ app: 'overtime-checkin', version: 2, exportedAt: Date.now(), state: ck }, null, 2)); return;
+    }
+    if (sp === 'all' && method === 'POST') { const out = await ckCheckinAll(); return sendJSON(res, 200, out); }
+    if (sp === 'daily' && method === 'POST') { return sendJSON(res, 200, ckDaily()); }
+    if (sp === 'load-demo' && method === 'POST') { ckDemoSites().forEach(s => ck.sites.push(s)); ck.meta.cleared = false; ckBump(); ckSave(); return sendJSON(res, 200, { ok: true }); }
+    if (sp === 'clear' && method === 'POST') { ck = ckDefaultState(); ck.meta.cleared = true; ckSave(); return sendJSON(res, 200, { ok: true }); }
+    if (sp === 'site') {
+      if (method === 'DELETE') {
+        const id = parts[2];
+        ck.sites = ck.sites.filter(x => x.id !== id); delete ck.siteLogs[id]; ckSave(); return sendJSON(res, 200, { ok: true });
+      }
+      if (method === 'POST') {
+        let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
+        if (b.id) {
+          const s = ck.sites.find(x => x.id === b.id);
+          if (s) {
+            const keep = s.req || {};
+            const incomingReq = (b.req && typeof b.req === 'object') ? b.req : {};
+            const preserved = {};
+            ['type', 'success', 'token', 'csrf', 'getUrl', 'keyword'].forEach(function (k) { if (keep[k] !== undefined && incomingReq[k] === undefined) preserved[k] = keep[k]; });
+            b.req = Object.assign({}, incomingReq, preserved);
+            Object.assign(s, b);
+          }
+        } else { const ns = Object.assign({ id: ckUid(), demo: false, enabled: true, cookie: '', req: {}, tpl: null, schedule: null, emoji: '', group: '' }, b); ck.sites.push(ns); }
+        ckBump(); ckSave(); return sendJSON(res, 200, { ok: true, id: b.id || ck.sites[ck.sites.length - 1].id });
+      }
+      return sendJSON(res, 405, { error: 'method not allowed' });
+    }
+    if (sp === 'settings' && method === 'POST') {
+      let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
+      ck.settings = Object.assign({}, ck.settings, b.settings || {});
+      if (b.meta) ck.meta = Object.assign({}, ck.meta, b.meta);
+      ckSave(); return sendJSON(res, 200, { ok: true });
+    }
+    if (sp === 'import' && method === 'POST') {
+      let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
+      const incoming = b.state || b;
+      let ns; try { ns = ckNormalize(incoming); } catch (e) { return sendJSON(res, 400, { ok: false, reason: '格式不正确' }); }
+      const mode = b.mode || 'overwrite';
+      if (mode === 'merge') {
+        const byId = {}; ck.sites.forEach(s => byId[s.id] = s);
+        ns.sites.forEach(s => { if (!byId[s.id]) ck.sites.push(s); });
+        for (const sid in ns.siteLogs) { const cur = ck.siteLogs[sid] || {}; for (const dt in ns.siteLogs[sid]) if (!cur[dt] || ns.siteLogs[sid][dt] < cur[dt]) cur[dt] = ns.siteLogs[sid][dt]; ck.siteLogs[sid] = cur; }
+        for (const d in ns.daily) if (!ck.daily[d] || ns.daily[d] < ck.daily[d]) ck.daily[d] = ns.daily[d];
+      } else { ck.sites = ns.sites; ck.siteLogs = ns.siteLogs; ck.daily = ns.daily; ck.settings = ns.settings; ck.meta = ns.meta; }
+      ck.meta.cleared = false; ckSave(); return sendJSON(res, 200, { ok: true });
+    }
+    if (sp === 'test' && method === 'POST') {
+      let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
+      const r2 = await ckRun({ id: b.id || 'test', name: b.name || '测试', cookie: b.cookie || '', req: b.req || {} });
+      return sendJSON(res, 200, r2);
+    }
+    if (method === 'POST' && sp && !['state', 'export', 'all', 'daily', 'load-demo', 'clear', 'site', 'settings', 'import', 'test'].includes(sp)) {
+      const r = await ckCheckinSite(sp);
+      return sendJSON(res, 200, r);
+    }
+    return sendJSON(res, 404, { error: 'unknown checkin endpoint' });
+  }
+
   return sendJSON(res, 404, { error: 'unknown endpoint' });
 }
 
@@ -773,6 +1138,7 @@ function scheduleDailyBackup() {
 
 function start() {
   scheduleDailyBackup();
+  startCheckinScheduler();
   if (SOCKET_PATH) {
     try { fs.unlinkSync(SOCKET_PATH); } catch (e) { /* ignore */ }
     server.listen(SOCKET_PATH, () => {

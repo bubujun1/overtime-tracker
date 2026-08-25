@@ -1,16 +1,16 @@
 {
   "overtime-tracker": {
     "display_name": "记加班",
-    "desc": "飞牛 NAS 上的加班记录与费用核算工具。\n• 日历视图，加班/周末/节假日分色标记，点击日期记录加班\n• 自定义每小时加班费，自动核算加班工资\n• 自由添加费用组成条目（餐补、交通、夜班补贴等）\n• 实时汇总总时长与总费用\n• 数据导入/导出备份，支持覆盖安装，卸载保留数据",
-    "labels": "工具,效率,记账",
-    "version": "1.1.9",
+    "desc": "飞牛 NAS 上的加班记录与费用核算工具。\n• 日历视图，加班/周末/节假日分色标记，点击日期记录加班\n• 自定义每小时加班费，自动核算加班工资\n• 自由添加费用组成条目（餐补、交通、夜班补贴等）\n• 实时汇总总时长与总费用\n• 网站自动签到：贴吧/B站直播/Discuz 论坛/自定义站点定时自动签到\n• 数据导入/导出备份，支持覆盖安装，卸载保留数据",
+    "labels": "工具,效率,记账,签到",
+    "version": "1.2.0",
     "author": "bubujun1",
     "author_url": "https://github.com/bubujun1/overtime-tracker",
     "bug_report_url": "https://github.com/bubujun1/overtime-tracker/issues",
     "install_type": "存储空间",
     "size": "60",
     "icon_url": "https://raw.githubusercontent.com/bubujun1/overtime-tracker/main/ICON_256.PNG",
-    "download_url": "https://github.com/bubujun1/overtime-tracker/releases/download/v1.1.9/overtime-tracker.fpk",
+    "download_url": "https://github.com/bubujun1/overtime-tracker/releases/download/v1.2.0/overtime-tracker.fpk",
     "history": {
       "v1.1.0": "日历分色标记+点击日期弹窗记录；导入/导出备份；卸载保留数据；支持飞牛应用中心一键更新",
       "v1.1.1": "UI 对标美化（浅背景护眼、2×2 统计卡、自定义项条件显隐）；新增周期性固定费用（每月/每季度自定义）；设置区恢复保存按钮；卸载保留数据选项；应用内直接检查更新并覆盖安装",
@@ -21,7 +21,8 @@
       "v1.1.6": "修复飞牛桌面应用图标不显示：此前仅改了商店列表用的根目录 ICON，漏掉 config.icon 指向的 app/ui/images/ 目录；对照 hermes 结构补齐 64.png 与 256.png 后桌面图标生效",
       "v1.1.7": "优化飞牛端「检查更新」可靠性：更新源优先走 NAS 可达的 raw.githubusercontent 与 GitHub API，去除不稳定的 jsdelivr/ghproxy 前置，避免每次检查先空等两个 8s 超时",
       "v1.1.8": "应用图标更换为用户提供的马卡龙渐变圆环「记」字图标（替换此前自绘的 iOS 蓝标），桌面与应用中心图标随版本更新",
-      "v1.1.9": "根治应用内「立即更新覆盖」自动更新失败：补全 cmd/upgrade_init（升级前停旧服务+清 socket）与 upgrade_callback（升级后启动新服务），install_init/install_callback 同步加强（对齐 hermes 升级机制），覆盖安装后服务自动重启"
+      "v1.1.9": "根治应用内「立即更新覆盖」自动更新失败：补全 cmd/upgrade_init（升级前停旧服务+清 socket）与 upgrade_callback（升级后启动新服务），install_init/install_callback 同步加强（对齐 hermes 升级机制），覆盖安装后服务自动重启",
+      "v1.2.0": "新增「签到」模块（与加班/设置并列）：网站自动签到，支持贴吧一键签到、B站直播、Discuz 论坛、自定义 API 站点，Cookie 手动粘贴、自定义请求头/请求体、成功关键词判定、每日定时自动签到、一键全部签到；加班统计查询改为弹窗（按年逐月显示、全年奖按已过月份计算）；设置改为即时自动保存（去掉保存按钮）；费用金额显示 ¥ 符号；整体 UI 青春活力化（渐变主色、圆角卡片）；应用图标改为圆角记字标"
     }
   }
 }

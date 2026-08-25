@@ -9,52 +9,52 @@
    记加班 — 现代极简 · 毛玻璃质感 · 双端自适应
    ============================================================ */
 
-/* ---- CSS 变量（低饱和 · 柔和护眼） ---- */
+/* ---- CSS 变量（青春活力 · 渐变通透） ---- */
 :root {
-  --bg: #f0f2f5; --surface: #ffffff; --surface-solid: #ffffff;
-  --text: #1d1d2e; --text-sec: #5c6370; --text-light: #a0a8b4;
-  --border: rgba(0,0,0,.06); --border-light: rgba(0,0,0,.04);
-  --hdr-from: #007AFF; --hdr-to: #5856D6;
-  --accent: #007AFF; --accent-hover: #0066d6;
-  --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
-  /* 日历色 — 低饱和柔和 */
-  --cal-ho-bg: rgba(251,191,36,.12); --cal-ho-border: rgba(245,158,11,.35); --cal-ho-text: #b45309;
-  --cal-wd-bg: rgba(251,191,36,.08); --cal-wd-border: rgba(245,158,11,.28);
-  --cal-we-bg: rgba(34,197,94,.07); --cal-we-border: rgba(34,197,94,.22);
-  --cal-ot-bg: rgba(0,122,255,.08); --cal-ot-border: rgba(0,122,255,.30); --cal-ot-text: #0066d6;
-  --cal-wk-bg: rgba(0,122,255,.035); --cal-wk-border: rgba(0,122,255,.14);
-  --cal-today-ring: #f43f5e;
+  --bg: #f5f0fa; --surface: #ffffff; --surface-solid: #ffffff;
+  --text: #1a1a2e; --text-sec: #5c5b7a; --text-light: #9b99af;
+  --border: rgba(120,80,200,.08); --border-light: rgba(120,80,200,.04);
+  --hdr-from: #6C63FF; --hdr-to: #FF6584;
+  --accent: #6C63FF; --accent-hover: #5a52e0;
+  --success: #00D2A8; --danger: #FF6584; --warning: #FFB347;
+  /* 日历色 — 活力柔和 */
+  --cal-ho-bg: rgba(255,107,129,.10); --cal-ho-border: rgba(255,107,129,.30); --cal-ho-text: #e84555;
+  --cal-wd-bg: rgba(255,179,71,.09); --cal-wd-border: rgba(255,179,71,.25);
+  --cal-we-bg: rgba(0,210,168,.07); --cal-we-border: rgba(0,210,168,.20);
+  --cal-ot-bg: rgba(108,99,255,.08); --cal-ot-border: rgba(108,99,255,.28); --cal-ot-text: #6C63FF;
+  --cal-wk-bg: rgba(108,99,255,.03); --cal-wk-border: rgba(108,99,255,.12);
+  --cal-today-ring: #FF6584;
   /* 统计卡片色 */
-  --stat-teal: #14b8a6; --stat-blue: #3b82f6; --stat-amber: #f59e0b;
-  --stat-grad-from: #7c3aed; --stat-grad-to: #a78bfa;
+  --stat-teal: #00D2A8; --stat-blue: #6C63FF; --stat-amber: #FFB347;
+  --stat-grad-from: #6C63FF; --stat-grad-to: #FF6584;
   /* 毛玻璃阴影体系 */
-  --glass-blur: blur(16px);
-  --shadow-sm: 0 2px 12px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.02);
-  --shadow-md: 0 6px 24px rgba(0,0,0,.06), 0 2px 6px rgba(0,0,0,.03);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
-  --shadow-glass: 0 8px 32px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.5);
-  --r-card: 20px; --r-input: 14px; --r-btn: 14px; --r-cell: 14px;
+  --glass-blur: blur(18px);
+  --shadow-sm: 0 2px 14px rgba(108,99,255,.05), 0 1px 4px rgba(108,99,255,.02);
+  --shadow-md: 0 8px 28px rgba(108,99,255,.08), 0 2px 8px rgba(255,101,132,.04);
+  --shadow-lg: 0 20px 56px rgba(108,99,255,.12), 0 4px 16px rgba(255,101,132,.06);
+  --shadow-glass: 0 10px 40px rgba(108,99,255,.07), inset 0 1px 0 rgba(255,255,255,.6);
+  --r-card: 22px; --r-input: 14px; --r-btn: 14px; --r-cell: 14px;
   --page-pad: 18px; --card-gap: 16px;
 }
 [data-theme="dark"] {
-  --bg: #0f1117; --surface: rgba(26,29,40,.75); --surface-solid: #1a1d27;
-  --text: #e4e6ed; --text-sec: #8b92a5; --text-light: #4a5062;
-  --border: rgba(255,255,255,.06); --border-light: rgba(255,255,255,.03);
-  --hdr-from: #0066d6; --hdr-to: #7c3aed;
-  --accent: #5ac8fa; --accent-hover: #007AFF;
-  --success: #34d399; --danger: #fb7185; --warning: #fbbf24;
-  --cal-ho-bg: rgba(245,158,11,.10); --cal-ho-border: rgba(251,191,36,.30); --cal-ho-text: #fbbf24;
-  --cal-wd-bg: rgba(245,158,11,.06); --cal-wd-border: rgba(251,191,36,.20);
-  --cal-we-bg: rgba(52,211,153,.06); --cal-we-border: rgba(52,211,153,.18);
-  --cal-ot-bg: rgba(90,200,250,.10); --cal-ot-border: rgba(90,200,250,.28); --cal-ot-text: #5ac8fa;
-  --cal-wk-bg: rgba(90,200,250,.04); --cal-wk-border: rgba(90,200,250,.12);
-  --cal-today-ring: #fb7185;
-  --stat-teal: #2dd4bf; --stat-blue: #60a5fa; --stat-amber: #fbbf24;
-  --stat-grad-from: #6d28d9; --stat-grad-to: #8b5cf6;
-  --shadow-sm: 0 2px 12px rgba(0,0,0,.25), 0 1px 3px rgba(0,0,0,.15);
-  --shadow-md: 0 6px 24px rgba(0,0,0,.35), 0 2px 6px rgba(0,0,0,.20);
-  --shadow-lg: 0 16px 48px rgba(0,0,0,.45), 0 4px 12px rgba(0,0,0,.25);
-  --shadow-glass: 0 8px 32px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
+  --bg: #12101e; --surface: rgba(26,22,42,.78); --surface-solid: #1a162e;
+  --text: #ede8f5; --text-sec: #948cb0; --text-light: #5a5072;
+  --border: rgba(140,120,220,.08); --border-light: rgba(140,120,220,.04);
+  --hdr-from: #7C6FFF; --hdr-to: #FF7A9D;
+  --accent: #8B7FFF; --accent-hover: #6C63FF;
+  --success: #00EAB5; --danger: #FF7A9D; --warning: #FFC04D;
+  --cal-ho-bg: rgba(255,122,157,.10); --cal-ho-border: rgba(255,122,157,.25); --cal-ho-text: #FF7A9D;
+  --cal-wd-bg: rgba(255,192,77,.07); --cal-wd-border: rgba(255,192,77,.18);
+  --cal-we-bg: rgba(0,234,181,.06); --cal-we-border: rgba(0,234,181,.16);
+  --cal-ot-bg: rgba(139,127,255,.09); --cal-ot-border: rgba(139,127,255,.24); --cal-ot-text: #8B7FFF;
+  --cal-wk-bg: rgba(139,127,255,.03); --cal-wk-border: rgba(139,127,255,.11);
+  --cal-today-ring: #FF7A9D;
+  --stat-teal: #00EAB5; --stat-blue: #8B7FFF; --stat-amber: #FFC04D;
+  --stat-grad-from: #8B7FFF; --stat-grad-to: #FF7A9D;
+  --shadow-sm: 0 2px 14px rgba(0,0,0,.28), 0 1px 4px rgba(0,0,0,.16);
+  --shadow-md: 0 8px 28px rgba(0,0,0,.38), 0 2px 8px rgba(0,0,0,.22);
+  --shadow-lg: 0 20px 56px rgba(0,0,0,.48), 0 4px 16px rgba(0,0,0,.26);
+  --shadow-glass: 0 10px 40px rgba(0,0,0,.32), inset 0 1px 0 rgba(255,255,255,.05);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
@@ -84,12 +84,11 @@ body{
 .header-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1440px;margin:0 auto;width:100%}
 .header-brand{display:flex;align-items:center;gap:10px}
 .header-icon{
-  width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.22);
+  width:42px;height:42px;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,.10));
   display:grid;place-items:center;flex-shrink:0;
-  border:1px solid rgba(255,255,255,.15)
+  border:1px solid rgba(255,255,255,.20)
 }
 .header-text h1{font-size:20px;font-weight:700;color:#fff;letter-spacing:.5px;line-height:1.2}
-.header-sub{font-size:12px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:400}
 .hdr-btn{
   width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.2);
   background:rgba(255,255,255,.14);color:#fff;cursor:pointer;display:grid;place-items:center;
@@ -104,7 +103,7 @@ body{
   max-width:1200px;margin-left:auto;margin-right:auto;width:100%
 }
 .layout-desktop{
-  display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;padding-top:20px
+  display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start;padding-top:16px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
 .layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
@@ -137,7 +136,7 @@ body{
   display:grid;place-items:center;transition:all .2s ease;flex-shrink:0;
   box-shadow:var(--shadow-sm)
 }
-.cal-arrow:hover{border-color:#007AFF;color:#007AFF;background:rgba(0,122,255,.06);transform:scale(1.05)}
+.cal-arrow:hover{border-color:#6C63FF;color:#6C63FF;background:rgba(108,99,255,.06);transform:scale(1.05)}
 .cal-arrow:active{transform:scale(.88)}
 .cal-month{font-size:17px;font-weight:650;color:var(--text);min-width:110px;text-align:center}
 
@@ -173,7 +172,7 @@ body{
 /* 加班角标 — 居中置底 */
 .cal-ot-badge{
   font-size:9px;font-weight:700;color:#fff;
-  background:linear-gradient(135deg,#007AFF,#5ac8fa);padding:1.5px 6px;border-radius:8px;
+  background:linear-gradient(135deg,#6C63FF,#8B7FFF);padding:1.5px 6px;border-radius:8px;
   line-height:1.4;min-height:0;display:inline-block;text-align:center;
   box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
 }
@@ -219,11 +218,11 @@ body{
 .query-select:focus,.query-input:focus{border-color:var(--accent)}
 .query-btn{
   height:38px;padding:0 18px;border:none;border-radius:var(--r-btn);
-  background:#007AFF;color:#fff;
+  background:linear-gradient(135deg,#6C63FF,#7C6FFF);color:#fff;
   font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .2s;
   -webkit-tap-highlight-color:transparent
 }
-.query-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,122,255,.28)}
+.query-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(108,99,255,.32)}
 .query-btn:active{transform:translateY(0)}
 .query-result{margin-top:12px;font-size:13px;line-height:1.7;color:var(--text-sec);display:none}
 .query-result.show{display:block}
@@ -234,6 +233,21 @@ body{
 .query-result .qr-v{font-weight:650;color:var(--text);font-size:15px}
 .query-result .qr-v.accent{color:var(--accent)}
 .query-result .qr-tip{margin-top:8px;font-size:11.5px;color:var(--text-light)}
+
+/* 查询触发按钮（标题右侧） */
+.query-trigger-btn{
+  margin-left:auto;flex-shrink:0;width:34px;height:34px;border-radius:10px;
+  border:1.5px solid var(--border);background:var(--surface-solid);color:var(--text-sec);
+  cursor:pointer;display:grid;place-items:center;transition:all .2s
+}
+.query-trigger-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,122,255,.05);transform:translateY(-1px)}
+.query-trigger-btn:active{transform:scale(.94)}
+/* 逐月明细 */
+.qr-months{margin-bottom:12px;border:1px solid var(--border-light);border-radius:14px;overflow:hidden}
+.qr-month-row{display:flex;align-items:center;gap:12px;padding:9px 14px;border-bottom:1px solid var(--border-light)}
+.qr-month-row:last-child{border-bottom:none}
+.qr-month-name{font-size:13px;font-weight:600;color:var(--text);min-width:72px;flex-shrink:0}
+.qr-month-v{font-size:13px;font-weight:650;color:var(--text-sec);margin-left:auto}
 
 /* ==================== 统计卡片 — 毛玻璃精致风 ==================== */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -248,14 +262,14 @@ body{
   border-radius:var(--r-card) var(--r-card) 0 0;opacity:.8
 }
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-/* 左边框渐变条 — iOS 风格 */
-.stat-teal::before{background:linear-gradient(90deg,var(--stat-teal),#2dd4bf)}
-.stat-blue::before{background:linear-gradient(90deg,#007AFF,#5ac8fa)}
-.stat-amber::before{background:linear-gradient(90deg,var(--stat-amber),#fbbf24)}
-/* 紫色渐变总费用卡 — 改为 iOS 风格蓝 */
+/* 左边框渐变条 — 活力风 */
+.stat-teal::before{background:linear-gradient(90deg,#00D2A8,#00F5C4)}
+.stat-blue::before{background:linear-gradient(90deg,#6C63FF,#8B7FFF)}
+.stat-amber::before{background:linear-gradient(90deg,#FFB347,#FFD060)}
+/* 紫色渐变总费用卡 — 活力粉紫 */
 .stat-gradient{
-  background:linear-gradient(135deg,#007AFF,#5856D6);
-  border:1px solid transparent;box-shadow:0 8px 28px rgba(0,122,255,.20)
+  background:linear-gradient(135deg,#6C63FF,#FF6584);
+  border:1px solid transparent;box-shadow:0 10px 32px rgba(108,99,255,.22),0 4px 12px rgba(255,101,132,.12)
 }
 .stat-gradient::before{display:none}
 .stat-gradient .stat-label,.stat-gradient .stat-val,.stat-gradient .stat-sub{color:#fff}
@@ -339,12 +353,12 @@ input[type="date"]{color-scheme:light dark}
 .submit-btn{
   width:100%;padding:12px 16px;font-size:15px;font-weight:700;border:none;
   border-radius:14px;cursor:pointer;
-  background:#007AFF;color:#fff;letter-spacing:.5px;
+  background:linear-gradient(135deg,#6C63FF,#7C6FFF);color:#fff;letter-spacing:.5px;
   transition:all .25s cubic-bezier(.16,1,.3,1);
-  box-shadow:0 4px 14px rgba(0,122,255,.28);margin-top:6px;
+  box-shadow:0 4px 16px rgba(108,99,255,.30);margin-top:6px;
   -webkit-tap-highlight-color:transparent
 }
-.submit-btn:hover{opacity:.93;box-shadow:0 6px 22px rgba(0,122,255,.38);transform:translateY(-1px)}
+.submit-btn:hover{opacity:.94;box-shadow:0 6px 24px rgba(108,99,255,.40);transform:translateY(-1px)}
 .submit-btn:active{transform:scale(.978)}
 
 /* ==================== iOS 风格自定义月份选择器 ==================== */
@@ -368,11 +382,11 @@ input[type="date"]{color-scheme:light dark}
 .mp-year{font-size:22px;font-weight:800;color:#1d1d2e;letter-spacing:.5px;min-width:72px;text-align:center}
 .mp-nav{
   width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
-  background:linear-gradient(135deg,#eef3ff,#e3ecff);color:#2D6CFF;
+  background:linear-gradient(135deg,#e8e0ff,#f0e8ff);color:#6C63FF;
   font-size:24px;font-weight:600;line-height:1;display:grid;place-items:center;
   transition:transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent
 }
-.mp-nav:active{transform:scale(.9);box-shadow:0 4px 12px rgba(45,108,255,.25)}
+.mp-nav:active{transform:scale(.9);box-shadow:0 4px 12px rgba(108,99,255,.22)}
 /* 月份网格 */
 .mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
 .mp-cell{
@@ -382,8 +396,8 @@ input[type="date"]{color-scheme:light dark}
 }
 .mp-cell:active{transform:scale(.94)}
 .mp-cell.sel{
-  background:linear-gradient(135deg,#3a8dff,#2D6CFF);border-color:transparent;color:#fff;
-  box-shadow:0 6px 16px rgba(45,108,255,.35);font-weight:700
+  background:linear-gradient(135deg,#6C63FF,#7C6FFF);border-color:transparent;color:#fff;
+  box-shadow:0 6px 16px rgba(108,99,255,.35);font-weight:700
 }
 /* 底部操作 */
 .mp-actions{display:flex;gap:10px}
@@ -395,8 +409,8 @@ input[type="date"]{color-scheme:light dark}
 .mp-cancel:active{background:#e6e8ee;transform:scale(.98)}
 .mp-done{
   flex:1;padding:13px;border-radius:14px;border:none;
-  background:linear-gradient(135deg,#3a8dff,#2D6CFF);color:#fff;font-size:15px;font-weight:700;
-  cursor:pointer;transition:all .2s;box-shadow:0 6px 16px rgba(45,108,255,.28);
+  background:linear-gradient(135deg,#6C63FF,#7C6FFF);color:#fff;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;box-shadow:0 6px 16px rgba(108,99,255,.28);
   -webkit-tap-highlight-color:transparent
 }
 .mp-done:active{transform:scale(.97);box-shadow:0 3px 10px rgba(45,108,255,.2)}
@@ -479,7 +493,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .tab-bar{
   position:sticky;top:0;z-index:60;
   display:flex;gap:0;padding:12px var(--page-pad);
-  background:rgba(240,242,245,.95);
+  background:rgba(245,240,250,.92);
   border-bottom:1px solid var(--border-light);
   max-width:1440px;margin:0 auto;width:100%
 }
@@ -496,8 +510,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     padding:3px;gap:2px;display:flex
   }
 }
-[data-theme="dark"] .tab-bar{background:rgba(15,17,23,.82)}
-[data-theme="dark"] .tab-bar::before{background:rgba(255,255,255,.08)}
+[data-theme="dark"] .tab-bar{background:rgba(18,16,30,.85)}
+[data-theme="dark"] .tab-bar::before{background:rgba(140,120,220,.10)}
 .tab-item{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
   padding:11px 14px;border-radius:14px;border:none;cursor:pointer;background:transparent;
@@ -593,10 +607,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .mine-save{
   display:block;width:100%;margin-top:6px;padding:14px;border:none;border-radius:14px;
   font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;letter-spacing:.5px;
-  background:#007AFF;
-  box-shadow:0 6px 20px rgba(0,122,255,.28);transition:all .2s;-webkit-tap-highlight-color:transparent
+  background:linear-gradient(135deg,#6C63FF,#7C6FFF);
+  box-shadow:0 6px 20px rgba(108,99,255,.28);transition:all .2s;-webkit-tap-highlight-color:transparent
 }
-.mine-save:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(0,122,255,.36)}
+.mine-save:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(108,99,255,.36)}
 .mine-save:active{transform:scale(.985)}
 .mine-update{margin:10px 4px 0}
 #exportBtn,#importBtn,#checkUpdateBtn{cursor:pointer;transition:background .18s}
@@ -667,24 +681,89 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .tab-item.active{box-shadow:var(--shadow-glass)}
 }
 @media(min-width:1180px){
-  :root{--page-pad:28px;--card-gap:20px}
-  .app-header{padding:38px var(--page-pad) 26px}
-  .cal-cell{min-height:68px}
+  :root{--page-pad:24px;--card-gap:18px}
+  .app-header{padding:32px var(--page-pad) 22px}
+  .cal-cell{min-height:66px}
   .cal-num{font-size:15px}
   .cal-ot-badge{font-size:10px;padding:2px 7px}
-  .stat-val{font-size:28px}
-  .layout-desktop{grid-template-columns:1fr 360px;gap:24px}
-  .tab-bar{width:200px}
+  .stat-val{font-size:27px}
+  .layout-desktop{grid-template-columns:1fr 320px;gap:20px}
+  .tab-bar{width:192px}
 }
 @media(min-width:1440px){
-  :root{--page-pad:32px;--card-gap:22px}
-  .layout-desktop{grid-template-columns:1fr 400px;gap:28px}
-  .cal-cell{min-height:74px}
-  .stat-val{font-size:30px}
-  .tab-bar{width:212px}
+  :root{--page-pad:28px;--card-gap:20px}
+  .layout-desktop{grid-template-columns:1fr 340px;gap:22px}
+  .cal-cell{min-height:72px}
+  .stat-val{font-size:29px}
+  .tab-bar{width:204px}
   .rate-section .stage-months{flex:1 1 260px;min-width:240px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+/* ============ 签到模块专属样式（复用全局变量，保持视觉一致） ============ */
+.ck-hero{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));border-radius:var(--r-card);padding:20px 22px;color:#fff;box-shadow:var(--shadow-md);margin-bottom:22px}
+.ck-hero .page-title{color:#fff;font-size:19px;margin:0}
+.ck-ring{position:relative;width:76px;height:76px;flex-shrink:0}
+.ck-ring svg{width:76px;height:76px;transform:rotate(-90deg)}
+.ck-ring .ck-ring-bg{fill:none;stroke:rgba(255,255,255,.25);stroke-width:8}
+.ck-ring .ck-ring-fg{fill:none;stroke:#fff;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.ck-ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.ck-hero-meta{flex:1;min-width:0}
+.ck-sub{font-size:12.5px;opacity:.92;margin-top:2px}
+.ck-hero .mine-save{margin-top:12px;width:auto;padding:9px 18px;background:#fff;color:var(--hdr-from);box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.ck-hero .mine-save:hover{color:var(--hdr-from);transform:translateY(-1px)}
+
+.ck-quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
+.ck-quick-item{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:13px 10px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ck-quick-item:hover{border-color:var(--accent);background:rgba(0,122,255,.05);transform:translateY(-1px)}
+.ck-quick-item:active{transform:scale(.97)}
+
+.ck-empty{text-align:center;color:var(--text-light);font-size:13px;padding:24px 16px;line-height:1.7}
+
+.ck-site{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-light)}
+.ck-site:last-child{border-bottom:none}
+.ck-site-emoji{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ck-site-main{flex:1;min-width:0;cursor:pointer}
+.ck-site-name{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
+.ck-site-sub{font-size:12px;color:var(--text-light);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-site-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ck-badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.ck-badge.ok{background:rgba(34,197,94,.14);color:var(--success)}
+.ck-badge.fail{background:rgba(239,68,68,.14);color:var(--danger)}
+.ck-badge.wait{background:rgba(245,158,11,.16);color:var(--warning)}
+.ck-run-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
+.ck-run-btn:hover{border-color:var(--accent);background:rgba(0,122,255,.06)}
+.ck-run-btn:active{transform:scale(.92)}
+.ck-run-btn svg{width:17px;height:17px}
+.ck-run-btn.busy{opacity:.5;pointer-events:none}
+.ck-del-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
+.ck-del-btn:hover{border-color:var(--danger);background:rgba(239,68,68,.06)}
+.ck-del-btn:active{transform:scale(.92)}
+.ck-del-btn svg{width:17px;height:17px}
+
+.ck-sched{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.ck-chip{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-sec);cursor:pointer;transition:all .15s;user-select:none}
+.ck-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.ck-chip .x{margin-left:5px;opacity:.7}
+.ck-chip-del{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--danger)}
+
+.ck-modal-dialog{max-width:560px;width:calc(100% - 32px);max-height:86vh;display:flex;flex-direction:column}
+.ck-modal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.ck-f-row{display:flex;flex-direction:column;gap:6px}
+.ck-f-row label{font-size:13px;font-weight:600;color:var(--text-sec)}
+.ck-f-row input,.ck-f-row select,.ck-f-row textarea{width:100%;border:1px solid var(--border);border-radius:var(--r-input);padding:10px 12px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit}
+.ck-f-row textarea{resize:vertical;min-height:64px;line-height:1.5}
+.ck-f-row .ck-hint{font-size:11.5px;color:var(--text-light);line-height:1.5}
+.ck-f-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ck-f-grid .ck-f-row{margin:0}
+.ck-sec{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-top:4px;text-transform:uppercase}
+.ck-modal-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border-light)}
+.ck-modal-foot .mine-save{margin:0;flex:1}
+.ck-modal-foot .ghost-btn{flex:1;margin:0}
+
+@media (max-width:520px){
+  .ck-f-grid{grid-template-columns:1fr}
+  .ck-quick{grid-template-columns:1fr 1fr}
+}
 </style>
 <script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
@@ -696,11 +775,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     <div class="header-inner">
       <div class="header-brand">
         <div class="header-icon" aria-hidden="true">
-          <svg viewBox="0 0 28 28" width="26" height="26" fill="none"><circle cx="14" cy="14" r="13" fill="rgba(255,255,255,.22)"/><text x="14" y="19" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">加</text></svg>
+          <svg viewBox="0 0 28 28" width="26" height="26" fill="none"><rect x="1" y="1" width="26" height="26" rx="9" ry="9" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.2)" stroke-width="1"/><text x="14" y="19.5" text-anchor="middle" fill="#fff" font-size="15" font-weight="700">记</text></svg>
         </div>
         <div class="header-text">
           <h1>记加班</h1>
-          <p class="header-sub">本地 · 隐私 · 离线可用</p>
         </div>
       </div>
       <button id="themeToggle" class="hdr-btn" title="切换主题" aria-label="切换主题">
@@ -717,6 +795,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     <button type="button" class="tab-item active" data-tab="overtime">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>
       <span>加班</span>
+    </button>
+    <button type="button" class="tab-item" data-tab="checkin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span>签到</span>
     </button>
     <button type="button" class="tab-item" data-tab="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -736,6 +818,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         <div class="page-title-row">
           <span class="page-emoji" aria-hidden="true">&#x1F4B0;</span>
           <h2 class="page-title">加班记录</h2>
+          <button type="button" id="queryModalBtn" class="query-trigger-btn" title="统计查询">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
         </div>
 
         <!-- 日历卡片 -->
@@ -827,8 +912,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
       <!-- 右栏：统计 + 记录列表 -->
       <div class="layout-right">
 
-        <!-- 查询条：按月份 / 年份 / 自定义时间段统计 -->
-        <section class="query-card" id="queryCard">
+        <!-- 查询弹窗触发：按钮在标题行右侧，控件在弹窗内 -->
+        <section class="query-card" id="queryCard" style="display:none">
           <div class="query-row">
             <select id="queryMode" class="query-select">
               <option value="month">按月份</option>
@@ -891,17 +976,15 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             </div>
             <div class="row-divider"></div>
             <div id="monthlyRatesList" style="padding:8px 0"></div>
-            <button type="button" id="addMonthRate" class="add-row">+ 添加月份阶段</button>
-            <div id="rateHint" style="padding:8px 16px 0;font-size:11.5px;color:var(--text-light);line-height:1.5">未设定阶段的月份沿用最近一个阶段费率，均无设定则使用上方默认值</div>
-          </div>
-          <button type="button" id="saveRateSettings" class="mine-save">保存计费设置</button>
+          <button type="button" id="addMonthRate" class="add-row">+ 添加月份阶段</button>
+          <div id="rateHint" style="padding:8px 16px 0;font-size:11.5px;color:var(--text-light);line-height:1.5">未设定阶段的月份沿用最近一个阶段费率，均无设定则使用上方默认值</div>
+        </div>
 
-          <!-- 自定义费用 -->
+        <!-- 自定义费用 -->
           <div class="group" style="margin-top:18px">
             <div class="group-title">自定义费用</div>
             <div class="group-card mine-fees" id="recurringList"></div>
             <button type="button" id="addRecurring" class="add-row">+ 添加自定义费用</button>
-            <button type="button" id="saveRecurringBtn" class="mine-save" style="margin-top:12px">保存自定义费用</button>
           </div>
         </section>
 
@@ -911,6 +994,166 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 
     </div><!-- /.layout-desktop -->
     </section><!-- /#paneOvertime -->
+
+    <!-- 签到 -->
+    <section class="tab-pane" id="paneCheckin">
+      <div class="mine-wrap">
+
+        <!-- 今日进度 hero -->
+        <div class="ck-hero">
+          <div class="ck-ring">
+            <svg viewBox="0 0 76 76">
+              <circle class="ck-ring-bg" cx="38" cy="38" r="32"></circle>
+              <circle class="ck-ring-fg" id="ckRingFg" cx="38" cy="38" r="32" stroke-dasharray="201" stroke-dashoffset="201"></circle>
+            </svg>
+            <div class="ck-ring-txt"><span id="ckDone">0</span>/<span id="ckTotal">0</span></div>
+          </div>
+          <div class="ck-hero-meta">
+            <h2 class="page-title">自动签到</h2>
+            <p class="ck-sub" id="ckHeroSub">还没有站点完成今天的签到</p>
+            <button type="button" class="mine-save" id="ckRunAll">一键全部签到</button>
+          </div>
+        </div>
+
+        <!-- 快速添加常用站点 -->
+        <div class="group">
+          <div class="group-title">快速添加<span class="group-hint">点一下接入常用站点</span></div>
+          <div class="group-card ck-quick">
+            <button type="button" class="ck-quick-item" data-add="tieba">🔥 百度贴吧</button>
+            <button type="button" class="ck-quick-item" data-add="bilibili-live">📺 B站直播</button>
+            <button type="button" class="ck-quick-item" data-add="discuz">🏷️ Discuz论坛</button>
+            <button type="button" class="ck-quick-item" data-add="custom">🌐 自定义</button>
+          </div>
+        </div>
+
+        <!-- 我的签到任务 -->
+        <div class="group">
+          <div class="list-header">
+            <div class="lh-left">
+              <h3>我的签到任务</h3>
+              <span class="list-count" id="ckSiteCount">0 个</span>
+            </div>
+            <button type="button" class="collapsible-btn" id="ckAddBtn" title="新增">＋</button>
+          </div>
+          <div class="group-card" id="ckSiteList"></div>
+          <div id="ckEmpty" class="ck-empty">还没有签到任务，点上方「＋」或选常用站点添加</div>
+        </div>
+
+        <!-- 签到设置 -->
+        <div class="group">
+          <div class="group-title">签到设置</div>
+          <div class="group-card">
+            <div class="row">
+              <div class="row-main">
+                <div class="row-label">每日自动签到时间</div>
+                <div class="row-value" id="ckAutoTimeVal" style="font-size:12px;color:var(--text-light)"></div>
+              </div>
+              <input type="time" id="ckAutoTime" class="row-input" style="max-width:96px">
+            </div>
+            <div class="row-divider"></div>
+            <div class="row">
+              <div class="row-main">
+                <div class="row-label">启用自动调度</div>
+                <div class="row-value" style="font-size:12px;color:var(--text-light)">到点自动签未设自定义时间的站点</div>
+              </div>
+              <label class="switch-wrap"><input type="checkbox" id="ckAutoRun"><span class="switch"></span></label>
+            </div>
+          </div>
+          <div style="padding:12px 16px;display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" class="ghost-btn" id="ckLoadDemo" style="flex:1;min-width:120px">载入示例</button>
+            <button type="button" class="ghost-btn" id="ckExport" style="flex:1;min-width:120px">导出</button>
+            <button type="button" class="ghost-btn" id="ckImportBtn" style="flex:1;min-width:120px">导入</button>
+            <button type="button" class="ghost-btn" id="ckClear" style="flex:1;min-width:120px">清空</button>
+          </div>
+          <input type="file" id="ckImportFile" accept="application/json,.json" class="hidden">
+        </div>
+
+        <div class="bottom-spacer"></div>
+      </div>
+
+      <!-- 编辑签到任务弹窗 -->
+      <div class="modal-overlay" id="ckModal">
+        <div class="modal-dialog ck-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="ckModalTitle">
+          <div class="modal-header">
+            <h3 id="ckModalTitle">添加签到任务</h3>
+            <button type="button" class="modal-close" id="ckModalClose" aria-label="close">&times;</button>
+          </div>
+          <div class="ck-modal-body">
+            <div class="ck-f-grid">
+              <div class="ck-f-row">
+                <label for="ckFName">任务名称</label>
+                <input type="text" id="ckFName" placeholder="如：百度贴吧签到">
+              </div>
+              <div class="ck-f-row">
+                <label for="ckFEmoji">图标 emoji</label>
+                <input type="text" id="ckFEmoji" placeholder="🔥" maxlength="4">
+              </div>
+            </div>
+            <div class="ck-f-grid">
+              <div class="ck-f-row">
+                <label for="ckFGroup">分组</label>
+                <input type="text" id="ckFGroup" placeholder="社区 / 论坛 / 直播">
+              </div>
+              <div class="ck-f-row">
+                <label for="ckFEnabled">启用</label>
+                <select id="ckFEnabled"><option value="true">启用</option><option value="false">停用</option></select>
+              </div>
+            </div>
+
+            <div class="ck-sec">登录凭证</div>
+            <div class="ck-f-row">
+              <label for="ckFCookie">登录凭证 Cookie（手动粘贴）</label>
+              <textarea id="ckFCookie" placeholder="把浏览器里该站登录后的 Cookie 整串粘贴到这里。本地存储，不会上传。" style="min-height:58px"></textarea>
+              <span class="ck-hint">仅在本地保存，用于自动带登录态请求。贴吧需含 BDUSS，B站需含 SESSDATA 与 bili_jct。</span>
+            </div>
+
+            <div class="ck-sec">请求配置</div>
+            <div class="ck-f-grid">
+              <div class="ck-f-row">
+                <label for="ckFType">方法类型</label>
+                <select id="ckFType"><option value="api">API 请求</option><option value="formSign">表单签到(Discuz)</option><option value="tiebaOneClick">贴吧一键签到</option></select>
+              </div>
+              <div class="ck-f-row">
+                <label for="ckFMethod">请求方法</label>
+                <select id="ckFMethod"><option value="GET">GET</option><option value="POST">POST</option></select>
+              </div>
+            </div>
+            <div class="ck-f-row">
+              <label for="ckFUrl">请求地址 URL</label>
+              <input type="text" id="ckFUrl" placeholder="https://...">
+            </div>
+            <div class="ck-f-row" id="ckGetUrlRow">
+              <label for="ckFGetUrl">抓表单页地址（formSign 用，可留空）</label>
+              <input type="text" id="ckFGetUrl" placeholder="https://.../forum.php">
+            </div>
+            <div class="ck-f-row">
+              <label for="ckFHeaders">请求头（JSON，可留空）</label>
+              <textarea id="ckFHeaders" placeholder='{"Referer":"https://.../"}'></textarea>
+            </div>
+            <div class="ck-f-row" id="ckBodyRow">
+              <label for="ckFBody">请求体（POST 用，可留空）</label>
+              <textarea id="ckFBody" placeholder="key1=value1&key2=value2 或 JSON"></textarea>
+            </div>
+            <div class="ck-f-row">
+              <label for="ckFKeyword">成功关键词（可留空，留空走防假绿安全判定）</label>
+              <input type="text" id="ckFKeyword" placeholder="如：成功 / signed">
+            </div>
+
+            <div class="ck-sec">定时签到</div>
+            <div class="ck-f-row">
+              <label>自定义签到时间（不选则跟随全局自动时间）</label>
+              <div class="ck-sched" id="ckSchedChips"></div>
+              <input type="time" id="ckSchedAdd" style="max-width:140px;margin-top:8px">
+              <button type="button" class="add-row" id="ckSchedAddBtn" style="margin-top:8px">+ 添加时间</button>
+            </div>
+          </div>
+          <div class="ck-modal-foot">
+            <button type="button" class="ghost-btn" id="ckModalCancel">取消</button>
+            <button type="button" class="mine-save" id="ckModalSave">保存</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- 设置 -->
     <section class="tab-pane" id="paneSettings">
@@ -984,8 +1227,6 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
         </div>
-
-        <button type="button" id="saveSettings" class="mine-save">保存设置</button>
       </div>
       <div class="bottom-spacer"></div>
     </section>
@@ -1025,6 +1266,20 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 
   <!-- Toast -->
   <div id="toast" class="toast hidden"></div>
+
+  <!-- 查询弹窗 -->
+  <div class="modal-overlay" id="queryModalOverlay">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="queryModalTitle">
+      <div class="modal-header">
+        <h3 id="queryModalTitle">统计查询</h3>
+        <button type="button" class="modal-close" id="queryModalClose" aria-label="close">&times;</button>
+      </div>
+      <div id="queryModalBody" style="padding:0 22px 8px">
+        <!-- 查询控件由 JS 从 queryCard 移入 -->
+      </div>
+      <div id="queryModalResultWrap" style="padding:0 22px 18px;display:none"></div>
+    </div>
+  </div>
   <!-- 左下角版本号 -->
   <div id="verBadgeFixed" class="ver-badge"></div>
 
@@ -1097,6 +1352,9 @@ function safeDownload(url, filename) {
 }
 
 function $(id) { try { return document.getElementById(id); } catch(e) { return null; } }
+
+/* 防抖：延迟执行，避免频繁保存 */
+function debounce(fn, ms) { var t; return function() { var ctx=this, args=arguments; clearTimeout(t); t=setTimeout(function(){fn.apply(ctx,args);},ms||300); }; }
 
 /* 金额格式化：无币种符号，保留两位小数 */
 function money(n) {
@@ -1293,7 +1551,7 @@ function renderSummary(scope) {
   }
   h = Math.round(hours * 100) / 100;
   el = $('statHours'); if (el) el.innerHTML = h + '<span class="stat-unit">h</span>';
-  el = $('statCost'); if (el) el.textContent = money(cost);
+  el = $('statCost'); if (el) el.textContent = '¥' + money(cost);
 
   // 自定义费用卡片：有数据才显示（对标要求）
   var recWrap = $('statRecurringWrap');
@@ -1307,7 +1565,7 @@ function renderSummary(scope) {
   var displayLabel = feeNames.length > 0 ? feeNames.join(' / ') : '自定义费用';
   if (recurring > 0 && recWrap) {
     recWrap.className = 'stat-card stat-amber'; // 移除 .hidden
-    if (recVal) recVal.textContent = money(recurring);
+    if (recVal) recVal.textContent = '¥' + money(recurring);
     if (recLabel) recLabel.textContent = displayLabel;
     // 有周期性费用时，总费用卡片不再跨列
     if (totalWrap) totalWrap.style.gridColumn = '';
@@ -1317,7 +1575,7 @@ function renderSummary(scope) {
     if (totalWrap) totalWrap.style.gridColumn = 'span 2';
   }
 
-  el = $('statTotal'); if (el) el.textContent = money(grandTotal);
+  el = $('statTotal'); if (el) el.textContent = '¥' + money(grandTotal);
   // 卡片标签：跟随当前统计月份
   var lblHours = $('statHoursLabel'), lblCost = $('statCostLabel'), lblTotal = $('statTotalLabel');
   if (lblHours) lblHours.textContent = labelPrefix + '加班';
@@ -1326,11 +1584,11 @@ function renderSummary(scope) {
   // 总费用明细
   var subEl = $('statTotalSub');
   if (subEl) {
-    var parts = ['加班费 ' + money(cost)];
+    var parts = ['加班费 ¥' + money(cost)];
     if (recurring > 0) {
       var fees2 = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
       var names = fees2.length ? fees2.map(function(f){ return f.name || '费用'; }).join('+') : '自定义费用';
-      parts.push(names + ' ' + money(recurring));
+      parts.push(names + ' ¥' + money(recurring));
     }
     subEl.textContent = parts.join(' + ');
   }
@@ -1364,7 +1622,16 @@ function runQuery() {
   } else if (mode === 'year') {
     var yv = $('queryYear') ? $('queryYear').value : '';
     if (!yv) { toast('请选择年份'); return; }
-    ymStart = yv + '-01'; ymEnd = yv + '-12'; label = yv + '年'; months = 12;
+    var now = new Date(), curYear = now.getFullYear(), curMonth = now.getMonth() + 1;
+    ymStart = yv + '-01';
+    // 当年只算到当前月（含），历史年份算满12月
+    if (+yv === curYear) {
+      ymEnd = yv + '-' + pad2(curMonth);
+      months = curMonth;
+    } else {
+      ymEnd = yv + '-12'; months = 12;
+    }
+    label = yv + '年';
   } else {
     var s = $('queryStart') ? $('queryStart').value : '';
     var e = $('queryEnd') ? $('queryEnd').value : '';
@@ -1375,34 +1642,59 @@ function runQuery() {
     months = monthCountBetween(ymStart, ymEnd);
   }
 
-  var hours = 0, cost = 0, cnt = 0, i, r;
+  // ---- 逐月汇总 ----
+  var monthMap = {}; // { 'YYYY-MM': { hours, cost, cnt } }
+  var totalHours = 0, totalCost = 0, totalCnt = 0, i, r;
   if (state.records) {
     for (i = 0; i < state.records.length; i++) {
       r = state.records[i];
       if (!r || !r.date) continue;
-      if (r.date < ymStart + '-01' || r.date > ymEnd + '-31') continue;
-      hours += Number(r.hours) || 0;
-      cost += Number(r.subtotal) || 0;
-      cnt++;
+      var rm = r.date.slice(0, 7);
+      if (rm < ymStart || rm > ymEnd) continue;
+      var h = Number(r.hours) || 0, c = Number(r.subtotal) || 0;
+      if (!monthMap[rm]) monthMap[rm] = { hours: 0, cost: 0, cnt: 0 };
+      monthMap[rm].hours += h;
+      monthMap[rm].cost += c;
+      monthMap[rm].cnt++;
+      totalHours += h; totalCost += c; totalCnt++;
     }
   }
   var recurring = recurringForMonths(months);
-  var grand = cost + recurring;
-  hours = Math.round(hours * 100) / 100;
+  var grand = totalCost + recurring;
+  totalHours = Math.round(totalHours * 100) / 100;
 
   var box = $('queryResult');
   if (!box) return;
   var feeNames = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees.map(function(f){ return f.name || '费用'; }) : [];
   var feeText = feeNames.length ? feeNames.join('+') : '自定义费用';
+
+  // ---- 构建逐月明细（按年或自定义时展示） ----
+  var monthRowsHtml = '';
+  if ((mode === 'year' || mode === 'range') && Object.keys(monthMap).length > 1) {
+    var mkeys = Object.keys(monthMap).sort();
+    monthRowsHtml = '<div class="qr-months">';
+    for (var mi = 0; mi < mkeys.length; mi++) {
+      var mk = mkeys[mi];
+      var md = monthMap[mk];
+      var mh = Math.round(md.hours * 100) / 100;
+      var mp = mk.split('-');
+      monthRowsHtml += '<div class="qr-month-row"><span class="qr-month-name">' + mp[0] + '年' + (+mp[1]) + '月</span>';
+      monthRowsHtml += '<span class="qr-month-v">¥' + money(md.cost) + '</span>';
+      monthRowsHtml += '<span class="qr-month-v">' + mh + 'h</span></div>';
+    }
+    monthRowsHtml += '</div>';
+  }
+
   box.innerHTML =
     '<div class="qr-title">' + escHtml(label) + ' 统计</div>' +
+    monthRowsHtml +
     '<div class="qr-grid">' +
-      '<div class="qr-item"><span class="qr-k">加班费</span><span class="qr-v">' + money(cost) + '</span></div>' +
-      '<div class="qr-item"><span class="qr-k">加班时长</span><span class="qr-v">' + hours + 'h</span></div>' +
-      '<div class="qr-item"><span class="qr-k">' + escHtml(feeText) + '(' + months + '月)</span><span class="qr-v">' + money(recurring) + '</span></div>' +
-      '<div class="qr-item"><span class="qr-k">合计</span><span class="qr-v accent">' + money(grand) + '</span></div>' +
+      '<div class="qr-item"><span class="qr-k">加班费</span><span class="qr-v">¥' + money(totalCost) + '</span></div>' +
+      '<div class="qr-item"><span class="qr-k">加班时长</span><span class="qr-v">' + totalHours + 'h</span></div>' +
+      '<div class="qr-item"><span class="qr-k">' + escHtml(feeText) + '</span><span class="qr-v">¥' + money(recurring) + '</span></div>' +
+      '<div class="qr-item"><span class="qr-k">合计</span><span class="qr-v accent">¥' + money(grand) + '</span></div>' +
     '</div>' +
-    (cnt ? '' : '<div class="qr-tip">该区间暂无加班记录</div>');
+    (totalCnt ? '' : '<div class="qr-tip">该区间暂无加班记录</div>');
   box.className = 'query-result show';
 }
 function clearQueryScope() {
@@ -1416,16 +1708,19 @@ function clearQueryScope() {
   if (box) { box.className = 'query-result'; box.innerHTML = ''; }
 }
 function bindQueryEvents() {
-  var mode = $('queryMode'), monthI = $('queryMonth'), yearI = $('queryYear'),
+  var mode = $('queryMode'), monthI = $('queryMonth'), monthTrig = $('queryMonthTrigger'),
+      yearI = $('queryYear'),
       startI = $('queryStart'), endI = $('queryEnd'), sep = $('queryRangeSep'), btn = $('queryBtn');
   if (!mode) return;
   function syncVisibility() {
     var v = mode.value;
-    if (monthI) monthI.style.display = (v === 'month') ? '' : 'none';
-    if (yearI) yearI.style.display = (v === 'year') ? '' : 'none';
-    if (startI) startI.style.display = (v === 'range') ? '' : 'none';
-    if (endI) endI.style.display = (v === 'range') ? '' : 'none';
-    if (sep) sep.style.display = (v === 'range') ? '' : 'none';
+    var showMonth = (v === 'month'), showYear = (v === 'year'), showRange = (v === 'range');
+    if (monthI) monthI.style.display = showMonth ? '' : 'none';
+    if (monthTrig) monthTrig.style.display = showMonth ? '' : 'none';
+    if (yearI) yearI.style.display = showYear ? '' : 'none';
+    if (startI) startI.style.display = showRange ? '' : 'none';
+    if (endI) endI.style.display = showRange ? '' : 'none';
+    if (sep) sep.style.display = showRange ? '' : 'none';
   }
   mode.onchange = syncVisibility;
   if (btn) btn.onclick = runQuery;
@@ -1440,6 +1735,47 @@ function bindQueryEvents() {
   }
   if (monthI) monthI.value = calState.year + '-' + pad2(calState.month + 1);
   syncVisibility();
+
+  // ---- 查询弹窗逻辑 ----
+  var qBtn = $('queryModalBtn');
+  var qOverlay = $('queryModalOverlay');
+  var qClose = $('queryModalClose');
+  var qBody = $('queryModalBody');
+  var qResultWrap = $('queryModalResultWrap');
+  var qCard = $('queryCard');
+  if (qBtn && qOverlay && qCard && qBody) {
+    qBtn.onclick = function() {
+      // 把查询控件移入弹窗
+      var qr = qCard.querySelector('.query-row');
+      if (qr && !qBody.contains(qr)) { qBody.appendChild(qr); }
+      syncVisibility();
+      qOverlay.className = 'modal-overlay show';
+      // 聚焦模式选择
+      try { mode.focus(); } catch(e) {}
+    };
+    function closeQueryModal() {
+      qOverlay.className = 'modal-overlay';
+      // 把结果移回（可选，保留在弹窗也行）
+      var resBox = $('queryResult');
+      if (resBox && qResultWrap && resBox.parentNode !== qResultWrap) {
+        qResultWrap.appendChild(resBox);
+        qResultWrap.style.display = resBox.className.indexOf('show') !== -1 ? '' : 'none';
+      }
+    }
+    if (qClose) qClose.onclick = closeQueryModal;
+    if (qOverlay) qOverlay.onclick = function(e) { if (e.target === qOverlay) closeQueryModal(); };
+  }
+
+  // 查询完成后把结果移入弹窗
+  var _origRun = runQuery;
+  runQuery = function() {
+    _origRun();
+    var resBox = $('queryResult');
+    if (resBox && qResultWrap && qOverlay) {
+      qResultWrap.appendChild(resBox);
+      qResultWrap.style.display = '';
+    }
+  };
 }
 function renderRecurring() {
   var rl = $('recurringList');
@@ -1718,29 +2054,33 @@ function bindEvents() {
     };
     submitFn().then(function(){ closeModal(); return refresh(); }).catch(function(err){ toast('\u64CD\u4F5C\u5931\u8D25:'+(err.message||err)); });
   };
-  var ss = $('saveSettings');
-  if (ss) ss.onclick = function() {
-    toast('\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();
+  // 设置页：即时自动保存（无需手动点保存按钮）
+  // — 费率输入框 change 时自动保存
+  var srs = $('sRate');
+  if (srs) srs.onchange = function() {
+    var rate = parseFloat(srs.value);
+    if (isNaN(rate)) return;
+    if (!state.settings) state.settings = {};
+    state.settings.hourlyRate = Math.round(rate*100)/100;
+    applyStagesToMonthlyRates();
+    api('POST','/api/settings',{hourlyRate:state.settings.hourlyRate,monthlyRates:state.settings.monthlyRates||{}}).then(function(){toast('✓ 计费已保存');return refresh();}).catch(function(err){toast('保存失败:'+(err.message||err));});
   };
-  var srb = $('saveRecurringBtn');
-  if (srb) srb.onclick = function() {
+  // — 自定义费用：每次增删改后自动保存（由 addRecurring / item-row delete 触发）
+  var autoSaveRecurring = function() {
     var fees=[], rRows = $('recurringList')?$('recurringList').querySelectorAll('.item-row'):[], rr, rn, ra, rc, fname, fam, fcycle, i;
     for (i = 0; i < rRows.length; i++) { rr = rRows[i]; rn = rr.querySelector('input[data-rn]'); ra = rr.querySelector('input[data-ra]'); rc = rr.querySelector('select[data-rc]'); fname = rn?rn.value.trim():''; fam = ra?parseFloat(ra.value)||0:0; fcycle = rc?rc.value:'monthly'; if (fname) fees.push({name:fname,amount:Math.round(fam*100)/100,cycle:fcycle}); }
-    // 立即更新本地 state 以便 UI 即时响应
     if (!state.settings) state.settings = {};
     state.settings.recurringFees = fees;
     renderSummary();
-    api('POST','/api/settings',{recurringFees:fees}).then(function(){toast('\u81EA\u5B9A\u4E49\u8D39\u7528\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
+    api('POST','/api/settings',{recurringFees:fees}).then(function(){toast('✓ 费用已保存');return refresh();}).catch(function(err){});
   };
-  var srs = $('saveRateSettings');
-  if (srs) srs.onclick = function() {
-    var rateInput = $('sRate'), rate = rateInput?parseFloat(rateInput.value):NaN;
-    var baseRate = isNaN(rate) ? ((state.settings&&state.settings.hourlyRate)?state.settings.hourlyRate:50) : Math.round(rate*100)/100;
-    if (!state.settings) state.settings = {};
-    state.settings.hourlyRate = baseRate;
-    applyStagesToMonthlyRates(); // 把阶段展平成逐月 map
-    api('POST','/api/settings',{hourlyRate:baseRate,monthlyRates:state.settings.monthlyRates||{}}).then(function(){toast('\u8BA1\u8D39\u8BBE\u7F6E\u5DF2\u4FDD\u5B58');return refresh();}).catch(function(err){toast('\u4FDD\u5B58\u5931\u8D25:'+(err.message||err));});
-  };
+  // 把原来的 saveRecurringBtn onclick 改为 autoSaveRecurring
+  var srb = $('saveRecurringBtn');
+  if (srb) { srb.onclick = autoSaveRecurring; srb.style.display='none'; } // 兼容旧 id
+  // 监听费用列表内的 input/change 事件
+  var rl = $('recurringList');
+  if (rl) rl.addEventListener('input', debounce(autoSaveRecurring, 400));
+  // — 备份开关等设置项同理（如有 switch 控件）
   var amb = $('addMonthRate');
   if (amb) amb.onclick = function() {
     var cm = curMonthStr();
@@ -1767,6 +2107,7 @@ function bindTabs() {
       for (k = 0; k < items.length; k++) items[k].className = 'tab-item';
       this.className = 'tab-item active';
       if (t === 'settings') { loadBackupList(); renderRecurring(); }
+      if (t === 'checkin') { if (window.ckLoad) window.ckLoad(); }
       try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
     };
   }
@@ -1918,6 +2259,22 @@ function bindDataButtons() {
   var cu = $('checkUpdateBtn');
   if (cu) cu.onclick = checkForUpdate;
   checkForUpdate(); // 页面加载自动检查更新（对齐 fnos-hermes-agent 的自动拉取）
+
+  // 备份按钮
+  var mbb = $('manualBackupBtn');
+  if (mbb) mbb.onclick = function() {
+    mbb.disabled = true; mbb.textContent = '备份中…';
+    api('POST', '/api/backup').then(function(r) {
+      mbb.disabled = false; mbb.textContent = '立即备份';
+      toast(r && r.ok ? '✓ ' + (r.message || '备份完成') : ('备份失败: ' + ((r && r.error) || '')));
+      return loadBackupList();
+    }).catch(function(e) { mbb.disabled = false; mbb.textContent = '立即备份'; toast('备份失败:' + (e && e.message || e)); });
+  };
+  var rbb = $('restoreBackupBtn');
+  if (rbb) rbb.onclick = function() {
+    var ifile = $('importFile');
+    if (ifile) { try { ifile.click(); } catch(e) { toast('打开文件失败'); } }
+  };
 }
 
 function doImport(text) {
@@ -1948,7 +2305,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.1.9';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.0';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var cv = $('curVerInline'); if (cv) cv.textContent = '记加班 v' + APP_VERSION; })();
@@ -2021,6 +2378,216 @@ function doAppUpdate() {
 }
 
 
+/* ============ 签到模块（自动签到，移植自便阅记 + QD） ============ */
+(function(){
+  var ckState = null, ckTemplates = [], ckEditId = null, ckEditReq = null, ckSchedArr = [];
+  var PRESETS = {
+    tieba: { name:'百度贴吧签到', emoji:'🔥', group:'社区', req:{ type:'tiebaOneClick', url:'https://tieba.baidu.com/sign/add', method:'POST', headers:'{"Referer":"https://tieba.baidu.com/"}' } },
+    'bilibili-live': { name:'B站直播签到', emoji:'📺', group:'直播', req:{ type:'api', url:'https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign', method:'GET', headers:'{"Referer":"https://live.bilibili.com/","Origin":"https://live.bilibili.com"}', csrf:{cookieKey:'bili_jct',queryKeys:['csrf_token','csrf']}, success:{type:'json',path:'code',equals:[0,101104]} } },
+    discuz: { name:'论坛签到(Discuz)', emoji:'🏷️', group:'论坛', req:{ type:'formSign', url:'https://www.hostloc.com/forum.php?mod=taskworker&id=1&item=1', getUrl:'https://www.hostloc.com/forum.php', method:'POST', headers:'{"Referer":"https://www.hostloc.com/"}', body:'' } },
+    custom: { name:'自定义签到', emoji:'🌐', group:'其他', req:{ type:'api', url:'', method:'GET', headers:'{}' } }
+  };
+  function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+  function ckApi(m,p,b){ return api(m,'/api/checkin'+p,b); }
+  function ckFind(id){ var a=ckState?ckState.sites:[]; for(var i=0;i<a.length;i++){ if(a[i].id===id) return a[i]; } return null; }
+
+  function ckLoad(){
+    return ckApi('GET','/state').then(function(r){
+      if(!r) return;
+      ckState = r.state || { sites:[], siteLogs:{}, scheduleLog:{}, settings:{}, daily:{}, meta:{} };
+      ckTemplates = r.templates || [];
+      ckRender();
+    }).catch(function(){ /* 签到模块尚未就绪 */ });
+  }
+  window.ckLoad = ckLoad;
+
+  function ckRender(){
+    if(!ckState) return;
+    var sites = ckState.sites || [];
+    var today = todayStr();
+    var done = 0;
+    sites.forEach(function(s){ var l = ckState.siteLogs && ckState.siteLogs[s.id]; if(l && l[today]) done++; });
+    var total = sites.length;
+    var dEl=$('ckDone'); if(dEl) dEl.textContent=done;
+    var tEl=$('ckTotal'); if(tEl) tEl.textContent=total;
+    var C = 2*Math.PI*32;
+    var fg=$('ckRingFg'); if(fg){ fg.setAttribute('stroke-dasharray',C.toFixed(1)); fg.setAttribute('stroke-dashoffset',(C*(1-(total?done/total:0))).toFixed(1)); }
+    var sub=$('ckHeroSub');
+    if(sub){ if(total===0) sub.textContent='还没有站点，先添加签到任务吧'; else if(done===total) sub.textContent='今天所有站点都签到了 🎉'; else sub.textContent='今天还有 '+(total-done)+' 个站点待签到'; }
+    var list=$('ckSiteList'), empty=$('ckEmpty');
+    var cnt=$('ckSiteCount'); if(cnt) cnt.textContent=total+' 个';
+    if(total===0){ if(list) list.innerHTML=''; if(empty) empty.style.display=''; return; }
+    if(empty) empty.style.display='none';
+    var html='';
+    sites.forEach(function(s){ html += ckSiteHtml(s, today); });
+    if(list){
+      list.innerHTML=html;
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-site-main'), function(el){ el.onclick=function(){ ckOpenEditor(el.getAttribute('data-id')); }; });
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-run-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckRunOne(el.getAttribute('data-id'), el); }; });
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-del-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckDeleteSite(el.getAttribute('data-id')); }; });
+    }
+    var st = ckState.settings || {};
+    var at=$('ckAutoTime'); if(at) at.value=st.autoDaily||'09:00';
+    var atv=$('ckAutoTimeVal'); if(atv) atv.textContent='每天 '+(st.autoDaily||'09:00')+' 自动签到';
+    var ar=$('ckAutoRun'); if(ar) ar.checked = st.autoRun!==false;
+  }
+
+  function ckSiteHtml(s, today){
+    var log = ckState.siteLogs && ckState.siteLogs[s.id];
+    var done = !!(log && log[today]);
+    var status = done ? {cls:'ok',text:'今日已签'} : (s.lastResult && s.lastResult.ok===false) ? {cls:'fail',text:'上次失败'} : {cls:'wait',text:'待签到'};
+    var sub=[];
+    if(s.schedule) sub.push('⏰ '+(Array.isArray(s.schedule)?s.schedule.join(' / '):s.schedule));
+    if(s.group) sub.push(s.group);
+    if(s.lastResult){ if(s.lastResult.reason) sub.push(s.lastResult.reason); else if(s.lastResult.ok) sub.push('上次成功 · HTTP '+(s.lastResult.status||'')); }
+    var subText=sub.join('　'); if(subText.length>64) subText=subText.slice(0,64)+'…';
+    var enabled = s.enabled!==false;
+    return '<div class="ck-site" style="'+(enabled?'':'opacity:.55')+'">'
+      + '<div class="ck-site-emoji">'+escapeHtml(s.emoji||'🌐')+'</div>'
+      + '<div class="ck-site-main" data-id="'+escapeHtml(s.id)+'">'
+      +   '<div class="ck-site-name">'+escapeHtml(s.name)+(enabled?'':' <span class="ck-badge wait">已停用</span>')+' <span class="ck-badge '+status.cls+'">'+status.text+'</span></div>'
+      +   '<div class="ck-site-sub">'+escapeHtml(subText)+'</div>'
+      + '</div>'
+      + '<div class="ck-site-act">'
+      +   '<button class="ck-run-btn" data-id="'+escapeHtml(s.id)+'" title="立即签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></button>'
+      +   '<button class="ck-del-btn" data-id="'+escapeHtml(s.id)+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'
+      + '</div></div>';
+  }
+
+  function ckName(id){ var s=ckFind(id); return s?s.name:'站点'; }
+
+  function ckRunOne(id, btn){
+    if(btn) btn.classList.add('busy');
+    ckApi('POST','/'+id).then(function(r){
+      if(!r) return;
+      toast(r.ok ? ('✓ '+ckName(id)+' 签到成功') : ('✗ '+ckName(id)+' 失败'+(r.reason?'：'+r.reason:'')));
+      return ckLoad();
+    }).catch(function(e){ toast('签到异常:'+(e&&e.message||e)); }).then(function(){ if(btn) btn.classList.remove('busy'); });
+  }
+
+  function ckRunAll(){
+    var btn=$('ckRunAll'); if(btn){ btn.disabled=true; btn.textContent='签到中…'; }
+    ckApi('POST','/all').then(function(r){
+      if(!r) return;
+      var msg='完成：成功 '+r.ok+'，失败 '+r.fail;
+      if(r.list){ var f=[]; r.list.forEach(function(x){ if(!x.ok) f.push(x.name); }); if(f.length) msg+='（'+f.join('、')+' 未成功）'; }
+      toast(msg);
+      return ckLoad();
+    }).catch(function(e){ toast('批量签到异常:'+(e&&e.message||e)); }).then(function(){ if(btn){ btn.disabled=false; btn.textContent='一键全部签到'; } });
+  }
+
+  function ckSaveSettings(){
+    var st={};
+    var at=$('ckAutoTime'); if(at) st.autoDaily=at.value||'09:00';
+    var ar=$('ckAutoRun'); st.autoRun = ar? ar.checked : true;
+    ckApi('POST','/settings',{settings:st}).then(function(){ ckLoad(); }).catch(function(e){ toast('保存失败:'+(e&&e.message||e)); });
+  }
+
+  function ckExport(){ safeDownload(API_BASE+'/api/checkin/export','checkin-backup.json'); }
+
+  function ckImportFile(file){
+    var reader=new FileReader();
+    reader.onload=function(ev){
+      var text=ev.target?ev.target.result:'';
+      var data; try{ data=JSON.parse(text); }catch(e){ toast('文件格式错误，需为 JSON'); return; }
+      ckApi('POST','/import',{ state:(data&&data.state)?data:data, mode:'overwrite' }).then(function(){ toast('导入成功'); return ckLoad(); }).catch(function(e){ toast('导入失败:'+(e&&e.message||e)); });
+    };
+    reader.readAsText(file);
+  }
+
+  function ckLoadDemo(){ ckApi('POST','/load-demo').then(function(){ toast('已载入示例站点'); return ckLoad(); }).catch(function(e){ toast('载入失败:'+(e&&e.message||e)); }); }
+  function ckClear(){ if(!confirm('确定清空全部签到任务与记录？此操作不可撤销。')) return; ckApi('POST','/clear').then(function(){ toast('已清空'); return ckLoad(); }).catch(function(e){ toast('清空失败:'+(e&&e.message||e)); }); }
+  function ckDeleteSite(id){ if(!confirm('删除「'+ckName(id)+'」这个签到任务？')) return; ckApi('DELETE','/site/'+id).then(function(){ toast('已删除'); return ckLoad(); }).catch(function(e){ toast('删除失败:'+(e&&e.message||e)); }); }
+
+  function ckOpenEditor(id, presetKey){
+    ckEditId = id || null; ckSchedArr = []; ckEditReq = null;
+    var site = id ? ckFind(id) : null;
+    if(site){
+      $('ckModalTitle').textContent='编辑签到任务';
+      $('ckFName').value=site.name||''; $('ckFEmoji').value=site.emoji||''; $('ckFGroup').value=site.group||'';
+      $('ckFEnabled').value=(site.enabled!==false)?'true':'false';
+      $('ckFCookie').value=site.cookie||'';
+      var req=site.req||{}; ckEditReq=req;
+      $('ckFType').value=req.type||'api'; $('ckFMethod').value=req.method||'GET'; $('ckFUrl').value=req.url||'';
+      $('ckFGetUrl').value=req.getUrl||'';
+      $('ckFHeaders').value=(typeof req.headers==='string')?req.headers:(req.headers?JSON.stringify(req.headers,null,2):'');
+      $('ckFBody').value=(req.body!=null)?String(req.body):'';
+      $('ckFKeyword').value=req.keyword||'';
+      if(site.schedule) ckSchedArr = Array.isArray(site.schedule)?site.schedule.slice():[site.schedule];
+    } else if(presetKey && PRESETS[presetKey]){
+      var p=PRESETS[presetKey];
+      $('ckModalTitle').textContent='添加签到任务';
+      $('ckFName').value=p.name||''; $('ckFEmoji').value=p.emoji||''; $('ckFGroup').value=p.group||'';
+      $('ckFEnabled').value='true'; $('ckFCookie').value='';
+      var pr=p.req||{}; ckEditReq=pr;
+      $('ckFType').value=pr.type||'api'; $('ckFMethod').value=pr.method||'GET'; $('ckFUrl').value=pr.url||'';
+      $('ckFGetUrl').value=pr.getUrl||'';
+      $('ckFHeaders').value=(typeof pr.headers==='string')?pr.headers:(pr.headers?JSON.stringify(pr.headers,null,2):'');
+      $('ckFBody').value=(pr.body!=null)?String(pr.body):'';
+      $('ckFKeyword').value=pr.keyword||'';
+    } else {
+      $('ckModalTitle').textContent='添加签到任务';
+      ['ckFName','ckFEmoji','ckFGroup','ckFCookie','ckFUrl','ckFGetUrl','ckFHeaders','ckFBody','ckFKeyword'].forEach(function(k){ if($(k)) $(k).value=''; });
+      $('ckFEmoji').value='🌐'; $('ckFEnabled').value='true'; $('ckFType').value='api'; $('ckFMethod').value='GET';
+    }
+    ckRenderSched(); ckToggleTypeRows();
+    var m=$('ckModal'); if(m){ try{ document.body.appendChild(m); }catch(e){} m.className='modal-overlay show'; }
+  }
+  function ckCloseEditor(){ var m=$('ckModal'); if(m) m.className='modal-overlay'; ckEditId=null; ckEditReq=null; }
+
+  function ckRenderSched(){
+    var box=$('ckSchedChips'); if(!box) return;
+    var presets=['08:00','09:00','12:00','18:00','21:00'];
+    var html='';
+    presets.forEach(function(t){ var on=ckSchedArr.indexOf(t)>=0; html+='<span class="ck-chip'+(on?' on':'')+'" data-t="'+t+'">'+t+'</span>'; });
+    ckSchedArr.forEach(function(t){ if(presets.indexOf(t)<0) html+='<span class="ck-chip on ck-chip-del" data-rm="'+t+'">'+t+' <span class="x">×</span></span>'; });
+    box.innerHTML=html;
+    Array.prototype.forEach.call(box.querySelectorAll('[data-t]'), function(el){ el.onclick=function(){ var t=el.getAttribute('data-t'); var i=ckSchedArr.indexOf(t); if(i>=0) ckSchedArr.splice(i,1); else ckSchedArr.push(t); ckRenderSched(); }; });
+    Array.prototype.forEach.call(box.querySelectorAll('[data-rm]'), function(el){ el.onclick=function(){ var t=el.getAttribute('data-rm'); var i=ckSchedArr.indexOf(t); if(i>=0) ckSchedArr.splice(i,1); ckRenderSched(); }; });
+  }
+  function ckToggleTypeRows(){
+    var type=$('ckFType').value;
+    var tieba=type==='tiebaOneClick', form=type==='formSign';
+    var mr=$('ckFMethod').closest('.ck-f-row'); if(mr) mr.style.display=tieba?'none':'';
+    var hr=$('ckFHeaders').closest('.ck-f-row'); if(hr) hr.style.display=tieba?'none':'';
+    var br=$('ckBodyRow'); if(br) br.style.display=(tieba||form)?'none':'';
+    var gr=$('ckGetUrlRow'); if(gr) gr.style.display=form?'':'none';
+  }
+  function ckSaveEditor(){
+    var req = ckEditReq ? JSON.parse(JSON.stringify(ckEditReq)) : {};
+    req.type=$('ckFType').value; req.url=$('ckFUrl').value.trim(); req.method=$('ckFMethod').value;
+    req.getUrl=$('ckFGetUrl').value.trim();
+    var hdr=$('ckFHeaders').value.trim(); req.headers=hdr?hdr:'{}';
+    var body=$('ckFBody').value; if(body!=null) req.body=body;
+    req.keyword=$('ckFKeyword').value.trim();
+    if(req.type==='tiebaOneClick'){ delete req.method; delete req.headers; delete req.body; delete req.getUrl; delete req.keyword; if(!req.url) req.url='https://tieba.baidu.com/sign/add'; }
+    var schedule = ckSchedArr.length===0 ? null : (ckSchedArr.length===1 ? ckSchedArr[0] : ckSchedArr.slice());
+    var payload={ name:$('ckFName').value.trim()||'未命名签到', emoji:$('ckFEmoji').value.trim()||'🌐', group:$('ckFGroup').value.trim(), enabled:$('ckFEnabled').value!=='false', cookie:$('ckFCookie').value, req:req, schedule:schedule };
+    if(ckEditId) payload.id=ckEditId;
+    ckApi('POST','/site',payload).then(function(){ toast('已保存'); ckCloseEditor(); return ckLoad(); }).catch(function(e){ toast('保存失败:'+(e&&e.message||e)); });
+  }
+
+  function ckBind(){
+    var ra=$('ckRunAll'); if(ra) ra.onclick=ckRunAll;
+    var ab=$('ckAddBtn'); if(ab) ab.onclick=function(){ ckOpenEditor(null); };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){ el.onclick=function(){ ckOpenEditor(null, el.getAttribute('data-add')); }; });
+    var mc=$('ckModalClose'); if(mc) mc.onclick=ckCloseEditor;
+    var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
+    var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
+    var ft=$('ckFType'); if(ft) ft.onchange=ckToggleTypeRows;
+    var sa=$('ckSchedAddBtn'); if(sa) sa.onclick=function(){ var v=$('ckSchedAdd').value; if(v && ckSchedArr.indexOf(v)<0){ ckSchedArr.push(v); ckRenderSched(); } };
+    var at=$('ckAutoTime'); if(at) at.onchange=ckSaveSettings;
+    var ar=$('ckAutoRun'); if(ar) ar.onchange=ckSaveSettings;
+    var ld=$('ckLoadDemo'); if(ld) ld.onclick=ckLoadDemo;
+    var ex=$('ckExport'); if(ex) ex.onclick=ckExport;
+    var ib=$('ckImportBtn'); if(ib) ib.onclick=function(){ try{ $('ckImportFile').click(); }catch(e){} };
+    var iff=$('ckImportFile'); if(iff) iff.onchange=function(){ if(this.files&&this.files[0]) ckImportFile(this.files[0]); this.value=''; };
+    var cl=$('ckClear'); if(cl) cl.onclick=ckClear;
+    var m=$('ckModal'); if(m) m.addEventListener('click', function(e){ if(e.target===m) ckCloseEditor(); });
+  }
+  ckBind();
+})();
+
 function refresh() {
   return api('GET','/api/state').then(function(data) {
     if (data) { if (data.settings) state.settings = data.settings; if (data.records) state.records = data.records; }
@@ -2037,6 +2604,7 @@ function init() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark', tt = $('themeToggle'), moon, sun;
   if (tt) { moon = tt.querySelector('.ico-moon'); sun = tt.querySelector('.ico-sun'); if (moon) moon.style.display = isDark?'none':''; if (sun) sun.style.display = isDark?'':'none'; }
   bindEvents(); bindTabs(); resetForm(); refresh();
+  if (window.ckLoad) window.ckLoad();
 }
 
 if (document.addEventListener) document.addEventListener('DOMContentLoaded', init);
