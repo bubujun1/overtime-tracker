@@ -9,7 +9,6 @@
     "bug_report_url": "https://github.com/bubujun1/overtime-tracker/issues",
     "install_type": "存储空间",
     "size": "60",
-    "icon_url": "https://cdn.jsdelivr.net/gh/bubujun1/overtime-tracker@main/ICON_256.PNG",
     "download_url": "https://github.com/bubujun1/overtime-tracker/releases/download/v1.1.6/overtime-tracker.fpk",
     "history": {
       "v1.1.0": "日历分色标记+点击日期弹窗记录；导入/导出备份；卸载保留数据；支持飞牛应用中心一键更新",
