@@ -11,18 +11,18 @@
 
 /* ---- CSS 变量（低饱和 · 柔和护眼） ---- */
 :root {
-  --bg: #f0f2f5; --surface: rgba(255,255,255,.78); --surface-solid: #ffffff;
+  --bg: #f0f2f5; --surface: #ffffff; --surface-solid: #ffffff;
   --text: #1d1d2e; --text-sec: #5c6370; --text-light: #a0a8b4;
   --border: rgba(0,0,0,.06); --border-light: rgba(0,0,0,.04);
-  --hdr-from: #6366f1; --hdr-to: #8b5cf6;
-  --accent: #6366f1; --accent-hover: #4f46e5;
+  --hdr-from: #007AFF; --hdr-to: #5856D6;
+  --accent: #007AFF; --accent-hover: #0066d6;
   --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
   /* 日历色 — 低饱和柔和 */
   --cal-ho-bg: rgba(251,191,36,.12); --cal-ho-border: rgba(245,158,11,.35); --cal-ho-text: #b45309;
   --cal-wd-bg: rgba(251,191,36,.08); --cal-wd-border: rgba(245,158,11,.28);
   --cal-we-bg: rgba(34,197,94,.07); --cal-we-border: rgba(34,197,94,.22);
-  --cal-ot-bg: rgba(99,102,241,.08); --cal-ot-border: rgba(99,102,241,.30); --cal-ot-text: #4338ca;
-  --cal-wk-bg: rgba(99,102,241,.035); --cal-wk-border: rgba(99,102,241,.14);
+  --cal-ot-bg: rgba(0,122,255,.08); --cal-ot-border: rgba(0,122,255,.30); --cal-ot-text: #0066d6;
+  --cal-wk-bg: rgba(0,122,255,.035); --cal-wk-border: rgba(0,122,255,.14);
   --cal-today-ring: #f43f5e;
   /* 统计卡片色 */
   --stat-teal: #14b8a6; --stat-blue: #3b82f6; --stat-amber: #f59e0b;
@@ -40,14 +40,14 @@
   --bg: #0f1117; --surface: rgba(26,29,40,.75); --surface-solid: #1a1d27;
   --text: #e4e6ed; --text-sec: #8b92a5; --text-light: #4a5062;
   --border: rgba(255,255,255,.06); --border-light: rgba(255,255,255,.03);
-  --hdr-from: #4f46e5; --hdr-to: #7c3aed;
-  --accent: #818cf8; --accent-hover: #6366f1;
+  --hdr-from: #0066d6; --hdr-to: #7c3aed;
+  --accent: #5ac8fa; --accent-hover: #007AFF;
   --success: #34d399; --danger: #fb7185; --warning: #fbbf24;
   --cal-ho-bg: rgba(245,158,11,.10); --cal-ho-border: rgba(251,191,36,.30); --cal-ho-text: #fbbf24;
   --cal-wd-bg: rgba(245,158,11,.06); --cal-wd-border: rgba(251,191,36,.20);
   --cal-we-bg: rgba(52,211,153,.06); --cal-we-border: rgba(52,211,153,.18);
-  --cal-ot-bg: rgba(129,140,248,.10); --cal-ot-border: rgba(129,140,248,.28); --cal-ot-text: #a5b4fc;
-  --cal-wk-bg: rgba(129,140,248,.04); --cal-wk-border: rgba(129,140,248,.12);
+  --cal-ot-bg: rgba(90,200,250,.10); --cal-ot-border: rgba(90,200,250,.28); --cal-ot-text: #5ac8fa;
+  --cal-wk-bg: rgba(90,200,250,.04); --cal-wk-border: rgba(90,200,250,.12);
   --cal-today-ring: #fb7185;
   --stat-teal: #2dd4bf; --stat-blue: #60a5fa; --stat-amber: #fbbf24;
   --stat-grad-from: #6d28d9; --stat-grad-to: #8b5cf6;
@@ -57,7 +57,7 @@
   --shadow-glass: 0 8px 32px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.06);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow-x:hidden}
+html,body{height:100%;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   font-size:15px;line-height:1.65;color:var(--text);background:var(--bg);
@@ -75,17 +75,16 @@ body{
 }
 .app-header::before{
   content:'';position:absolute;top:-50%;right:-15%;width:220px;height:220px;border-radius:50%;
-  background:rgba(255,255,255,.07);filter:blur(60px)
+  background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,0) 70%)
 }
 .app-header::after{
   content:'';position:absolute;bottom:-40%;left:-15%;width:180px;height:180px;border-radius:50%;
-  background:rgba(255,255,255,.05);filter:blur(50px)
+  background:radial-gradient(circle,rgba(255,255,255,.10),rgba(255,255,255,0) 70%)
 }
 .header-inner{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;max-width:1440px;margin:0 auto;width:100%}
 .header-brand{display:flex;align-items:center;gap:10px}
 .header-icon{
-  width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.18);
-  backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.22);
   display:grid;place-items:center;flex-shrink:0;
   border:1px solid rgba(255,255,255,.15)
 }
@@ -94,7 +93,7 @@ body{
 .hdr-btn{
   width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.2);
   background:rgba(255,255,255,.14);color:#fff;cursor:pointer;display:grid;place-items:center;
-  transition:all .2s ease;flex-shrink:0;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)
+  transition:all .2s ease;flex-shrink:0
 }
 .hdr-btn:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
 .hdr-btn:active{transform:scale(.90)}
@@ -121,7 +120,7 @@ body{
 
 /* ---- 卡片通用（毛玻璃） ---- */
 .card{
-  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  background:var(--surface);
   border-radius:var(--r-card);box-shadow:var(--shadow-glass);
   padding:18px;border:1px solid var(--border-light);
   transition:background .3s,border-color .3s,transform .2s
@@ -138,7 +137,7 @@ body{
   display:grid;place-items:center;transition:all .2s ease;flex-shrink:0;
   box-shadow:var(--shadow-sm)
 }
-.cal-arrow:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,241,.06);transform:scale(1.05)}
+.cal-arrow:hover{border-color:#007AFF;color:#007AFF;background:rgba(0,122,255,.06);transform:scale(1.05)}
 .cal-arrow:active{transform:scale(.88)}
 .cal-month{font-size:17px;font-weight:650;color:var(--text);min-width:110px;text-align:center}
 
@@ -174,7 +173,7 @@ body{
 /* 加班角标 — 居中置底 */
 .cal-ot-badge{
   font-size:9px;font-weight:700;color:#fff;
-  background:linear-gradient(135deg,var(--accent),#818cf8);padding:1.5px 6px;border-radius:8px;
+  background:linear-gradient(135deg,#007AFF,#5ac8fa);padding:1.5px 6px;border-radius:8px;
   line-height:1.4;min-height:0;display:inline-block;text-align:center;
   box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
 }
@@ -203,10 +202,43 @@ body{
   .cal-num{font-size:12px}
 }
 
+/* ==================== 查询条 — 精简 ==================== */
+.query-card{
+  background:var(--surface);
+  border-radius:var(--r-card);padding:14px 15px;
+  box-shadow:var(--shadow-glass);border:1px solid var(--border-light);margin-bottom:14px
+}
+.query-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.query-select,.query-input{
+  height:38px;border:1px solid var(--border);border-radius:var(--r-input);
+  background:var(--surface-solid);color:var(--text);padding:0 10px;font-size:13px;outline:none
+}
+.query-select{min-width:104px}
+.query-input{min-width:120px}
+.query-input[type="date"]{min-width:140px}
+.query-select:focus,.query-input:focus{border-color:var(--accent)}
+.query-btn{
+  height:38px;padding:0 18px;border:none;border-radius:var(--r-btn);
+  background:#007AFF;color:#fff;
+  font-size:13px;font-weight:600;cursor:pointer;transition:transform .15s,box-shadow .2s;
+  -webkit-tap-highlight-color:transparent
+}
+.query-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,122,255,.28)}
+.query-btn:active{transform:translateY(0)}
+.query-result{margin-top:12px;font-size:13px;line-height:1.7;color:var(--text-sec);display:none}
+.query-result.show{display:block}
+.query-result .qr-title{font-weight:600;color:var(--text);margin-bottom:6px}
+.query-result .qr-grid{display:flex;flex-wrap:wrap;gap:8px 18px}
+.query-result .qr-item{display:flex;align-items:baseline;gap:6px}
+.query-result .qr-k{color:var(--text-light);font-size:12px}
+.query-result .qr-v{font-weight:650;color:var(--text);font-size:15px}
+.query-result .qr-v.accent{color:var(--accent)}
+.query-result .qr-tip{margin-top:8px;font-size:11.5px;color:var(--text-light)}
+
 /* ==================== 统计卡片 — 毛玻璃精致风 ==================== */
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .stat-card{
-  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  background:var(--surface);
   border-radius:var(--r-card);padding:16px 15px;
   box-shadow:var(--shadow-glass);border:1px solid var(--border-light);
   transition:transform .2s,box-shadow .25s;position:relative;overflow:hidden
@@ -216,14 +248,14 @@ body{
   border-radius:var(--r-card) var(--r-card) 0 0;opacity:.8
 }
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-/* 左边框渐变条 */
+/* 左边框渐变条 — iOS 风格 */
 .stat-teal::before{background:linear-gradient(90deg,var(--stat-teal),#2dd4bf)}
-.stat-blue::before{background:linear-gradient(90deg,var(--stat-blue),#60a5fa)}
+.stat-blue::before{background:linear-gradient(90deg,#007AFF,#5ac8fa)}
 .stat-amber::before{background:linear-gradient(90deg,var(--stat-amber),#fbbf24)}
-/* 紫色渐变总费用卡 */
+/* 紫色渐变总费用卡 — 改为 iOS 风格蓝 */
 .stat-gradient{
-  background:linear-gradient(135deg,var(--stat-grad-from),var(--stat-grad-to));
-  border:1px solid transparent;box-shadow:0 8px 28px rgba(124,58,237,.25)
+  background:linear-gradient(135deg,#007AFF,#5856D6);
+  border:1px solid transparent;box-shadow:0 8px 28px rgba(0,122,255,.20)
 }
 .stat-gradient::before{display:none}
 .stat-gradient .stat-label,.stat-gradient .stat-val,.stat-gradient .stat-sub{color:#fff}
@@ -265,11 +297,12 @@ body{
 }
 .modal-overlay.show{opacity:1;pointer-events:auto}
 .modal-dialog{
-  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
-  border-radius:24px;box-shadow:var(--shadow-lg);width:94%;max-width:400px;
-  max-height:88vh;overflow-y:auto;padding:26px 22px 22px;
+  background:var(--surface-solid);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.15),0 8px 24px rgba(0,0,0,.08);
+  width:94%;max-width:400px;
+  max-height:88vh;overflow-y:auto;padding:24px 22px 22px;
   transform:translateY(20px) scale(.96);transition:transform .3s cubic-bezier(.16,1,.3,1);
-  border:1px solid var(--border-light)
+  border:1px solid rgba(0,0,0,.04)
 }
 .modal-overlay.show .modal-dialog{transform:translateY(0) scale(1)}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
@@ -305,13 +338,89 @@ input[type="date"]{color-scheme:light dark}
 .cycle-select{padding:9px 11px;font-size:13.5px;border:1.5px solid var(--border);border-radius:11px;background:var(--bg);color:var(--text);outline:none;transition:border-color .2s;min-width:0}
 .submit-btn{
   width:100%;padding:12px 16px;font-size:15px;font-weight:700;border:none;
-  border-radius:var(--r-btn);cursor:pointer;
-  background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;
-  letter-spacing:.5px;transition:all .25s cubic-bezier(.16,1,.3,1);
-  box-shadow:0 4px 14px rgba(99,102,241,.28);margin-top:6px
+  border-radius:14px;cursor:pointer;
+  background:#007AFF;color:#fff;letter-spacing:.5px;
+  transition:all .25s cubic-bezier(.16,1,.3,1);
+  box-shadow:0 4px 14px rgba(0,122,255,.28);margin-top:6px;
+  -webkit-tap-highlight-color:transparent
 }
-.submit-btn:hover{opacity:.93;box-shadow:0 6px 22px rgba(99,102,241,.38);transform:translateY(-1px)}
+.submit-btn:hover{opacity:.93;box-shadow:0 6px 22px rgba(0,122,255,.38);transform:translateY(-1px)}
 .submit-btn:active{transform:scale(.978)}
+
+/* ==================== iOS 风格自定义月份选择器 ==================== */
+.ios-month-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:250;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s ease;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)
+}
+.ios-month-overlay.show{opacity:1;pointer-events:auto}
+.ios-month-picker.mp-modern{
+  background:#fff;border-radius:22px;
+  box-shadow:0 24px 80px rgba(20,40,80,.28),0 8px 32px rgba(20,40,80,.12);
+  width:320px;max-width:90vw;overflow:hidden;padding:22px 20px 18px;
+  transform:scale(.92) translateY(20px);transition:transform .35s cubic-bezier(.16,1,.3,1);
+  border:1px solid rgba(0,0,0,.05)
+}
+.ios-month-overlay.show .ios-month-picker{transform:scale(1) translateY(0)}
+/* 顶部年份切换 */
+.mp-top{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:18px}
+.mp-year{font-size:22px;font-weight:800;color:#1d1d2e;letter-spacing:.5px;min-width:72px;text-align:center}
+.mp-nav{
+  width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+  background:linear-gradient(135deg,#eef3ff,#e3ecff);color:#2D6CFF;
+  font-size:24px;font-weight:600;line-height:1;display:grid;place-items:center;
+  transition:transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent
+}
+.mp-nav:active{transform:scale(.9);box-shadow:0 4px 12px rgba(45,108,255,.25)}
+/* 月份网格 */
+.mp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.mp-cell{
+  height:46px;border-radius:14px;border:1.5px solid #eef0f4;background:#fafbfc;
+  display:grid;place-items:center;font-size:15px;font-weight:600;color:#5c6370;
+  cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;user-select:none
+}
+.mp-cell:active{transform:scale(.94)}
+.mp-cell.sel{
+  background:linear-gradient(135deg,#3a8dff,#2D6CFF);border-color:transparent;color:#fff;
+  box-shadow:0 6px 16px rgba(45,108,255,.35);font-weight:700
+}
+/* 底部操作 */
+.mp-actions{display:flex;gap:10px}
+.mp-cancel{
+  flex:1;padding:13px;border-radius:14px;border:none;
+  background:#f2f3f7;color:#5c6370;font-size:15px;font-weight:600;
+  cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent
+}
+.mp-cancel:active{background:#e6e8ee;transform:scale(.98)}
+.mp-done{
+  flex:1;padding:13px;border-radius:14px;border:none;
+  background:linear-gradient(135deg,#3a8dff,#2D6CFF);color:#fff;font-size:15px;font-weight:700;
+  cursor:pointer;transition:all .2s;box-shadow:0 6px 16px rgba(45,108,255,.28);
+  -webkit-tap-highlight-color:transparent
+}
+.mp-done:active{transform:scale(.97);box-shadow:0 3px 10px rgba(45,108,255,.2)}
+
+/* 隐藏原生 month 输入框（用自定义触发器替代） */
+input[type="month"].ios-styled,
+input[type="month"].stage-from,
+input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;height:0;width:0}
+
+/* iOS 触发器（替代原生输入框的可见部分） */
+.ios-trigger{
+  height:38px;border:1px solid var(--border);border-radius:var(--r-input);
+  background:var(--surface-solid);color:var(--text);padding:0 10px;font-size:13px;
+  display:flex;align-items:center;cursor:pointer;transition:border-color .2s;
+  min-width:120px;user-select:none;-webkit-tap-highlight-color:transparent
+}
+.ios-trigger:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.10)}
+.ios-trigger::after{
+  content:'';width:0;height:0;margin-left:auto;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:6px solid var(--text-light);flex-shrink:0
+}
+.ios-trigger .ios-trig-text{flex:1;font-size:13px;color:var(--text)}
+.ios-trigger .ios-trig-ph{color:var(--text-light);font-size:13px}
 
 /* ==================== 计费设置 ==================== */
 .rate-section{margin-top:18px}
@@ -352,31 +461,64 @@ input[type="date"]{color-scheme:light dark}
 .ver-badge{
   position:fixed;left:16px;bottom:16px;z-index:150;
   font-size:11.5px;color:var(--text-sec);font-weight:550;
-  background:var(--surface);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  background:var(--surface);
   border:1px solid var(--border);padding:4px 14px;border-radius:999px;
   box-shadow:var(--shadow-sm);pointer-events:none;user-select:none;
   opacity:.7;transition:opacity .25s
 }
 .ver-badge:hover{opacity:1}
+/* 手机端（窄屏）不显示左下角版本号 —— 空间小、非必需；电脑宽屏保留 */
+@media (max-width:768px){
+  .ver-badge{display:none}
+}
 
 /* ==================== 主区域容器（双端布局） ==================== */
 .app-main{width:100%;max-width:1440px;margin:0 auto}
 
-/* ==================== 模块导航 ==================== */
+/* ==================== 模块导航 — iOS 分段控制 ==================== */
 .tab-bar{
   position:sticky;top:0;z-index:60;
-  display:flex;gap:8px;padding:12px var(--page-pad);
-  background:rgba(240,242,245,.82);
-  backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
+  display:flex;gap:0;padding:12px var(--page-pad);
+  background:rgba(240,242,245,.95);
   border-bottom:1px solid var(--border-light);
   max-width:1440px;margin:0 auto;width:100%
 }
+/* 手机端：iOS 分段控制（胶囊容器） */
+@media (max-width:719px){
+  .tab-bar{
+    justify-content:center;padding:10px var(--page-pad);gap:0;
+    background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
+    border-bottom:none
+  }
+  .tab-bar::before{
+    content:'';display:inline-block;
+    background:var(--border);border-radius:10px;
+    padding:3px;gap:2px;display:flex
+  }
+}
 [data-theme="dark"] .tab-bar{background:rgba(15,17,23,.82)}
+[data-theme="dark"] .tab-bar::before{background:rgba(255,255,255,.08)}
 .tab-item{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
   padding:11px 14px;border-radius:14px;border:none;cursor:pointer;background:transparent;
   color:var(--text-sec);font-size:14.5px;font-weight:600;font-family:inherit;
   transition:background .22s,color .22s,box-shadow .22s,transform .15s;-webkit-tap-highlight-color:transparent
+}
+/* 手机端分段控制样式 */
+@media (max-width:719px){
+  .tab-item{
+    flex:1;border-radius:8px;padding:9px 12px;font-size:14px;
+    background:transparent;color:var(--text-sec)
+  }
+  .tab-item.active{
+    background:#fff;color:var(--text);
+    box-shadow:0 2px 8px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);
+    font-weight:700
+  }
+  [data-theme="dark"] .tab-item.active{
+    background:rgba(255,255,255,.08);color:#fff;
+    box-shadow:none
+  }
 }
 .tab-item svg{width:18px;height:18px;flex-shrink:0}
 .tab-item:active{transform:scale(.97)}
@@ -449,12 +591,12 @@ input[type="date"]{color-scheme:light dark}
 .add-row:active{transform:scale(.99)}
 .add-row:hover{border-color:var(--accent);background:rgba(99,102,241,.04)}
 .mine-save{
-  display:block;width:100%;margin-top:6px;padding:14px;border:none;border-radius:16px;
+  display:block;width:100%;margin-top:6px;padding:14px;border:none;border-radius:14px;
   font-size:15px;font-weight:700;color:#fff;cursor:pointer;font-family:inherit;letter-spacing:.5px;
-  background:linear-gradient(135deg,var(--accent),var(--accent-hover));
-  box-shadow:0 6px 20px rgba(99,102,241,.28);transition:all .2s;-webkit-tap-highlight-color:transparent
+  background:#007AFF;
+  box-shadow:0 6px 20px rgba(0,122,255,.28);transition:all .2s;-webkit-tap-highlight-color:transparent
 }
-.mine-save:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(99,102,241,.36)}
+.mine-save:hover{transform:translateY(-1px);box-shadow:0 8px 26px rgba(0,122,255,.36)}
 .mine-save:active{transform:scale(.985)}
 .mine-update{margin:10px 4px 0}
 #exportBtn,#importBtn,#checkUpdateBtn{cursor:pointer;transition:background .18s}
@@ -685,14 +827,33 @@ input[type="date"]{color-scheme:light dark}
       <!-- 右栏：统计 + 记录列表 -->
       <div class="layout-right">
 
+        <!-- 查询条：按月份 / 年份 / 自定义时间段统计 -->
+        <section class="query-card" id="queryCard">
+          <div class="query-row">
+            <select id="queryMode" class="query-select">
+              <option value="month">按月份</option>
+              <option value="year">按年份</option>
+              <option value="range">自定义时间段</option>
+            </select>
+            <input type="month" id="queryMonth" class="query-input ios-styled" value="">
+            <div class="ios-trigger" id="queryMonthTrigger" data-target="queryMonth"><span class="ios-trig-ph">选择月份</span></div>
+            <select id="queryYear" class="query-input" style="display:none"></select>
+            <input type="date" id="queryStart" class="query-input" style="display:none" placeholder="起始">
+            <span id="queryRangeSep" style="display:none;color:var(--text-light)">至</span>
+            <input type="date" id="queryEnd" class="query-input" style="display:none" placeholder="结束">
+            <button type="button" id="queryBtn" class="query-btn">查询</button>
+          </div>
+          <div class="query-result" id="queryResult"></div>
+        </section>
+
         <!-- 统计卡片 2×2 -->
         <section class="stats-grid" id="statsGrid">
           <div class="stat-card stat-teal">
-            <div class="stat-label">本月加班</div>
+            <div class="stat-label" id="statHoursLabel">本月加班</div>
             <div class="stat-val" id="statHours">0<span class="stat-unit">h</span></div>
           </div>
           <div class="stat-card stat-blue">
-            <div class="stat-label">本月加班费</div>
+            <div class="stat-label" id="statCostLabel">本月加班费</div>
             <div class="stat-val" id="statCost">0.00</div>
           </div>
           <!-- 自定义费用卡片：添加后才显示 -->
@@ -702,7 +863,7 @@ input[type="date"]{color-scheme:light dark}
           </div>
           <!-- 总费用（紫渐变） -->
           <div class="stat-card stat-gradient" id="statTotalWrap">
-            <div class="stat-label">本月总费用</div>
+            <div class="stat-label" id="statTotalLabel">本月总费用</div>
             <div class="stat-val" id="statTotal">0.00</div>
             <div class="stat-sub" id="statTotalSub">加班费 + 额外费用</div>
           </div>
@@ -866,6 +1027,22 @@ input[type="date"]{color-scheme:light dark}
   <div id="toast" class="toast hidden"></div>
   <!-- 左下角版本号 -->
   <div id="verBadgeFixed" class="ver-badge"></div>
+
+  <!-- 自定义月份选择器（年轻精致风） -->
+  <div class="ios-month-overlay" id="iosMonthOverlay">
+    <div class="ios-month-picker mp-modern">
+      <div class="mp-top">
+        <button type="button" class="mp-nav" id="iosMpYearDown" aria-label="上一年">‹</button>
+        <div class="mp-year" id="iosMpYearVal">2026</div>
+        <button type="button" class="mp-nav" id="iosMpYearUp" aria-label="下一年">›</button>
+      </div>
+      <div class="mp-grid" id="iosMpGrid"></div>
+      <div class="mp-actions">
+        <button type="button" class="mp-cancel" id="iosMpCancel">取消</button>
+        <button type="button" class="mp-done" id="iosMpConfirm">完成</button>
+      </div>
+    </div>
+  </div>
 </div>
 <script>
 /* ====== 记加班 v5.1 — 全内联极致兼容版 ====== */
@@ -1043,7 +1220,7 @@ function openModal(dateStr, existingRecord) {
 }
 function closeModal() { var mo = $('modalOverlay'); if (mo) mo.className = 'modal-overlay'; setTimeout(function() { resetForm(); }, 250); }
 function pickDate(dateStr) { var existing = null, i; if (state.records) { for (i = 0; i < state.records.length; i++) { if (state.records[i].date === dateStr) { existing = state.records[i]; break; } } } openModal(dateStr, existing); }
-function shiftMonth(delta) { var m = calState.month + delta, y = calState.year; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; } calState.year = y; calState.month = m; renderCalendar(); }
+function shiftMonth(delta) { var m = calState.month + delta, y = calState.year; if (m < 0) { m = 11; y--; } else if (m > 11) { m = 0; y++; } calState.year = y; calState.month = m; renderCalendar(); clearQueryScope(); renderSummary(); }
 
 function bindCalendarEvents() {
   var prevBtn = $('calPrev'); if (prevBtn) prevBtn.onclick = function() { shiftMonth(-1); };
@@ -1072,13 +1249,28 @@ function bindCalendarEvents() {
   document.onkeydown = function(e) { e = e || window.event; var key = e.key || e.keyCode; if (key === 'Escape' || key === 27) { var ol = $('modalOverlay'); if (ol && ol.className.indexOf('show') !== -1) closeModal(); } };
 }
 
-function renderSummary() {
+// scope: {year, month} 限定统计范围；不传则按当前日历 calState（本月）
+function renderSummary(scope) {
+  var ym, y, m, labelPrefix;
+  if (scope && scope.year) { y = scope.year; m = scope.month; }
+  else { y = calState.year || new Date().getFullYear(); m = (calState.month != null ? calState.month : new Date().getMonth()); }
+  ym = y + '-' + pad2(m + 1);
+  labelPrefix = y + '年' + (m + 1) + '月';
+
   var hours = 0, cost = 0, recurring = 0, grandTotal = 0, i, r, el, h;
-  if (state.records) { for (i = 0; i < state.records.length; i++) { r = state.records[i]; hours += Number(r.hours) || 0; cost += Number(r.subtotal) || 0; } }
-  // 从 /api/state 的 summary 字段获取周期性费用（后端已折算为月）
+  if (state.records) {
+    for (i = 0; i < state.records.length; i++) {
+      r = state.records[i];
+      if (!r || !r.date) continue;
+      if (r.date.slice(0, 7) !== ym) continue; // 仅统计目标月份
+      hours += Number(r.hours) || 0;
+      cost += Number(r.subtotal) || 0;
+    }
+  }
+  // 周期性费用：按月度展示（后端 summary.monthlyRecurring 已是月折算值）
   if (state.summary) {
     recurring = state.summary.monthlyRecurring || 0;
-    grandTotal = state.summary.grandTotal || (cost + recurring);
+    grandTotal = cost + recurring;
   } else {
     grandTotal = cost;
   }
@@ -1109,15 +1301,129 @@ function renderSummary() {
   }
 
   el = $('statTotal'); if (el) el.textContent = money(grandTotal);
+  // 卡片标签：跟随当前统计月份
+  var lblHours = $('statHoursLabel'), lblCost = $('statCostLabel'), lblTotal = $('statTotalLabel');
+  if (lblHours) lblHours.textContent = labelPrefix + '加班';
+  if (lblCost) lblCost.textContent = labelPrefix + '加班费';
+  if (lblTotal) lblTotal.textContent = labelPrefix + '总费用';
   // 总费用明细
   var subEl = $('statTotalSub');
   if (subEl) {
     var parts = ['加班费 ' + money(cost)];
-    if (recurring > 0) parts.push('自定义费用 ' + money(recurring));
+    if (recurring > 0) {
+      var fees2 = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
+      var names = fees2.length ? fees2.map(function(f){ return f.name || '费用'; }).join('+') : '自定义费用';
+      parts.push(names + ' ' + money(recurring));
+    }
     subEl.textContent = parts.join(' + ');
   }
 }
 
+/* ============ 查询功能：按月份 / 年份 / 自定义时间段 ============ */
+// 自定义费用按区间自然月数量折算（季费 ÷3 转月费后再 ×月数）
+function recurringForMonths(months) {
+  var fees = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
+  var total = 0;
+  for (var i = 0; i < fees.length; i++) {
+    var amt = Number(fees[i].amount) || 0;
+    var monthly = (fees[i].cycle === 'quarterly') ? amt / 3 : amt;
+    total += monthly * months;
+  }
+  return total;
+}
+function monthCountBetween(ymStart, ymEnd) {
+  // ymStart/ymEnd 形如 YYYY-MM，返回包含两端的自然月数量
+  var a = +ymStart.slice(0,4) * 12 + (+ymStart.slice(5,7) - 1);
+  var b = +ymEnd.slice(0,4) * 12 + (+ymEnd.slice(5,7) - 1);
+  return Math.max(0, b - a + 1);
+}
+function runQuery() {
+  var mode = $('queryMode') ? $('queryMode').value : 'month';
+  var ymStart, ymEnd, label, months;
+  if (mode === 'month') {
+    var mv = $('queryMonth') ? $('queryMonth').value : '';
+    if (!mv) { toast('请选择月份'); return; }
+    ymStart = ymEnd = mv; label = mv.slice(0,4) + '年' + (+mv.slice(5,7)) + '月'; months = 1;
+  } else if (mode === 'year') {
+    var yv = $('queryYear') ? $('queryYear').value : '';
+    if (!yv) { toast('请选择年份'); return; }
+    ymStart = yv + '-01'; ymEnd = yv + '-12'; label = yv + '年'; months = 12;
+  } else {
+    var s = $('queryStart') ? $('queryStart').value : '';
+    var e = $('queryEnd') ? $('queryEnd').value : '';
+    if (!s || !e) { toast('请选择起止日期'); return; }
+    if (s > e) { toast('起始日期不能晚于结束日期'); return; }
+    ymStart = s.slice(0,7); ymEnd = e.slice(0,7);
+    label = s + ' 至 ' + e;
+    months = monthCountBetween(ymStart, ymEnd);
+  }
+
+  var hours = 0, cost = 0, cnt = 0, i, r;
+  if (state.records) {
+    for (i = 0; i < state.records.length; i++) {
+      r = state.records[i];
+      if (!r || !r.date) continue;
+      if (r.date < ymStart + '-01' || r.date > ymEnd + '-31') continue;
+      hours += Number(r.hours) || 0;
+      cost += Number(r.subtotal) || 0;
+      cnt++;
+    }
+  }
+  var recurring = recurringForMonths(months);
+  var grand = cost + recurring;
+  hours = Math.round(hours * 100) / 100;
+
+  var box = $('queryResult');
+  if (!box) return;
+  var feeNames = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees.map(function(f){ return f.name || '费用'; }) : [];
+  var feeText = feeNames.length ? feeNames.join('+') : '自定义费用';
+  box.innerHTML =
+    '<div class="qr-title">' + escHtml(label) + ' 统计</div>' +
+    '<div class="qr-grid">' +
+      '<div class="qr-item"><span class="qr-k">加班费</span><span class="qr-v">' + money(cost) + '</span></div>' +
+      '<div class="qr-item"><span class="qr-k">加班时长</span><span class="qr-v">' + hours + 'h</span></div>' +
+      '<div class="qr-item"><span class="qr-k">' + escHtml(feeText) + '(' + months + '月)</span><span class="qr-v">' + money(recurring) + '</span></div>' +
+      '<div class="qr-item"><span class="qr-k">合计</span><span class="qr-v accent">' + money(grand) + '</span></div>' +
+    '</div>' +
+    (cnt ? '' : '<div class="qr-tip">该区间暂无加班记录</div>');
+  box.className = 'query-result show';
+}
+function clearQueryScope() {
+  // 切换月份时，若查询处于"按月份"模式则同步到当前日历月
+  var mode = $('queryMode');
+  if (mode && mode.value === 'month') {
+    var mi = $('queryMonth');
+    if (mi) mi.value = calState.year + '-' + pad2(calState.month + 1);
+  }
+  var box = $('queryResult');
+  if (box) { box.className = 'query-result'; box.innerHTML = ''; }
+}
+function bindQueryEvents() {
+  var mode = $('queryMode'), monthI = $('queryMonth'), yearI = $('queryYear'),
+      startI = $('queryStart'), endI = $('queryEnd'), sep = $('queryRangeSep'), btn = $('queryBtn');
+  if (!mode) return;
+  function syncVisibility() {
+    var v = mode.value;
+    if (monthI) monthI.style.display = (v === 'month') ? '' : 'none';
+    if (yearI) yearI.style.display = (v === 'year') ? '' : 'none';
+    if (startI) startI.style.display = (v === 'range') ? '' : 'none';
+    if (endI) endI.style.display = (v === 'range') ? '' : 'none';
+    if (sep) sep.style.display = (v === 'range') ? '' : 'none';
+  }
+  mode.onchange = syncVisibility;
+  if (btn) btn.onclick = runQuery;
+  // 初始化：年份下拉 + 月份默认值
+  if (yearI) {
+    var years = {}, y, i;
+    if (state.records) { for (i = 0; i < state.records.length; i++) { if (state.records[i].date) years[state.records[i].date.slice(0,4)] = 1; } }
+    years[String(new Date().getFullYear())] = 1;
+    var ykeys = Object.keys(years).sort();
+    var cy = String(calState.year || new Date().getFullYear());
+    yearI.innerHTML = ykeys.map(function(k){ return '<option value="' + k + '"' + (k === cy ? ' selected' : '') + '>' + k + '年</option>'; }).join('');
+  }
+  if (monthI) monthI.value = calState.year + '-' + pad2(calState.month + 1);
+  syncVisibility();
+}
 function renderRecurring() {
   var rl = $('recurringList');
   var fees = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
@@ -1233,6 +1539,43 @@ function renderMonthlyRates(rebuild) {
     }
   }
   container.innerHTML = html;
+  /* 为 stage month input 绑定 iOS 触发器（替代原生弹窗） */
+  (function bindStageMonthTriggers() {
+    var fromInputs = container.querySelectorAll('.stage-from');
+    var toInputs = container.querySelectorAll('.stage-to');
+    var i, trig, inp, wrapper;
+    for (i = 0; i < fromInputs.length; i++) {
+      inp = fromInputs[i];
+      if (!inp._iosTrigBound) {
+        trig = document.createElement('span');
+        trig.className = 'ios-trigger stage-month-trig';
+        trig.setAttribute('data-target', inp.id || ('_st_from_'+i));
+        trig.innerHTML = '<span class="ios-trig-ph">' + (inp.value ? formatYmLabel(inp.value) : '起始月') + '</span>';
+        wrapper = inp.parentNode;
+        if (wrapper) wrapper.insertBefore(trig, inp.nextSibling);
+        trig.onclick = function(e){ e.preventDefault(); e.stopPropagation(); var target = document.querySelector('[data-target="'+this.getAttribute('data-target')+'"]'); if(target && window.iosMonthPicker) window.iosMonthPicker.show(target); };
+        inp.style.cssText = 'position:absolute;opacity:0;pointer-events:none;height:0;width:0';
+        inp.id = inp.id || ('_st_from_'+i);
+        inp._iosTrigBound = 1;
+      }
+    }
+    for (i = 0; i < toInputs.length; i++) {
+      inp = toInputs[i];
+      if (!inp._iosTrigBound) {
+        trig = document.createElement('span');
+        trig.className = 'ios-trigger stage-month-trig';
+        trig.setAttribute('data-target', inp.id || ('_st_to_'+i));
+        trig.innerHTML = '<span class="ios-trig-ph">' + (inp.value ? formatYmLabel(inp.value) : '结束月') + '</span>';
+        wrapper = inp.parentNode;
+        if (wrapper) wrapper.insertBefore(trig, inp.nextSibling);
+        trig.onclick = function(e){ e.preventDefault(); e.stopPropagation(); var target = document.querySelector('[data-target="'+this.getAttribute('data-target')+'"]'); if(target && window.iosMonthPicker) window.iosMonthPicker.show(target); };
+        inp.style.cssText = 'position:absolute;opacity:0;pointer-events:none;height:0;width:0';
+        inp.id = inp.id || ('_st_to_'+i);
+        inp._iosTrigBound = 1;
+      }
+    }
+  })();
+  if (!window.formatYmLabel) { window.formatYmLabel = function(v){ if(!v) return ''; var p=v.split('-'); return p[0]+'年'+(+p[1])+'月'; }; }
   if (!container._bound) {
     container.onclick = function(e) {
       var t = e.target;
@@ -1324,6 +1667,7 @@ function loadBackupList() {
 
 function bindEvents() {
   bindCalendarEvents();
+  bindQueryEvents();
   var tt = $('themeToggle');
   if (tt) tt.onclick = function() {
     var cur = document.documentElement.getAttribute('data-theme'), next = (cur==='dark')?'light':'dark';
@@ -1410,6 +1754,122 @@ function bindTabs() {
     };
   }
 }
+
+/* ============ 自定义月份选择器（年轻精致风） ============ */
+(function(){
+  var overlay = $('iosMonthOverlay');
+  if (!overlay) return;
+  var yUp = $('iosMpYearUp'), yDown = $('iosMpYearDown');
+  var yVal = $('iosMpYearVal');
+  var grid = $('iosMpGrid');
+  var cancelBtn = $('iosMpCancel'), confirmBtn = $('iosMpConfirm');
+  var currentTarget = null; // 当前正在编辑的 input 元素
+  var pYear = 2026, pMonth = 8;
+
+  function renderGrid() {
+    if (!grid) return;
+    var html = '';
+    for (var i = 1; i <= 12; i++) {
+      var sel = (i === pMonth) ? ' sel' : '';
+      html += '<div class="mp-cell' + sel + '" data-m="' + i + '">' + i + '月</div>';
+    }
+    grid.innerHTML = html;
+  }
+  function updateYear() { if (yVal) yVal.textContent = pYear; }
+
+  function showPicker(targetInput) {
+    currentTarget = targetInput || null;
+    // 从 input 当前值初始化
+    var v = '';
+    if (targetInput && targetInput.value) v = targetInput.value;
+    else { var now = new Date(); v = now.getFullYear() + '-' + ('0'+(now.getMonth()+1)).slice(-2); }
+    if (v && /^\d{4}-\d{2}$/.test(v)) {
+      pYear = parseInt(v.slice(0,4),10); pMonth = parseInt(v.slice(5,7),10);
+    } else { var n=new Date();pYear=n.getFullYear();pMonth=n.getMonth()+1; }
+    updateYear(); renderGrid();
+    overlay.className = 'ios-month-overlay show';
+  }
+  function hidePicker() { overlay.className = 'ios-month-overlay'; currentTarget = null; }
+  function confirmPick() {
+    if (currentTarget) {
+      var val = pYear + '-' + (pMonth < 10 ? '0' : '') + pMonth;
+      currentTarget.value = val;
+      // 触发 change 事件让监听者知道
+      var evt = document.createEvent('Event');
+      evt.initEvent('change', true, true);
+      currentTarget.dispatchEvent(evt);
+      // 同步触发器显示
+      syncTriggerText(currentTarget);
+    }
+    hidePicker();
+  }
+  function syncTriggerText(input) {
+    if (!input) return;
+    var trig = document.querySelector('[data-target="'+input.id+'"]');
+    if (!trig) return;
+    var ph = trig.querySelector('.ios-trig-ph');
+    var txt = trig.querySelector('.ios-trig-text');
+    if (input.value) {
+      var parts = input.value.split('-');
+      if (ph) ph.style.display='none';
+      if (!txt) { txt=document.createElement('span');txt.className='ios-trig-text';trig.insertBefore(txt,trig.lastChild); }
+      txt.textContent = parts[0]+'年'+parseInt(parts[1],10)+'月';
+      txt.style.display='';
+    } else {
+      if (ph) ph.style.display='';
+      var t=trig.querySelector('.ios-trig-text');if(t)t.style.display='none';
+    }
+  }
+
+  if (yUp) yUp.onclick = function(){ pYear++; if(pYear>2100)pYear=2100; updateYear(); };
+  if (yDown) yDown.onclick = function(){ pYear--; if(pYear<1970)pYear=1970; updateYear(); };
+  if (grid) grid.onclick = function(e){
+    var cell = e.target.closest ? e.target.closest('.mp-cell') : null;
+    if (!cell) return;
+    pMonth = parseInt(cell.getAttribute('data-m'),10);
+    var all = grid.querySelectorAll('.mp-cell');
+    for (var i=0;i<all.length;i++) all[i].className = 'mp-cell';
+    cell.className = 'mp-cell sel';
+  };
+  if (cancelBtn) cancelBtn.onclick = hidePicker;
+  if (confirmBtn) confirmBtn.onclick = confirmPick;
+  // 点击遮罩关闭
+  overlay.addEventListener('click', function(e){ if(e.target===overlay) hidePicker(); });
+
+  // 暴露全局方法
+  window.iosMonthPicker = { show: showPicker, hide: hidePicker, syncTrigger: syncTriggerText };
+
+  /* 将所有原生 month 输入框替换为 iOS 触发器行为 */
+  function initMonthInputs() {
+    // 静态 queryMonth
+    var qm = $('queryMonth');
+    if (qm) {
+      var qTrig = $('queryMonthTrigger');
+      if (qTrig) qTrig.onclick = function(e){ e.preventDefault(); e.stopPropagation(); showPicker(qm); };
+      syncTriggerText(qm);
+      qm.addEventListener('change', function(){ syncTriggerText(qm); });
+    }
+    // 动态 stage-from / stage-to（延迟绑定，因为它们由 JS 渲染）
+    document.body.addEventListener('click', function(e){
+      var t = e.target;
+      // 点击原生 month 输入框或其附近
+      if (t && t.type === 'month') {
+        e.preventDefault(); e.stopPropagation();
+        showPicker(t);
+      }
+      // 也支持点击已有关联的 trigger
+      if (t && t.closest && t.closest('.ios-trigger')) {
+        var trg = t.closest('.ios-trigger');
+        var tid = trg.getAttribute('data-target');
+        var inp = $(tid);
+        if (inp) { e.preventDefault(); e.stopPropagation(); showPicker(inp); }
+      }
+    }, true);
+  }
+  // DOM ready 后初始化
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMonthInputs);
+  else initMonthInputs();
+})();
 
 /* ============ 数据导入 / 导出 / 更新 ============ */
 function bindDataButtons() {
@@ -1551,7 +2011,7 @@ function refresh() {
     return api('GET','/api/summary');
   }).then(function(sum) {
     if (sum) state.summary = sum;
-    syncSettingsInputs(); renderRecurring(); renderSummary(); renderCalendar();
+    syncSettingsInputs(); renderRecurring(); renderCalendar(); renderSummary(); bindQueryEvents();
   }).catch(function(err) {
     toast('\u52A0\u8F7D\u5931\u8D25:' + ((err&&err.message)?err.message:String(err)));
   });

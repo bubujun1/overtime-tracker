@@ -1,5 +1,5 @@
 appname               = overtime-tracker
-version               = 1.1.3
+version               = 1.1.4
 install_dep_apps      = nodejs_v24
 display_name          = "记加班"
 desc                  = "记加班 · 飞牛 NAS 上的加班记录与费用核算工具。<br/><br/><strong>功能特性：</strong><br/>• 日历视图，加班/周末/节假日分色标记，点击日期记录加班<br/>• 自定义每小时加班费，自动核算加班工资<br/>• 自由添加费用组成条目（餐补、交通、夜班补贴等）<br/>• 实时汇总总时长与总费用<br/>• 数据导入/导出备份，支持覆盖安装，卸载保留数据<br/><br/><strong>隐私：</strong>所有数据保存在本机 @apphome 目录，不会上传任何云端；卸载应用不会删除数据。"
