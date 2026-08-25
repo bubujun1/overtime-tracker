@@ -35,7 +35,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: overtime-tracker.fpk
-          name: "记加班 v${{ steps.ver.outputs.version }}"
+          name: "记加班 ${{ steps.ver.outputs.version }}"
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
