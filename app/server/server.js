@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.2.6';
+const APP_VERSION = '1.2.7';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -68,13 +68,114 @@ let db = loadDB();
  * ========================================================================= */
 const CHECKIN_FILE = path.join(DATA_DIR, 'checkin.json');
 
-/* 站点模板（参照 GitHub 自动签到项目的真实接口） */
+/* 站点模板（参照 GitHub 自动签到项目的真实接口）
+ * domains: 用于「识别」时按域名自动匹配；cookieHint: 提示用户需要哪种 Cookie。
+ * {host} 占位符会被用户实际域名替换（Discuz 通用模板）。 */
 const ckTemplates = [
-  { key: 'custom', name: '自定义（手动配置）', emoji: '🌐', type: 'api', method: 'GET', url: '', baseHeaders: {}, success: null, keyword: '', note: '手动填请求地址 / 方法 / 请求头 / 成功关键词。适合任何开放接口的站点。' },
-  { key: 'bilibili-live', name: 'B站直播签到', emoji: '📺', type: 'api', method: 'GET', url: 'https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign', baseHeaders: { 'Referer': 'https://live.bilibili.com/', 'Origin': 'https://live.bilibili.com' }, csrf: { cookieKey: 'bili_jct', queryKeys: ['csrf_token', 'csrf'] }, body: '', success: { type: 'json', path: 'code', equals: [0, 101104] }, note: '需登录 Cookie（含 SESSDATA 和 bili_jct）。把浏览器里的 Cookie 整串粘贴到「登录凭证 Cookie」即可，引擎自动提取 bili_jct 作为 csrf 注入查询参数。成功返回 code=0，今日已签返回 101104。' },
-  { key: 'discuz', name: 'Discuz 论坛签到（通用）', emoji: '🏷️', type: 'formSign', method: 'POST', url: 'https://{host}/forum.php?mod=taskworker&id=1&item=1', getUrl: 'https://{host}/forum.php', baseHeaders: { 'Referer': 'https://{host}/' }, successKeyword: '成功', note: '把 {host} 换成你的论坛域名（如 www.hostloc.com）。需登录 Cookie。先抓页面 formhash 再 POST 完成签到，多数 Discuz 论坛通用。' },
-  { key: 'tieba', name: '百度贴吧签到', emoji: '🔥', type: 'tiebaOneClick', method: 'POST', url: 'https://tieba.baidu.com/sign/add', baseHeaders: { 'Referer': 'https://tieba.baidu.com/' }, note: '一键签到所有关注的吧（复刻贴吧网页版「一键签到」）。需登录 Cookie（含 BDUSS）。把浏览器里的 Cookie 整串粘贴到「登录凭证 Cookie」即可。引擎会先校验登录态，再逐个吧签到，返回每个吧的结果。' }
+  { key: 'custom', name: '自定义（手动配置）', emoji: '🌐', type: 'api', method: 'GET', url: '', baseHeaders: {}, domains: [], success: null, keyword: '', cookieHint: '', note: '手动填请求地址 / 方法 / 请求头 / 成功关键词。' },
+  { key: 'tieba', name: '百度贴吧签到', emoji: '🔥', type: 'tiebaOneClick', method: 'POST', url: 'https://tieba.baidu.com/sign/add', baseHeaders: { 'Referer': 'https://tieba.baidu.com/' }, domains: ['tieba.baidu.com', 'tieba'], cookieHint: '需含 BDUSS 的 Cookie', note: '一键签到所有关注的吧。引擎先校验登录态，再逐个吧签到。' },
+  { key: 'bilibili-live', name: 'B站直播签到', emoji: '📺', type: 'api', method: 'GET', url: 'https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign', baseHeaders: { 'Referer': 'https://live.bilibili.com/', 'Origin': 'https://live.bilibili.com' }, csrf: { cookieKey: 'bili_jct', queryKeys: ['csrf_token', 'csrf'] }, body: '', domains: ['bilibili.com', 'b23.tv', 'live.bilibili'], cookieHint: '需含 SESSDATA 与 bili_jct 的 Cookie', success: { type: 'json', path: 'code', equals: [0, 101104] }, note: '直播区签到，引擎自动提取 bili_jct 注入 csrf。' },
+  { key: 'v2ex', name: 'V2EX 每日签到', emoji: '💬', type: 'api', method: 'GET', url: 'https://www.v2ex.com/mission/daily', baseHeaders: { 'Referer': 'https://www.v2ex.com/' }, domains: ['v2ex.com'], cookieHint: '需登录 Cookie', successKeyword: '已成功', note: '每日登录奖励，GET 即签到。' },
+  { key: 'steam', name: 'Steam 社区', emoji: '🎮', type: 'api', method: 'POST', url: 'https://store.steampowered.com/android/login', baseHeaders: {}, domains: ['steamcommunity.com', 'store.steampowered.com', 'steampowered'], cookieHint: '需登录 Cookie', note: '示例接口，具体以实际为准。' },
+  { key: 'smzdm', name: '什么值得买签到', emoji: '🛒', type: 'api', method: 'POST', url: 'https://zhiyou.smzdm.com/user/checkin', baseHeaders: { 'Referer': 'https://www.smzdm.com/' }, domains: ['smzdm.com'], cookieHint: '需登录 Cookie', successKeyword: '签到成功', note: '什么值得买每日签到。' },
+  { key: 'music163', name: '网易云音乐签到', emoji: '🎵', type: 'api', method: 'POST', url: 'https://music.163.com/weapi/point/dailyTask', baseHeaders: { 'Referer': 'https://music.163.com/' }, domains: ['music.163.com', '163.com'], cookieHint: '需登录 Cookie', note: '每日签到（需加密参数，仅作模板）。' },
+  { key: 'jd', name: '京东签到', emoji: '🛍️', type: 'api', method: 'GET', url: 'https://signin.jd.com/auto/login', baseHeaders: { 'Referer': 'https://www.jd.com/' }, domains: ['jd.com', 'jingdong'], cookieHint: '需登录 Cookie（含 pt_key/pt_pin）', note: '京东每日签到。' },
+  { key: 'iqiyi', name: '爱奇艺签到', emoji: '📺', type: 'api', method: 'GET', url: 'https://tc.vip.iqiyi.com/api/taskService/userCheckin', baseHeaders: { 'Referer': 'https://www.iqiyi.com/' }, domains: ['iqiyi.com'], cookieHint: '需登录 Cookie', note: '爱奇艺会员签到。' },
+  { key: 'baidupan', name: '百度网盘签到', emoji: '☁️', type: 'api', method: 'POST', url: 'https://pan.baidu.com/api/pointshop?type=1', baseHeaders: { 'Referer': 'https://pan.baidu.com/' }, domains: ['pan.baidu.com', 'baidu.com'], cookieHint: '需登录 Cookie（含 BDUSS/STOKEN）', note: '百度网盘积分签到。' },
+  { key: 'pan115', name: '115 网盘签到', emoji: '💾', type: 'api', method: 'POST', url: 'https://115.com/?ct=offline&ac=space', baseHeaders: { 'Referer': 'https://115.com/' }, domains: ['115.com', '115pan'], cookieHint: '需登录 Cookie', note: '115 网盘。' },
+  { key: 'discuz', name: 'Discuz 论坛签到（通用）', emoji: '🏷️', type: 'formSign', method: 'POST', url: 'https://{host}/forum.php?mod=taskworker&id=1&item=1', getUrl: 'https://{host}/forum.php', baseHeaders: { 'Referer': 'https://{host}/' }, domains: ['forum.php'], successKeyword: '成功', cookieHint: '需登录 Cookie', note: '把 {host} 换成你的论坛域名（如 www.hostloc.com）。需登录 Cookie。先抓页面 formhash 再 POST 完成签到，多数 Discuz 论坛通用。' },
 ];
+
+const CK_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36';
+
+/* 把模板转成前端可回填的识别结果（替换 {host}） */
+function ckBuildDetect(t, domain, confidence, extraNote) {
+  const fill = (s) => (typeof s === 'string') ? s.replace(/\{host\}/g, domain) : s;
+  const hdr = {};
+  const bh = t.baseHeaders || {};
+  for (const k in bh) hdr[k] = fill(bh[k]);
+  return {
+    found: true, confidence: confidence || 'high',
+    name: t.name, emoji: t.emoji, type: t.type, method: t.method,
+    url: fill(t.url || ''), getUrl: fill(t.getUrl || ''),
+    headers: JSON.stringify(hdr, null, 2),
+    keyword: t.keyword || t.successKeyword || '',
+    cookieHint: t.cookieHint || '',
+    note: (t.note || '') + (extraNote ? ('\n' + extraNote) : '')
+  };
+}
+
+/* 抓取首页 HTML（带超时），用于未知站点探测 */
+async function ckFetchHome(url) {
+  const ctrl = new AbortController();
+  const tm = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const r = await fetch(url, { headers: { 'User-Agent': CK_UA, 'Accept': 'text/html,application/xhtml+xml' }, signal: ctrl.signal, redirect: 'follow' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const buf = await r.arrayBuffer();
+    clearTimeout(tm);
+    return Buffer.from(buf).toString('utf8');
+  } catch (e) { clearTimeout(tm); throw e; }
+}
+
+/* 核心：根据用户输入的网址，自动找到对应签到接口
+ * 双轨：① 已知站点库精确匹配（即时）② 未知站点抓首页启发式探测（Discuz / 签到链接 / 兜底） */
+async function ckDetectSite(rawInput) {
+  const input = (rawInput || '').trim();
+  if (!input) return { found: false, reason: 'empty' };
+  let url = input;
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url.replace(/^\/+/, '');
+  const base = url.split('?')[0];
+  let domain = base.toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^www\./, '').replace(/:\d+$/, '');
+  if (!domain) return { found: false, reason: 'no-domain' };
+  // ① 已知库匹配
+  for (const t of ckTemplates) {
+    if (!t.domains || !t.domains.length) continue;
+    for (const d of t.domains) {
+      const safe = d.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      if (domain.includes(d) || new RegExp(safe, 'i').test(input) || new RegExp(safe, 'i').test(domain)) {
+        return ckBuildDetect(t, domain, 'high');
+      }
+    }
+  }
+  // ② 抓首页启发式探测
+  try {
+    const html = await ckFetchHome(base);
+    if (/Discuz!|forum\.php|mod=taskworker/i.test(html)) {
+      const dt = ckTemplates.find((x) => x.key === 'discuz');
+      const r = ckBuildDetect(dt, domain, 'medium');
+      r.note = (r.note || '') + '\n已检测到 Discuz 论坛，已按通用模板填充（{host} 已替换为你的域名）。';
+      return r;
+    }
+    // 扫描首页里疑似签到的链接
+    const cands = [];
+    const re = /href=["']([^"']*(?:sign|qiandao|checkin|taskworker|task|daily|plugin\.php\?id=)[^"']*)["']/gi;
+    let m;
+    while ((m = re.exec(html)) && cands.length < 8) {
+      let u = m[1];
+      if (u.startsWith('//')) u = 'https:' + u;
+      else if (u.startsWith('/')) u = 'https://' + domain + u;
+      if (/^https?:/i.test(u)) cands.push(u);
+    }
+    if (cands.length) {
+      return {
+        found: true, confidence: 'low', name: domain, emoji: '🌐', type: 'api', method: 'GET',
+        url: cands[0], headers: JSON.stringify({ 'Referer': base }, null, 2), keyword: '',
+        cookieHint: '需登录 Cookie',
+        note: '未在已知库匹配，已从首页探测到可能的签到入口（已取第一个），请核对接口是否正确后再保存。'
+      };
+    }
+    // 兜底：用首页地址占位
+    return {
+      found: true, confidence: 'low', name: domain, emoji: '🌐', type: 'api', method: 'GET',
+      url: base, headers: JSON.stringify({ 'Referer': base }, null, 2), keyword: '',
+      cookieHint: '需登录 Cookie',
+      note: '未识别到具体签到接口，已用首页地址占位，请在「高级」里补充正确的签到接口地址。'
+    };
+  } catch (e) {
+    return { found: false, reason: 'fetch-failed', message: String(e && e.message || e) };
+  }
+}
 
 function ckDefaultState() {
   return {
@@ -673,11 +774,50 @@ async function handleApi(req, res, apiPath, method) {
     }
   }
 
-  // 下载已缓存的 fpk 到浏览器（绕过飞牛文件选择器无法访问管理员目录的限制，作为自动安装失败时的兜底）
+  // 下载安装包到浏览器（绕过飞牛文件选择器无法访问管理员目录的限制，作为手动安装的安全通道）
+  // 关键修复：WebView 内直连 GitHub 会被 CORS 拦截、<a download> 跨域失效 → 改为「后端同域中转」：
+  // 本地无缓存时由 NAS 服务端代下载 GitHub 安装包（NAS 可达 github.com），再同源流式推回浏览器，彻底绕开跨域问题。
   if (head === 'update-download' && method === 'GET') {
     try {
-      const ver = parts[1] || null; // 形如 /api/update-download/1.1.2
-      let fpkPath = ver ? path.join(VAR_DIR, 'updates', 'overtime-tracker-' + ver + '.fpk') : null;
+      const ver = parts[1] || null; // 形如 /api/update-download/1.2.6
+      const updateDir = path.join(VAR_DIR, 'updates');
+      fs.mkdirSync(updateDir, { recursive: true });
+      let fpkPath = ver ? path.join(updateDir, 'overtime-tracker-' + ver + '.fpk') : null;
+      // 本地无缓存 → 服务端代下载（绕开 WebView 跨域）
+      if (!fpkPath || !fs.existsSync(fpkPath)) {
+        try {
+          const info = await checkUpdate();
+          if (info.ok && info.downloadUrl) {
+            const latestVer = String(info.latest || '').replace(/^v/i, '');
+            const targetVer = ver || latestVer;
+            // 若请求版本与最新版本不同，把 downloadUrl 中的文件名替换成目标版本
+            let dlUrl = info.downloadUrl;
+            if (ver && ver !== latestVer) {
+              dlUrl = info.downloadUrl.replace(/overtime-tracker-[^/\\]+\.fpk$/i, 'overtime-tracker-' + ver + '.fpk');
+            }
+            const savePath = path.join(updateDir, 'overtime-tracker-' + targetVer + '.fpk');
+            const candidates = mirrorCandidates(dlUrl);
+            console.log('[update-download] server-side fetch candidates:', candidates);
+            let buf = null, lastErr = null;
+            for (const c of candidates) {
+              try {
+                const dlCtrl = new AbortController();
+                const dlTimer = setTimeout(() => dlCtrl.abort(), 120000);
+                const dlRes = await fetch(c, { signal: dlCtrl.signal, headers: { 'User-Agent': 'overtime-tracker-updater' } });
+                clearTimeout(dlTimer);
+                if (!dlRes.ok || !dlRes.body) { lastErr = 'HTTP ' + dlRes.status; continue; }
+                buf = Buffer.from(await dlRes.arrayBuffer());
+                break;
+              } catch (e) { lastErr = e.message; }
+            }
+            if (buf) { fs.writeFileSync(savePath, buf); fpkPath = savePath; console.log('[update-download] server-side downloaded', buf.length, 'bytes ->', savePath); }
+            else console.error('[update-download] server-side fetch failed:', lastErr);
+          }
+        } catch (e) {
+          console.error('[update-download] server-side fetch exception:', e.message);
+        }
+      }
+      // 仍无文件 → 回退到目录下最新缓存
       if (!fpkPath || !fs.existsSync(fpkPath)) {
         const dir = path.join(VAR_DIR, 'updates');
         if (fs.existsSync(dir)) {
@@ -686,7 +826,7 @@ async function handleApi(req, res, apiPath, method) {
         }
       }
       if (!fpkPath || !fs.existsSync(fpkPath)) {
-        return sendJSON(res, 404, { ok: false, error: '未找到已下载的安装包，请先点「立即更新覆盖」下载' });
+        return sendJSON(res, 404, { ok: false, error: '未找到安装包，请尝试在电脑端或 GitHub 发布页手动下载' });
       }
       const stat = fs.statSync(fpkPath);
       res.setHeader('Content-Type', 'application/octet-stream');
@@ -1040,6 +1180,11 @@ async function handleApi(req, res, apiPath, method) {
       let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
       const r2 = await ckRun({ id: b.id || 'test', name: b.name || '测试', cookie: b.cookie || '', req: b.req || {} });
       return sendJSON(res, 200, r2);
+    }
+    if (sp === 'detect' && method === 'POST') {
+      let b; try { b = JSON.parse((await readBody(req)) || '{}'); } catch { return sendJSON(res, 400, { error: 'invalid json' }); }
+      const r = await ckDetectSite(b.url || '');
+      return sendJSON(res, 200, r);
     }
     if (method === 'POST' && sp && !['state', 'export', 'all', 'daily', 'load-demo', 'clear', 'site', 'settings', 'import', 'test'].includes(sp)) {
       const r = await ckCheckinSite(sp);
