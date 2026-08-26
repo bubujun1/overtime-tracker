@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.2.5';
+const APP_VERSION = '1.2.6';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');

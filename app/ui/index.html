@@ -103,26 +103,36 @@ body{
 .hdr-btn:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
 .hdr-btn:active{transform:scale(.90)}
 
-/* 窄屏：header 内的 tab 三模块入口（与头部融为一体）；PC 端隐藏 */
+/* 窄屏：header 内的 tab 三模块入口 — 参考微信/钉钉顶部分段控制风格 */
 .tab-bar-header{
   display:flex!important;
-  padding:6px var(--page-pad) 10px;margin:0;
-  /* 无独立背景，直接用头部渐变 */
+  padding:4px var(--page-pad) 8px;margin:0;
+  /* 无独立背景，融入头部渐变 */
 }
 .tab-bar-header .tab-item{
-  color:rgba(255,255,255,.72);background:transparent;border-radius:10px;
-  flex:1;justify-content:center;padding:8px 4px;font-size:14px;font-weight:500;
-  transition:all .2s ease;gap:5px
+  color:rgba(255,255,255,.55)!important;
+  background:transparent!important;
+  border:none!important;border-radius:0!important;
+  flex:1;justify-content:center;
+  padding:10px 6px 8px;font-size:14px;font-weight:500;
+  transition:all .2s ease;gap:5px;
+  position:relative;-webkit-tap-highlight-color:transparent
 }
-.tab-bar-header .tab-item:hover{background:rgba(255,255,255,.12);color:#fff}
+/* 激活态：纯白粗字 + 底部指示线（无背景填充） */
 .tab-bar-header .tab-item.active{
-  background:rgba(255,255,255,.22);color:#fff;
-  box-shadow:none;font-weight:600;
-  border-bottom:2.5px solid rgba(255,255,255,.75);
-  border-radius:10px 10px 0 0
+  color:#fff!important;font-weight:700!important;
+  background:transparent!important;box-shadow:none!important;
+  border-bottom:none!important;border-radius:0!important
 }
+.tab-bar-header .tab-item.active::after{
+  content:'';position:absolute;left:22%;right:22%;bottom:2px;
+  height:3px;border-radius:2px;background:#fff
+}
+.tab-bar-header .tab-item:hover{color:rgba(255,255,255,.82)!important}
+.tab-bar-header .tab-item svg{opacity:.7;transition:opacity .2s}
+.tab-bar-header .tab-item.active svg{opacity:1}
 @media (min-width:720px){
-  .tab-bar-header{display:none!important}  /* PC 端隐藏 header 内的 tab，用 main 内左侧 tab */
+  .tab-bar-header{display:none!important}  /* PC 端隐藏 */
 }
 
 /* ---- 主内容区 ---- */
@@ -134,7 +144,9 @@ body{
   display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start;padding-top:16px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0;padding-top:48px}
+.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
+/* 右栏统计区与左栏日历顶部对齐（抵消左侧标题行高度） */
+.layout-right .stats-grid{margin-top:155px}
 @media(max-width:719px){
   .layout-desktop{display:block}
   .layout-right{margin-top:var(--card-gap)}
@@ -473,6 +485,18 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .collapsible-btn{width:30px;height:30px;border:none;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:14px;line-height:1;color:var(--text-light);cursor:pointer;transition:background .18s,transform .18s}
 .collapsible-btn:hover{background:var(--border-light)}
 .collapsible-btn:active{transform:scale(.92)}
+/* 签到页「新增」按钮 — 主题色渐变胶囊 */
+.ck-add-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:7px 16px;border:none;border-radius:999px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-hover));
+  color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+  transition:all .2s ease;box-shadow:0 2px 10px rgba(99,102,241,.25);
+  white-space:nowrap;line-height:1.4
+}
+.ck-add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,.35)}
+.ck-add-btn:active{transform:scale(.96)}
+.ck-add-btn svg{flex-shrink:0}
 .stage-row{display:flex;align-items:center;gap:10px;padding:8px 4px;flex-wrap:wrap}
 .stage-row+.stage-row{border-top:1px solid var(--border-light)}
 .stage-months{display:flex;align-items:center;gap:6px;flex:1 1 200px;min-width:180px}
@@ -552,10 +576,11 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     background:rgba(255,255,255,.08);color:#fff;
     box-shadow:none
   }
-  /* header 内 tab 保持融入渐变的风格，不受上面白底影响 */
-  .tab-bar-header .tab-item{ color:rgba(255,255,255,.72);background:transparent;border-radius:10px;padding:8px 4px;font-size:14px;font-weight:500;gap:5px }
-  .tab-bar-header .tab-item.active{ background:rgba(255,255,255,.22);color:#fff;box-shadow:none;font-weight:600;border-bottom:2.5px solid rgba(255,255,255,.75);border-radius:10px 10px 0 0 }
-  .tab-bar-header .tab-item:hover{ background:rgba(255,255,255,.12);color:#fff }
+  /* header 内 tab — 纯文字+底指示线，无背景块 */
+  .tab-bar-header .tab-item{ color:rgba(255,255,255,.55)!important;background:transparent!important;border:none!important;border-radius:0!important;padding:10px 6px 8px;font-size:14px;font-weight:500;gap:5px;position:relative }
+  .tab-bar-header .tab-item.active{ color:#fff!important;font-weight:700!important;background:transparent!important;box-shadow:none!important;border:none!important;border-radius:0!important }
+  .tab-bar-header .tab-item.active::after{ content:'';position:absolute;left:22%;right:22%;bottom:2px;height:3px;border-radius:2px;background:#fff }
+  .tab-bar-header .tab-item:hover{ color:rgba(255,255,255,.82)!important;background:transparent!important }
 }
 .tab-item svg{width:18px;height:18px;flex-shrink:0}
 .tab-item:active{transform:scale(.97)}
@@ -603,8 +628,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .row-divider{height:1px;background:var(--border-light);margin-left:60px}
 .mine-fees{padding:4px 0}
 .mine-fees .item-row{
-  grid-template-columns:1fr 76px 68px 32px;gap:8px;
-  padding:10px 16px;border-bottom:1px solid var(--border-light);align-items:center
+  grid-template-columns:1fr 72px 64px 100px 30px;gap:7px;
+  padding:10px 14px;border-bottom:1px solid var(--border-light);align-items:center
 }
 .mine-fees .item-row:last-child{border-bottom:none}
 .mine-fees .item-row input{
@@ -613,6 +638,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 }
 .mine-fees .item-row input:focus{border-color:var(--accent)}
 .mine-fees .item-row .cycle-select{padding:7px 6px;font-size:13px}
+.mine-fees .item-row input[type="month"]{padding:7px 6px;font-size:12.5px;color:var(--text-sec)}
+.mine-fees .item-row input[type="month"]::webkit-calendar-picker-indicator{cursor:pointer;opacity:.55}
 .mine-fees .item-row .del{
   width:30px;height:30px;border-radius:8px;border:1.5px solid var(--border);
   background:var(--bg);color:var(--danger);cursor:pointer;font-size:16px;
@@ -1050,7 +1077,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         </div>
 
         <!-- 自定义费用 -->
-          <div class="group" style="margin-top:18px">
+          <div class="group">
             <div class="group-title">自定义费用</div>
             <div class="group-card mine-fees" id="recurringList"></div>
             <button type="button" id="addRecurring" class="add-row">+ 添加自定义费用</button>
@@ -1091,7 +1118,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               <h3>我的签到任务</h3>
               <span class="list-count" id="ckSiteCount">0 个</span>
             </div>
-            <button type="button" class="collapsible-btn" id="ckAddBtn" title="新增">新增</button>
+            <button type="button" class="ck-add-btn" id="ckAddBtn" title="新增签到任务">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>新增</span>
+            </button>
           </div>
           <div class="group-card" id="ckSiteList"></div>
           <div id="ckEmpty" class="ck-empty">还没有签到任务，点上方「新增」添加</div>
@@ -1746,14 +1776,12 @@ function runQuery() {
       totalHours += h; totalCost += c; totalCnt++;
     }
   }
-  var recurring = recurringForMonths(months);
-  var grand = totalCost + recurring;
+  var recurring = 0; // 查询只统计加班费，不含自定义费用
+  var grand = totalCost; // 合计 = 加班费（不含自定义费用）
   totalHours = Math.round(totalHours * 100) / 100;
 
   var box = $('queryResult');
   if (!box) return;
-  var feeNames = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees.map(function(f){ return f.name || '费用'; }) : [];
-  var feeText = feeNames.length ? feeNames.join('+') : '自定义费用';
 
   // ---- 构建逐月明细（按年或自定义时展示） ----
   var monthRowsHtml = '';
@@ -1778,7 +1806,6 @@ function runQuery() {
     '<div class="qr-grid">' +
       '<div class="qr-item"><span class="qr-k">加班费</span><span class="qr-v">¥' + money(totalCost) + '</span></div>' +
       '<div class="qr-item"><span class="qr-k">加班时长</span><span class="qr-v">' + totalHours + 'h</span></div>' +
-      '<div class="qr-item"><span class="qr-k">' + escHtml(feeText) + '</span><span class="qr-v">¥' + money(recurring) + '</span></div>' +
       '<div class="qr-item"><span class="qr-k">合计</span><span class="qr-v accent">¥' + money(grand) + '</span></div>' +
     '</div>' +
     (totalCnt ? '' : '<div class="qr-tip">该区间暂无加班记录</div>');
@@ -1869,7 +1896,7 @@ function renderRecurring() {
   var fees = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
   var html = '', i, f;
   if (!rl) return;
-  for (i = 0; i < fees.length; i++) { f = fees[i]; html += '<div class="item-row"><input type="text" data-rn="' + i + '" value="' + escHtml(f.name) + '" placeholder="\u8D39\u7528\u540D\u79F0"><input type="number" data-ra="' + i + '" value="' + f.amount + '" min="0" step="0.5" placeholder="\u91D1\u989D"><select data-rc="' + i + '" class="cycle-select"><option value="monthly"' + (f.cycle==='monthly'?' selected':'') + '>\u6BCF\u6708</option><option value="quarterly"' + (f.cycle==='quarterly'?' selected':'') + '>\u6BCF\u5B63\u5EA6</option></select><button type="button" class="del" data-rd="' + i + '">\u00D7</button></div>'; }
+  for (i = 0; i < fees.length; i++) { f = fees[i]; html += '<div class="item-row"><input type="text" data-rn="' + i + '" value="' + escHtml(f.name) + '" placeholder="\u8D39\u7528\u540D\u79F0"><input type="number" data-ra="' + i + '" value="' + f.amount + '" min="0" step="0.5" placeholder="\u91D1\u989D"><select data-rc="' + i + '" class="cycle-select"><option value="monthly"' + (f.cycle==='monthly'?' selected':'') + '>\u6BCF\u6708</option><option value="quarterly"' + (f.cycle==='quarterly'?' selected':'') + '>\u6BCF\u5B63\u5EA6</option></select><input type="month" data-rfrom="' + i + '" value="' + (f.from||escHtml('')) + '" placeholder="\u8D77\u6548\u65F6\u95F4" title="\u8D77\u6548\u65F6\u95F4\uFF0C\u4ECE\u8BE5\u6708\u5F00\u59CB\u8BA1\u7B97"><button type="button" class="del" data-rd="' + i + '">\u00D7</button></div>'; }
   rl.innerHTML = html;
 }
 
@@ -2126,7 +2153,7 @@ function bindEvents() {
     while (t3 && t3 !== rlist) { if (t3.tagName === 'BUTTON' && t3.getAttribute && t3.getAttribute('data-rd')) { btn2 = t3; break; } t3 = t3.parentNode; }
     if (!btn2) return;
     var rd = btn2.getAttribute('data-rd');
-    if (rd !== null && state.settings && state.settings.recurringFees) { state.settings.recurringFees.splice(+rd, 1); renderRecurring(); }
+    if (rd !== null && state.settings && state.settings.recurringFees) { state.settings.recurringFees.splice(+rd, 1); renderRecurring(); autoSaveRecurring(); }
   };
   var rf = $('recordForm');
   if (rf) rf.onsubmit = function(e) {
@@ -2154,8 +2181,8 @@ function bindEvents() {
   };
   // — 自定义费用：每次增删改后自动保存（由 addRecurring / item-row delete 触发）
   var autoSaveRecurring = function() {
-    var fees=[], rRows = $('recurringList')?$('recurringList').querySelectorAll('.item-row'):[], rr, rn, ra, rc, fname, fam, fcycle, i;
-    for (i = 0; i < rRows.length; i++) { rr = rRows[i]; rn = rr.querySelector('input[data-rn]'); ra = rr.querySelector('input[data-ra]'); rc = rr.querySelector('select[data-rc]'); fname = rn?rn.value.trim():''; fam = ra?parseFloat(ra.value)||0:0; fcycle = rc?rc.value:'monthly'; if (fname) fees.push({name:fname,amount:Math.round(fam*100)/100,cycle:fcycle}); }
+    var fees=[], rRows = $('recurringList')?$('recurringList').querySelectorAll('.item-row'):[], rr, rn, ra, rc, rf, fname, fam, fcycle, ffrom, i;
+    for (i = 0; i < rRows.length; i++) { rr = rRows[i]; rn = rr.querySelector('input[data-rn]'); ra = rr.querySelector('input[data-ra]'); rc = rr.querySelector('select[data-rc]'); rf = rr.querySelector('input[data-rfrom]'); fname = rn?rn.value.trim():''; fam = ra?parseFloat(ra.value)||0:0; fcycle = rc?rc.value:'monthly'; ffrom = rf?rf.value.trim():''; if (fname) fees.push({name:fname,amount:Math.round(fam*100)/100,cycle:fcycle,from:ffrom||undefined}); }
     if (!state.settings) state.settings = {};
     state.settings.recurringFees = fees;
     renderSummary();
@@ -2396,7 +2423,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.5';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.6';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
