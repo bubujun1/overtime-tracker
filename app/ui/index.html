@@ -126,7 +126,7 @@ body{
   display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start;padding-top:16px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
+.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0;padding-top:48px}
 @media(max-width:719px){
   .layout-desktop{display:block}
   .layout-right{margin-top:var(--card-gap)}
@@ -695,18 +695,20 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   :root{--page-pad:22px}  /* 中宽 PC 增加两侧留白，统计卡不顶格 */
 }
 @media(min-width:1180px){
-  :root{--page-pad:24px;--card-gap:18px}
+  :root{--page-pad:20px;--card-gap:18px}
+  .app-body{max-width:1360px}
   .app-header{padding:32px var(--page-pad) 22px}
   .cal-cell{min-height:66px}
   .cal-num{font-size:15px}
   .cal-ot-badge{font-size:10px;padding:2px 7px}
   .stat-val{font-size:27px}
-  .layout-desktop{grid-template-columns:1fr 320px;gap:20px}
+  .layout-desktop{grid-template-columns:1fr 330px;gap:24px}
   .tab-bar{width:192px}
 }
 @media(min-width:1440px){
-  :root{--page-pad:28px;--card-gap:20px}
-  .layout-desktop{grid-template-columns:1fr 340px;gap:22px}
+  :root{--page-pad:24px;--card-gap:20px}
+  .app-body{max-width:1500px}
+  .layout-desktop{grid-template-columns:1fr 360px;gap:28px}
   .cal-cell{min-height:72px}
   .stat-val{font-size:29px}
   .tab-bar{width:204px}
@@ -744,6 +746,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-site-sub{font-size:12px;color:var(--text-light);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ck-detail-list{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:11.5px;line-height:1.6;color:var(--text-sec)}
 .ck-detail-list span{white-space:nowrap}
+.ck-detail-btn{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(0,122,255,.08);color:var(--accent);cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:2px}
+.ck-detail-btn:hover{background:rgba(0,122,255,.16)}
 .ck-toast-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;line-height:1.7;max-height:200px;overflow:auto;text-align:left;word-break:break-all}
 .ck-site-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .ck-badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
@@ -759,6 +763,11 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-del-btn:hover{border-color:var(--danger);background:rgba(239,68,68,.06)}
 .ck-del-btn:active{transform:scale(.92)}
 .ck-del-btn svg{width:17px;height:17px}
+.ck-toggle-btn{width:40px;height:24px;border-radius:12px;border:none;background:var(--border);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0;padding:0}
+.ck-toggle-btn.on{background:var(--accent)}
+.ck-toggle-btn.off{background:var(--border)}
+.ck-toggle-slider{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
+.ck-toggle-btn.on .ck-toggle-slider{transform:translateX(16px)}
 
 .ck-sched{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
 .ck-chip{font-size:12px;padding:5px 12px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text-sec);cursor:pointer;transition:all .15s;user-select:none}
@@ -767,6 +776,11 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-chip-del{background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.3);color:var(--danger)}
 
 .ck-modal-dialog{max-width:560px;width:calc(100% - 32px);max-height:86vh;display:flex;flex-direction:column}
+.ck-detail-dialog{max-width:480px;width:calc(100% - 32px);max-height:70vh;display:flex;flex-direction:column}
+.ck-detail-body{padding:16px 20px 20px;overflow-y:auto;flex:1}
+.ck-detail-card{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13px;line-height:1.6;color:var(--text);display:flex;align-items:center;gap:8px}
+.ck-detail-card .ck-d-ok{color:var(--success);font-weight:600}
+.ck-detail-card .ck-d-fail{color:var(--danger);font-weight:600}
 .ck-modal-body{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 18px;display:flex;flex-direction:column;gap:14px}
 .ck-f-row{display:flex;flex-direction:column;gap:6px}
 .ck-f-row label{font-size:13px;font-weight:600;color:var(--text-sec)}
@@ -1055,7 +1069,6 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             <button type="button" class="ck-quick-item" data-add="tieba">🔥 百度贴吧<span class="ck-qdel" data-hide="tieba" title="隐藏此推荐">×</span></button>
             <button type="button" class="ck-quick-item" data-add="bilibili-live">📺 B站直播<span class="ck-qdel" data-hide="bilibili-live" title="隐藏此推荐">×</span></button>
             <button type="button" class="ck-quick-item" data-add="discuz">🏷️ Discuz论坛<span class="ck-qdel" data-hide="discuz" title="隐藏此推荐">×</span></button>
-            <button type="button" class="ck-quick-item" data-add="custom">🌐 自定义</button>
           </div>
         </div>
 
@@ -1066,7 +1079,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               <h3>我的签到任务</h3>
               <span class="list-count" id="ckSiteCount">0 个</span>
             </div>
-            <button type="button" class="collapsible-btn" id="ckAddBtn" title="新增">＋</button>
+            <button type="button" class="collapsible-btn" id="ckAddBtn" title="新增">新增</button>
           </div>
           <div class="group-card" id="ckSiteList"></div>
           <div id="ckEmpty" class="ck-empty">还没有签到任务，点上方「＋」或选常用站点添加</div>
@@ -1153,9 +1166,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             </div>
             <div class="ck-f-row">
               <label for="ckFUrl">请求地址 URL <span class="ck-hint">输入网址后点「识别」自动填充</span></label>
-              <div style="display:flex;gap:6px;align-items:center">
-                <input type="text" id="ckFUrl" placeholder="如 tieba.baidu.com 或完整 API 地址" style="flex:1">
-                <button type="button" id="ckAutoDetectBtn" class="mine-save" style="flex-shrink:0;padding:8px 14px;font-size:13px;white-space:nowrap">🔍 识别</button>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="ckFUrl" placeholder="如 tieba.baidu.com 或完整 API 地址" style="flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;outline:none;transition:border-color .16s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+                <button type="button" id="ckAutoDetectBtn" style="flex-shrink:0;padding:8px 12px;font-size:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text-sec);cursor:pointer;white-space:nowrap;transition:all .16s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sec)'">🔍 识别</button>
               </div>
               <span class="ck-hint" id="ckDetectHint" style="color:var(--success);display:none"></span>
             </div>
@@ -1188,6 +1201,17 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             <button type="button" class="ghost-btn" id="ckModalCancel">取消</button>
             <button type="button" class="mine-save" id="ckModalSave">保存</button>
           </div>
+        </div>
+      </div>
+
+      <!-- 签到详情弹窗 -->
+      <div class="modal-overlay" id="ckDetailModal">
+        <div class="modal-dialog ck-detail-dialog" role="dialog" aria-modal="true">
+          <div class="modal-header">
+            <h3 id="ckDetailTitle">签到详情</h3>
+            <button type="button" class="modal-close" id="ckDetailClose" aria-label="close">&times;</button>
+          </div>
+          <div class="ck-detail-body" id="ckDetailBody"></div>
         </div>
       </div>
     </section>
@@ -2360,7 +2384,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.3';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.4';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
@@ -2449,6 +2473,8 @@ function checkForUpdate() {
       Array.prototype.forEach.call(list.querySelectorAll('.ck-site-main'), function(el){ el.onclick=function(){ ckOpenEditor(el.getAttribute('data-id')); }; });
       Array.prototype.forEach.call(list.querySelectorAll('.ck-run-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckRunOne(el.getAttribute('data-id'), el); }; });
       Array.prototype.forEach.call(list.querySelectorAll('.ck-del-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckDeleteSite(el.getAttribute('data-id')); }; });
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-detail-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckShowDetail(el.getAttribute('data-id')); }; });
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-toggle-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckToggleEnabled(el.getAttribute('data-id'), el); }; });
     }
     var st = ckState.settings || {};
     var at=$('ckAutoTime'); if(at) at.value=st.autoDaily||'09:00';
@@ -2464,20 +2490,20 @@ function checkForUpdate() {
     if(s.schedule) sub.push('⏰ '+(Array.isArray(s.schedule)?s.schedule.join(' / '):s.schedule));
     if(s.group) sub.push(s.group);
     if(s.lastResult){ if(s.lastResult.reason) sub.push(s.lastResult.reason); else if(s.lastResult.ok) sub.push('上次成功 · HTTP '+(s.lastResult.status||'')); }
-    var detailHtml='';
+    var detailBtn='';
     if(s.lastResult && s.lastResult.details && s.lastResult.details.length){
-      detailHtml='<div class="ck-detail-list">'+s.lastResult.details.map(function(d){ return '<span>'+escapeHtml(d)+'</span>'; }).join('')+'</div>';
+      detailBtn=' <span class="ck-detail-btn" data-id="'+escapeHtml(s.id)+'" title="点击查看签到详情">📋 详情 '+s.lastResult.details.length+'条</span>';
     }
     var subText=sub.join('　'); if(subText.length>64) subText=subText.slice(0,64)+'…';
     var enabled = s.enabled!==false;
     return '<div class="ck-site" style="'+(enabled?'':'opacity:.55')+'">'
       + '<div class="ck-site-emoji">'+escapeHtml(s.emoji||'🌐')+'</div>'
       + '<div class="ck-site-main" data-id="'+escapeHtml(s.id)+'">'
-      +   '<div class="ck-site-name">'+escapeHtml(s.name)+(enabled?'':' <span class="ck-badge wait">已停用</span>')+' <span class="ck-badge '+status.cls+'">'+status.text+'</span></div>'
+      +   '<div class="ck-site-name">'+escapeHtml(s.name)+(enabled?'':' <span class="ck-badge wait">已停用</span>')+' <span class="ck-badge '+status.cls+'">'+status.text+'</span>'+detailBtn+'</div>'
       +   '<div class="ck-site-sub">'+escapeHtml(subText)+'</div>'
-      +   detailHtml
       + '</div>'
       + '<div class="ck-site-act">'
+      +   '<button class="ck-toggle-btn '+(enabled?'on':'off')+'" data-id="'+escapeHtml(s.id)+'" title="'+(enabled?'点击停用':'点击启用')+'"><span class="ck-toggle-slider"></span></button>'
       +   '<button class="ck-run-btn" data-id="'+escapeHtml(s.id)+'" title="立即签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></button>'
       +   '<button class="ck-del-btn" data-id="'+escapeHtml(s.id)+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'
       + '</div></div>';
@@ -2606,6 +2632,46 @@ function checkForUpdate() {
   }
   function ckCloseEditor(){ var m=$('ckModal'); if(m) m.className='modal-overlay'; ckEditId=null; ckEditReq=null; }
 
+  /* 签到详情弹窗：点击「📋 详情 N条」触发 */
+  function ckShowDetail(id){
+    var site=ckFind(id); if(!site||!site.lastResult||!site.lastResult.details||!site.lastResult.details.length){ toast('暂无详情'); return; }
+    var title=$('ckDetailTitle'); var body=$('ckDetailBody');
+    if(title) title.textContent=escapeHtml(site.name)+' — 签到详情';
+    if(body){
+      var html='<div style="font-size:12px;color:var(--text-light);margin-bottom:12px">'
+        +'⏱ '+escapeHtml(site.lastResult.time||'')+' | 总计 '+site.lastResult.details.length+' 条'
+        +(site.lastResult.ok!==undefined ? (site.lastResult.ok ? ' | <span class="ck-d-ok">✅ 成功</span>' : ' | <span class="ck-d-fail">❌ 失败</span>') : '')
+        +'</div>';
+      site.lastResult.details.forEach(function(d, i){
+        html+='<div class="ck-detail-card"><span style="color:var(--text-sec);min-width:20px">'+(i+1)+'.</span> '+escapeHtml(d)+'</div>';
+      });
+      body.innerHTML=html;
+    }
+    var dm=$('ckDetailModal'); if(dm){ try{ document.body.appendChild(dm); }catch(e){} dm.className='modal-overlay show'; }
+  }
+  function ckCloseDetail(){ var m=$('ckDetailModal'); if(m) m.className='modal-overlay'; }
+
+  /* 站点启用/停用切换（卡片上直接操作） */
+  function ckToggleEnabled(id, btn){
+    var site=ckFind(id); if(!site) return;
+    var newState = site.enabled===false; // toggle
+    site.enabled = newState;
+    ckApi('POST','/'+id,{enabled:newState, cookie:site.cookie, req:site.req||{}, name:site.name, emoji:site.emoji, group:site.group||'', schedule:site.schedule||[]})
+    .then(function(r){
+      if(btn){ btn.className='ck-toggle-btn '+(newState?'on':'off'); btn.title=newState?'点击停用':'点击启用'; }
+      // 更新卡片透明度
+      var card=btn.closest('.ck-site'); if(card) card.style.opacity=newState?'':'.55';
+      // 更新 badge
+      var nameEl=card.querySelector('.ck-site-name'); if(nameEl){
+        var oldBadge=nameEl.querySelector('.ck-badge.wait');
+        if(!newState && !oldBadge) nameEl.insertAdjacentHTML('beforeend',' <span class="ck-badge wait">已停用</span>');
+        else if(newState && oldBadge) oldBadge.remove();
+      }
+      toast(newState?'✅ 已启用':'⏸ 已停用');
+      return ckLoad();
+    }).catch(function(e){ toast('切换失败:'+(e&&e.message||e)); site.enabled=!newState; });
+  }
+
   function ckRenderSched(){
     var box=$('ckSchedChips'); if(!box) return;
     var presets=['08:00','09:00','12:00','18:00','21:00'];
@@ -2652,6 +2718,7 @@ function checkForUpdate() {
     var mc=$('ckModalClose'); if(mc) mc.onclick=ckCloseEditor;
     var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
     var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
+    var dc=$('ckDetailClose'); if(dc) dc.onclick=ckCloseDetail;
     var ft=$('ckFType'); if(ft) ft.onchange=ckToggleTypeRows;
     var ad=$('ckAutoDetectBtn'); if(ad) ad.onclick=ckAutoDetectUrl;
     var sa=$('ckSchedAddBtn'); if(sa) sa.onclick=function(){ var v=$('ckSchedAdd').value; if(v && ckSchedArr.indexOf(v)<0){ ckSchedArr.push(v); ckRenderSched(); } };
