@@ -103,16 +103,24 @@ body{
 .hdr-btn:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
 .hdr-btn:active{transform:scale(.90)}
 
-/* 窄屏：header 内的 tab 三模块入口；PC 端隐藏 */
+/* 窄屏：header 内的 tab 三模块入口（与头部融为一体）；PC 端隐藏 */
 .tab-bar-header{
   display:flex!important;
-  background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));
-  padding:10px var(--page-pad) 12px;margin:10px calc(-1 * var(--page-pad)) 0;
-  border-top:1px solid rgba(255,255,255,.18)
+  padding:6px var(--page-pad) 10px;margin:0;
+  /* 无独立背景，直接用头部渐变 */
 }
-.tab-bar-header .tab-item{color:rgba(255,255,255,.78);background:transparent;border-radius:10px;flex:1;justify-content:center}
-.tab-bar-header .tab-item:hover{background:rgba(255,255,255,.10);color:#fff}
-.tab-bar-header .tab-item.active{background:rgba(255,255,255,.95);color:var(--hdr-from);box-shadow:0 4px 14px rgba(0,0,0,.15);font-weight:700}
+.tab-bar-header .tab-item{
+  color:rgba(255,255,255,.72);background:transparent;border-radius:10px;
+  flex:1;justify-content:center;padding:8px 4px;font-size:14px;font-weight:500;
+  transition:all .2s ease;gap:5px
+}
+.tab-bar-header .tab-item:hover{background:rgba(255,255,255,.12);color:#fff}
+.tab-bar-header .tab-item.active{
+  background:rgba(255,255,255,.22);color:#fff;
+  box-shadow:none;font-weight:600;
+  border-bottom:2.5px solid rgba(255,255,255,.75);
+  border-radius:10px 10px 0 0
+}
 @media (min-width:720px){
   .tab-bar-header{display:none!important}  /* PC 端隐藏 header 内的 tab，用 main 内左侧 tab */
 }
@@ -318,7 +326,7 @@ body{
 .update-info .up-tip{display:block;margin-top:4px}
 .update-info .up-code{display:inline-block;margin:5px 0;padding:4px 8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--text-sec);word-break:break-all}
 .update-info .up-notes{margin:8px 0;padding:10px 12px;background:var(--bg);border-left:3.5px solid var(--accent);border-radius:10px;color:var(--text-sec);font-size:12px;word-break:break-word;line-height:1.5}
-.update-info .up-dl{display:inline-block;margin:8px 0 4px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;border-radius:999px;font-weight:700;text-decoration:none;word-break:break-all;box-shadow:0 4px 14px rgba(99,102,241,.30);transition:all .2s}
+.update-info .up-dl{display:inline-block;margin:8px 0 4px;padding:10px 20px;background:linear-gradient(135deg,var(--accent),var(--accent-hover));color:#fff;border-radius:999px;font-weight:700;text-decoration:none;word-break:break-all;box-shadow:0 4px 14px rgba(99,102,241,.30);transition:all .2s;cursor:pointer;border:none;font-family:inherit;font-size:inherit}
 .update-info .up-dl:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.40)}
 .update-info .up-err{color:#e5484d;font-weight:600}
 .update-info .up-loading{color:var(--text-light)}
@@ -529,21 +537,25 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   color:var(--text-sec);font-size:14.5px;font-weight:600;font-family:inherit;
   transition:background .22s,color .22s,box-shadow .22s,transform .15s;-webkit-tap-highlight-color:transparent
 }
-/* 手机端分段控制样式 */
+/* 手机端分段控制样式（仅限 main 内 PC tab，header 内 tab 由 .tab-bar-header 单独控制） */
 @media (max-width:719px){
-  .tab-item{
+  #tabBar .tab-item{
     flex:1;border-radius:8px;padding:9px 12px;font-size:14px;
     background:transparent;color:var(--text-sec)
   }
-  .tab-item.active{
+  #tabBar .tab-item.active{
     background:#fff;color:var(--text);
     box-shadow:0 2px 8px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.04);
     font-weight:700
   }
-  [data-theme="dark"] .tab-item.active{
+  [data-theme="dark"] #tabBar .tab-item.active{
     background:rgba(255,255,255,.08);color:#fff;
     box-shadow:none
   }
+  /* header 内 tab 保持融入渐变的风格，不受上面白底影响 */
+  .tab-bar-header .tab-item{ color:rgba(255,255,255,.72);background:transparent;border-radius:10px;padding:8px 4px;font-size:14px;font-weight:500;gap:5px }
+  .tab-bar-header .tab-item.active{ background:rgba(255,255,255,.22);color:#fff;box-shadow:none;font-weight:600;border-bottom:2.5px solid rgba(255,255,255,.75);border-radius:10px 10px 0 0 }
+  .tab-bar-header .tab-item:hover{ background:rgba(255,255,255,.12);color:#fff }
 }
 .tab-item svg{width:18px;height:18px;flex-shrink:0}
 .tab-item:active{transform:scale(.97)}
@@ -787,6 +799,16 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-f-row input,.ck-f-row select,.ck-f-row textarea{width:100%;border:1px solid var(--border);border-radius:var(--r-input);padding:10px 12px;font-size:14px;background:var(--surface);color:var(--text);font-family:inherit}
 .ck-f-row textarea{resize:vertical;min-height:64px;line-height:1.5}
 .ck-f-row .ck-hint{font-size:11.5px;color:var(--text-light);line-height:1.5}
+/* URL 输入行：输入框为主 + 识别小按钮 */
+.ck-url-flex{display:flex;gap:8px;align-items:center}
+.ck-url-flex input{flex:1;min-width:0!important;width:auto!important}
+.ck-url-flex input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,122,255,.12);outline:none}
+.ck-detect-btn{
+  flex-shrink:0;padding:9px 14px;font-size:13px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface);color:var(--text-sec);cursor:pointer;
+  white-space:nowrap;transition:all .16s
+}
+.ck-detect-btn:hover,.ck-detect-btn:active{border-color:var(--accent);color:var(--accent);background:rgba(0,122,255,.05)}
 .ck-f-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .ck-f-grid .ck-f-row{margin:0}
 .ck-sec{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-top:4px;text-transform:uppercase}
@@ -1062,16 +1084,6 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </div>
 
-        <!-- 快速添加常用站点 -->
-        <div class="group">
-          <div class="group-title">快速添加<span class="group-hint">点一下接入常用站点</span></div>
-          <div class="group-card ck-quick" id="ckQuickGrid">
-            <button type="button" class="ck-quick-item" data-add="tieba">🔥 百度贴吧<span class="ck-qdel" data-hide="tieba" title="隐藏此推荐">×</span></button>
-            <button type="button" class="ck-quick-item" data-add="bilibili-live">📺 B站直播<span class="ck-qdel" data-hide="bilibili-live" title="隐藏此推荐">×</span></button>
-            <button type="button" class="ck-quick-item" data-add="discuz">🏷️ Discuz论坛<span class="ck-qdel" data-hide="discuz" title="隐藏此推荐">×</span></button>
-          </div>
-        </div>
-
         <!-- 我的签到任务 -->
         <div class="group">
           <div class="list-header">
@@ -1082,7 +1094,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             <button type="button" class="collapsible-btn" id="ckAddBtn" title="新增">新增</button>
           </div>
           <div class="group-card" id="ckSiteList"></div>
-          <div id="ckEmpty" class="ck-empty">还没有签到任务，点上方「＋」或选常用站点添加</div>
+          <div id="ckEmpty" class="ck-empty">还没有签到任务，点上方「新增」添加</div>
         </div>
 
         <!-- 签到设置 -->
@@ -1166,9 +1178,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             </div>
             <div class="ck-f-row">
               <label for="ckFUrl">请求地址 URL <span class="ck-hint">输入网址后点「识别」自动填充</span></label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="ckFUrl" placeholder="如 tieba.baidu.com 或完整 API 地址" style="flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:14px;outline:none;transition:border-color .16s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-                <button type="button" id="ckAutoDetectBtn" style="flex-shrink:0;padding:8px 12px;font-size:12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text-sec);cursor:pointer;white-space:nowrap;transition:all .16s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-sec)'">🔍 识别</button>
+              <div class="ck-url-flex">
+                <input type="text" id="ckFUrl" placeholder="如 tieba.baidu.com 或完整 API 地址">
+                <button type="button" id="ckAutoDetectBtn" class="ck-detect-btn">🔍 识别</button>
               </div>
               <span class="ck-hint" id="ckDetectHint" style="color:var(--success);display:none"></span>
             </div>
@@ -2384,7 +2396,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.4';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.5';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
@@ -2414,12 +2426,17 @@ function checkForUpdate() {
     // 发现新版本 — 显示更新内容 + 下载链接（无自动覆盖）
     var html = '<span class="up-new">发现新版本 v' + escapeHtml(r.latest) + (r.publishedAt ? '（' + escapeHtml(r.publishedAt.slice(0, 10)) + '）' : '') + '</span>';
     if (r.notes) html += '<div class="up-notes">' + escapeHtml(r.notes).replace(/\n/g, '<br>') + '</div>';
-    // 下载链接：直连 GitHub Release（手机端可能无法直接下载，见下方提示）
-    var dlUrl = (r.downloadUrl || UPDATE_SOURCE + '/releases/download/v' + r.latest + '/overtime-tracker.fpk');
-    html += '<a class="up-dl" href="' + escapeHtml(dlUrl) + '" target="_blank" rel="noopener" id="manualDlLink">⬇ 下载安装包 v' + escapeHtml(r.latest) + '</a>';
-    html += '<div class="up-tip" style="margin-top:8px"><b>安装方法：</b>电脑端下载 fpk 文件后，打开飞牛应用中心 → 手动安装 → 选择文件上传覆盖即可。</div>';
-    html += '<div class="up-tip">手机端如无法下载，请用电脑完成上述操作。</div>';
+    // 下载：用 safeDownload 兜底（WebView 内 <a> 可能被拦截）
+    var dlUrl = (r.downloadUrl || UPDATE_SOURCE + '/releases/download/v' + r.latest + '/overtime-tracker-' + r.latest + '.fpk');
+    var dlName = 'overtime-tracker-' + r.latest + '.fpk';
+    html += '<button class="up-dl" id="manualDlLink" data-url="' + escapeHtml(dlUrl) + '" data-name="' + escapeHtml(dlName) + '">⬇ 下载安装包 v' + escapeHtml(r.latest) + '</button>';
+    html += '<div class="up-tip" style="margin-top:8px"><b>安装方法：</b>下载 fpk 文件后，打开飞牛应用中心 → 手动安装 → 选择文件上传覆盖即可。</div>';
     info.innerHTML = html;
+    // 绑定下载按钮：使用 safeDownload 兜底 WebView 下载拦截
+    var dlBtn = $('manualDlLink');
+    if (dlBtn) dlBtn.onclick = function() {
+      safeDownload(this.getAttribute('data-url'), this.getAttribute('data-name'));
+    };
   }).catch(function(err) {
     info.innerHTML = '<span class="up-err">检查失败：' + escapeHtml(err.message || String(err)) + '</span>'
       + '<br><span class="up-tip">可手动前往 <a href="' + UPDATE_SOURCE + '/releases" target="_blank" rel="noopener">GitHub 发布页</a> 下载</span>';
@@ -2556,13 +2573,6 @@ function checkForUpdate() {
   function ckDeleteSite(id){ if(!confirm('删除「'+ckName(id)+'」这个签到任务？')) return; ckApi('DELETE','/site/'+id).then(function(){ toast('已删除'); return ckLoad(); }).catch(function(e){ toast('删除失败:'+(e&&e.message||e)); }); }
 
   /* 快速推荐站点的隐藏/恢复（localStorage 持久化） */
-  var CK_QUICK_KEY = 'ck_hidden_quick';
-  function ckGetHiddenQuick(){ try{ var j=localStorage.getItem(CK_QUICK_KEY); return j?JSON.parse(j):[]; }catch(e){ return []; } }
-  function ckHideQuick(key){ var h=ckGetHiddenQuick(); if(h.indexOf(key)<0) h.push(key); localStorage.setItem(CK_QUICK_KEY, JSON.stringify(h)); ckApplyQuickHidden(); }
-  function ckShowQuick(key){ var h=ckGetHiddenQuick(); h=h.filter(function(k){ return k!==key; }); localStorage.setItem(CK_QUICK_KEY, JSON.stringify(h)); ckApplyQuickHidden(); }
-  function ckApplyQuickHidden(){ var h=ckGetHiddenQuick(); document.querySelectorAll('.ck-quick-item[data-add]').forEach(function(el){ var k=el.getAttribute('data-add'); el.style.display=(h.indexOf(k)>=0)?'none':''; }); }
-  function ckRestoreQuickHidden(){ ckApplyQuickHidden(); }
-
   /* 网址自动识别：输入普通网址 → 自动填充 API 地址、请求头、类型 */
   var CK_URL_RULES = [
     { match: /tieba\.baidu\.com|baidu\.com.*tieba/, name: '百度贴吧', type: 'tiebaOneClick', method: 'POST', url: 'https://tieba.baidu.com/sign/add', headers: '{"Referer":"https://tieba.baidu.com/"}', hint: '已识别为「百度贴吧一键签到」，需粘贴含 BDUSS 的 Cookie' },
@@ -2707,14 +2717,6 @@ function checkForUpdate() {
   function ckBind(){
     var ra=$('ckRunAll'); if(ra) ra.onclick=ckRunAll;
     var ab=$('ckAddBtn'); if(ab) ab.onclick=function(){ ckOpenEditor(null); };
-    // 快速添加：点击卡片打开编辑器；× 按钮隐藏推荐
-    Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){
-      el.onclick=function(e){ if(e.target.classList.contains('ck-qdel')) return; ckOpenEditor(null, el.getAttribute('data-add')); };
-    });
-    Array.prototype.forEach.call(document.querySelectorAll('.ck-qdel'), function(el){
-      el.onclick=function(e){ e.stopPropagation(); var k=el.getAttribute('data-hide'); ckHideQuick(k); };
-    });
-    ckRestoreQuickHidden();
     var mc=$('ckModalClose'); if(mc) mc.onclick=ckCloseEditor;
     var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
     var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
