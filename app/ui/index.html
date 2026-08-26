@@ -139,14 +139,14 @@ body{
   flex:1;padding:0 var(--page-pad);margin-top:0;position:relative;z-index:2;
   max-width:none;margin-left:auto;margin-right:auto;width:100%
 }
+/* PC端：单列布局（导航左侧 + 内容区含统计+日历） */
 .layout-desktop{
-  display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;padding-top:16px
+  display:flex;flex-direction:column;gap:var(--card-gap);padding-top:16px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
 .layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-/* 右栏占位符：与左侧标题行+间距等高，使统计卡片与日历顶部对齐 */
-.right-spacer{height:62px;flex-shrink:0}
-@media(max-width:719px){ .right-spacer{display:none} }
+/* 右栏占位符：PC新布局下隐藏（统计已移到日历上方） */
+.right-spacer{display:none}
 @media(max-width:719px){
   .layout-desktop{display:block}
   .layout-right{margin-top:var(--card-gap)}
@@ -222,6 +222,13 @@ body{
   background:linear-gradient(135deg,#6C63FF,#8B7FFF);padding:1.5px 6px;border-radius:8px;
   line-height:1.4;min-height:0;display:inline-block;text-align:center;
   box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
+}
+/* 备注文字 — 加班单元格内显示 */
+.cal-note{
+  font-size:8px;font-weight:500;color:var(--accent);line-height:1.2;
+  display:block;text-align:center;margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+  opacity:.8
 }
 
 /* 单元格状态色 */
@@ -753,23 +760,23 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .app-header{padding:36px var(--page-pad) 24px}
   .cal-cell{min-height:56px}
   .stat-val{font-size:26px}
-  .layout-desktop{gap:24px}
+  .layout-desktop{gap:18px}
 }
 @media(min-width:720px){
   :root{--page-pad:24px;--card-gap:18px}
   .app-header{padding:36px var(--page-pad) 24px}
   .header-text h1{font-size:21px}
-  .cal-cell{min-height:62px}
+  .cal-cell{min-height:58px}
   .cal-num{font-size:14.5px}
   .cal-ot-badge{font-size:9.5px;padding:1.5px 6px}
   .stat-val{font-size:26px}
   .modal-dialog{max-width:420px;padding:26px 24px 24px}
   /* 桌面端：模块导航变左侧竖排 */
-  .app-main{display:flex;align-items:flex-start;gap:24px;padding:0 var(--page-pad)}
+  .app-main{display:flex;align-items:flex-start;gap:20px;padding:0 var(--page-pad)}
   .app-body{max-width:none;margin:0;flex:1;min-width:0;padding:0}
   .tab-bar{
     display:flex;position:sticky;top:24px;flex-direction:column;align-items:stretch;
-    width:184px;flex-shrink:0;gap:6px;
+    width:172px;flex-shrink:0;gap:6px;
     background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
     border-bottom:none;padding:0;margin:0
   }
@@ -777,6 +784,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .tab-item svg{width:19px;height:19px}
   .tab-item:hover{background:var(--bg)}
   .tab-item.active{box-shadow:var(--shadow-glass)}
+  /* PC端统计卡片+信息卡横排两列（在日历上方） */
+  .stats-grid{gap:14px}
+  .rate-section{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0}
+  .rate-section .info-card{height:100%}
 }
 @media(min-width:900px){
   :root{--page-pad:20px}  /* 中宽 PC 适度留白 */
@@ -785,21 +796,18 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   :root{--page-pad:18px;--card-gap:18px}
   .app-body{max-width:1400px}
   .app-header{padding:28px var(--page-pad) 20px}
-  .cal-cell{min-height:64px}
+  .cal-cell{min-height:60px}
   .cal-num{font-size:15px}
   .cal-ot-badge{font-size:10px;padding:2px 7px}
   .stat-val{font-size:26px}
-  .layout-desktop{grid-template-columns:1fr 320px;gap:22px}
-  .tab-bar{width:188px}
+  .tab-bar{width:180px}
 }
 @media(min-width:1440px){
   :root{--page-pad:20px;--card-gap:20px}
   .app-body{max-width:1600px}
-  .layout-desktop{grid-template-columns:1fr 350px;gap:26px}
-  .cal-cell{min-height:70px}
+  .cal-cell{min-height:64px}
   .stat-val{font-size:28px}
-  .tab-bar{width:200px}
-  .rate-section .stage-months{flex:1 1 260px;min-width:240px}
+  .tab-bar{width:192px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* ============ 签到模块专属样式（复用全局变量，保持视觉一致） ============ */
@@ -825,32 +833,33 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 
 .ck-empty{text-align:center;color:var(--text-light);font-size:13px;padding:24px 16px;line-height:1.7}
 
-.ck-site{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border-light)}
+.ck-site{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-light)}
 .ck-site:last-child{border-bottom:none}
-.ck-site-emoji{width:40px;height:40px;border-radius:12px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.ck-site-main{flex:1;min-width:0;cursor:pointer}
-.ck-site-name{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
-.ck-site-sub{font-size:12px;color:var(--text-light);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-site-emoji{width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ck-site-main{flex:1;min-width:0;cursor:pointer;min-width:0;overflow:hidden}
+.ck-site-name{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:2px}
+.ck-site-name span{white-space:nowrap}
+.ck-site-sub{font-size:11.5px;color:var(--text-light);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ck-detail-list{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:11.5px;line-height:1.6;color:var(--text-sec)}
 .ck-detail-list span{white-space:nowrap}
 .ck-detail-btn{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(0,122,255,.08);color:var(--accent);cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:2px}
 .ck-detail-btn:hover{background:rgba(0,122,255,.16)}
 .ck-toast-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;line-height:1.7;max-height:200px;overflow:auto;text-align:left;word-break:break-all}
-.ck-site-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.ck-badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
+.ck-site-act{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ck-badge{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
 .ck-badge.ok{background:rgba(34,197,94,.14);color:var(--success)}
 .ck-badge.fail{background:rgba(239,68,68,.14);color:var(--danger)}
 .ck-badge.wait{background:rgba(245,158,11,.16);color:var(--warning)}
-.ck-run-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
+.ck-run-btn{width:30px;height:30px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
 .ck-run-btn:hover{border-color:var(--accent);background:rgba(0,122,255,.06)}
 .ck-run-btn:active{transform:scale(.92)}
-.ck-run-btn svg{width:17px;height:17px}
+.ck-run-btn svg{width:15px;height:15px}
 .ck-run-btn.busy{opacity:.5;pointer-events:none}
-.ck-del-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
+.ck-del-btn{width:30px;height:30px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .16s}
 .ck-del-btn:hover{border-color:var(--danger);background:rgba(239,68,68,.06)}
 .ck-del-btn:active{transform:scale(.92)}
-.ck-del-btn svg{width:17px;height:17px}
-.ck-toggle-btn{width:40px;height:24px;border-radius:12px;border:none;background:var(--border);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0;padding:0}
+.ck-del-btn svg{width:15px;height:15px}
+.ck-toggle-btn{width:36px;height:22px;border-radius:11px;border:none;background:var(--border);position:relative;cursor:pointer;transition:all .2s;flex-shrink:0;padding:0}
 .ck-toggle-btn.on{background:var(--accent)}
 .ck-toggle-btn.off{background:var(--border)}
 .ck-toggle-slider{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s}
@@ -964,7 +973,51 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     <section class="tab-pane active" id="paneOvertime">
     <div class="layout-desktop">
 
-      <!-- 左栏：日历 -->
+      <!-- 统计卡片 + 费率信息（日历上方） -->
+      <div class="layout-right">
+
+        <!-- 统计卡片 — 双列并列 -->
+        <section class="stats-grid" id="statsGrid">
+          <div class="stat-card stat-gradient stat-teal-grad">
+            <div class="stat-label" id="statHoursLabel">本月加班</div>
+            <div class="stat-val" id="statHours">0<span class="stat-unit">h</span></div>
+          </div>
+          <div class="stat-card stat-gradient stat-blue-grad">
+            <div class="stat-label" id="statCostLabel">本月加班费</div>
+            <div class="stat-val" id="statCost">¥0.00</div>
+          </div>
+        </section>
+
+        <!-- 计费设置（信息展示态 — 点击弹窗编辑） -->
+        <section class="rate-section">
+          <!-- 时薪卡片：点击弹窗修改 -->
+          <div class="info-card" id="hourlyRateCard" onclick="openRateModal()">
+            <div class="info-card-ico ico-indigo" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2c0-1.1 1-1.7 2.5-1.7s2.5.6 2.5 1.7-1 1.6-2.5 1.6-2.5.6-2.5 1.7 1 1.7 2.5 1.7 2.5-.6 2.5-1.7"/><line x1="9.5" y1="14.6" x2="14.5" y2="14.6"/></svg>
+            </div>
+            <div class="info-card-body">
+              <div class="info-card-label">每小时加班费</div>
+              <div class="info-card-val" id="displayHourlyRate">--</div>
+            </div>
+            <div class="info-card-edit">&#9998;</div>
+          </div>
+
+          <!-- 自定义费用：点击弹窗管理 -->
+          <div class="info-card" id="recurringCard" onclick="openRecurringModal()">
+            <div class="info-card-ico ico-amber" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="info-card-body">
+              <div class="info-card-label">自定义费用</div>
+              <div class="info-card-val" id="displayRecurring">暂无</div>
+            </div>
+            <div class="info-card-edit">&#9998;</div>
+          </div>
+        </section>
+
+      </div><!-- /.layout-right (stats+rate) -->
+
+      <!-- 日历（全宽） -->
       <div class="layout-left">
 
         <div class="page-title-row">
@@ -1060,75 +1113,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </section>
 
-      </div><!-- /.layout-left -->
-
-      <!-- 右栏：统计 + 记录列表 -->
-      <div class="layout-right">
-
-        <!-- 查询弹窗触发：按钮在标题行右侧，控件在弹窗内 -->
-        <section class="query-card" id="queryCard" style="display:none">
-          <div class="query-row">
-            <select id="queryMode" class="query-select">
-              <option value="month">按月份</option>
-              <option value="year">按年份</option>
-              <option value="range">自定义时间段</option>
-            </select>
-            <input type="month" id="queryMonth" class="query-input ios-styled" value="">
-            <div class="ios-trigger" id="queryMonthTrigger" data-target="queryMonth"><span class="ios-trig-ph">选择月份</span></div>
-            <select id="queryYear" class="query-input" style="display:none"></select>
-            <input type="date" id="queryStart" class="query-input" style="display:none" placeholder="起始">
-            <span id="queryRangeSep" style="display:none;color:var(--text-light)">至</span>
-            <input type="date" id="queryEnd" class="query-input" style="display:none" placeholder="结束">
-            <button type="button" id="queryBtn" class="query-btn">查询</button>
-          </div>
-          <div class="query-result" id="queryResult"></div>
-        </section>
-
-        <!-- 占位：与左侧标题行等高，使统计卡片与日历顶部对齐 -->
-        <div class="right-spacer" aria-hidden="true"></div>
-
-        <!-- 统计卡片 — 双列并列 -->
-        <section class="stats-grid" id="statsGrid">
-          <div class="stat-card stat-gradient stat-teal-grad">
-            <div class="stat-label" id="statHoursLabel">本月加班</div>
-            <div class="stat-val" id="statHours">0<span class="stat-unit">h</span></div>
-          </div>
-          <div class="stat-card stat-gradient stat-blue-grad">
-            <div class="stat-label" id="statCostLabel">本月加班费</div>
-            <div class="stat-val" id="statCost">¥0.00</div>
-          </div>
-        </section>
-
-        <!-- 计费设置（信息展示态 — 点击弹窗编辑） -->
-        <section class="rate-section">
-          <!-- 时薪卡片：点击弹窗修改 -->
-          <div class="info-card" id="hourlyRateCard" onclick="openRateModal()">
-            <div class="info-card-ico ico-indigo" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.2c0-1.1 1-1.7 2.5-1.7s2.5.6 2.5 1.7-1 1.6-2.5 1.6-2.5.6-2.5 1.7 1 1.7 2.5 1.7 2.5-.6 2.5-1.7"/><line x1="9.5" y1="14.6" x2="14.5" y2="14.6"/></svg>
-            </div>
-            <div class="info-card-body">
-              <div class="info-card-label">每小时加班费</div>
-              <div class="info-card-val" id="displayHourlyRate">--</div>
-            </div>
-            <div class="info-card-edit">&#9998;</div>
-          </div>
-
-          <!-- 自定义费用：点击弹窗管理 -->
-          <div class="info-card" id="recurringCard" onclick="openRecurringModal()">
-            <div class="info-card-ico ico-amber" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            </div>
-            <div class="info-card-body">
-              <div class="info-card-label">自定义费用</div>
-              <div class="info-card-val" id="displayRecurring">暂无</div>
-            </div>
-            <div class="info-card-edit">&#9998;</div>
-          </div>
-        </section>
-
-        <div class="bottom-spacer"></div>
-
-      </div><!-- /.layout-right -->
+      </div><!-- /.layout-left (calendar) -->
 
     </div><!-- /.layout-desktop -->
     </section><!-- /#paneOvertime -->
@@ -1359,7 +1344,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.2.8</div>
+              <div class="row-value" id="verInline">v1.3.0</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1699,7 +1684,14 @@ function renderCalendar() {
       if (dateStr === today) cls += ' cal-today';
       hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
       otBadge = (rec && rec.hours > 0) ? '<span class="cal-ot-badge">' + (Math.round(rec.hours * 100) / 100) + 'h</span>' : '';
-      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + otBadge + '</div>');
+      /* 备注显示：有加班记录且有备注时，在角标下方显示截断备注 */
+      var noteEl = '';
+      if (rec && rec.note && rec.note.trim()) {
+        var ntxt = escHtml(rec.note.trim());
+        if (ntxt.length > 8) ntxt = ntxt.slice(0, 7) + '…';
+        noteEl = '<span class="cal-note" title="' + escHtml(rec.note.trim()) + '">' + ntxt + '</span>';
+      }
+      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + (rec && rec.note ? ' | '+escHtml(rec.note) : '') + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + otBadge + noteEl + '</div>');
     }
     daysEl = $('calDays');
     if (daysEl) daysEl.innerHTML = cells.join('');
@@ -2590,7 +2582,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.8';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.3.0';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
