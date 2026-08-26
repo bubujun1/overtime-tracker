@@ -107,7 +107,7 @@ body{
 .tab-bar-header .tab-item:hover{background:rgba(255,255,255,.10);color:#fff}
 .tab-bar-header .tab-item.active{background:rgba(255,255,255,.95);color:var(--hdr-from);box-shadow:0 4px 14px rgba(0,0,0,.15);font-weight:700}
 @media (min-width:720px){
-  .tab-bar-header{display:none}  /* PC 端隐藏 header 内的 tab，用 main 内左侧 tab */
+  .tab-bar-header{display:none!important}  /* PC 端隐藏 header 内的 tab，用 main 内左侧 tab */
 }
 
 /* ---- 主内容区 ---- */
@@ -514,7 +514,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   max-width:1440px;margin:0 auto;width:100%
 }
 @media (max-width:719px){
-  .tab-bar{display:none!important}  /* 窄屏用 header 内的 tab，main 内此份彻底隐藏 */
+  #tabBar{display:none!important}  /* 窄屏用 header 内的 tab，仅隐藏 main 内此份 */
 }
 .tab-item{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
@@ -1354,21 +1354,42 @@ var API_BASE = (function() {
   return m ? m[1] : '';
 })();
 
-// 跨 WebView 安全的文件下载（避免 window.open 被弹窗拦截导致“没反应”）
+// 跨 WebView 安全的文件下载（避免 window.open 被弹窗拦截导致"没反应"）
+// 策略：①先尝试 <a> click（同源文件有效）；②失败则 fetch blob → createObjectURL → <a>
 function safeDownload(url, filename) {
+  // 方案 A：直接 a 标签点击（同源场景最可靠）
   try {
     var a = document.createElement('a');
     a.href = url;
     if (filename) a.download = filename;
     a.rel = 'noopener';
+    a.style.display = 'none';
     document.body.appendChild(a);
     a.click();
-    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 1500);
-    toast('已开始下载，请到下载目录查看');
+    setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); }, 2000);
+    toast('已开始下载：' + (filename || '文件'));
     return;
-  } catch (e) { /* 继续兜底 */ }
-  // 兜底：直接导航以触发 WebView 下载管理器
-  try { window.location.href = url; } catch (e2) {}
+  } catch (e) { /* 走方案 B */ }
+  // 方案 B：fetch blob → ObjectURL（跨域/被拦截时兜底）
+  try {
+    fetch(url).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.blob();
+    }).then(function(blob) {
+      var bUrl = window.URL.createObjectURL(blob);
+      var ba = document.createElement('a');
+      ba.href = bUrl;
+      ba.download = filename || 'download';
+      document.body.appendChild(ba);
+      ba.click();
+      setTimeout(function() { window.URL.revokeObjectURL(bUrl); if(ba.parentNode)ba.parentNode.removeChild(ba); }, 3000);
+      toast('已开始下载：' + (filename || '文件'));
+    }).catch(function() {
+      toast('下载失败，请尝试在电脑端操作');
+    });
+  } catch(e2) {
+    toast('下载不可用，请在电脑端下载');
+  }
 }
 
 function $(id) { try { return document.getElementById(id); } catch(e) { return null; } }
@@ -2329,7 +2350,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.1';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.2';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var cv = $('curVerInline'); if (cv) cv.textContent = '记加班 v' + APP_VERSION; })();
@@ -2342,7 +2363,7 @@ function escapeHtml(s) {
 }
 
 // 检查更新：调用后端 /api/check-update（后端代理 GitHub，绕开 WebView CORS）
-// 对齐 fnos-hermes-agent 的「更新页自动拉取版本信息、对比后一键升级」体验
+// 仅展示版本信息与下载链接，不提供一键覆盖安装
 function checkForUpdate() {
   var info = $('updateInfo');
   if (!info) return;
@@ -2350,57 +2371,27 @@ function checkForUpdate() {
   api('GET', '/api/check-update').then(function(r) {
     if (!r || !r.ok) {
       info.innerHTML = '<span class="up-err">检查失败：' + escapeHtml((r && r.error) || '未知错误') + '</span>'
-        + '<br><span class="up-tip">可手动前往：<a href="' + UPDATE_SOURCE + '" target="_blank" rel="noopener">发布页</a></span>';
+        + '<br><span class="up-tip">可手动前往 <a href="' + UPDATE_SOURCE + '/releases" target="_blank" rel="noopener">GitHub 发布页</a> 下载</span>';
       return;
     }
     if (!r.hasUpdate) {
       info.innerHTML = '<span class="up-latest">✓ 已是最新版本 v' + escapeHtml(r.current) + '</span>';
       return;
     }
-    // 发现新版本 — 显示更新内容 + 立即更新按钮（对齐 hermes-agent 一键升级）
+    // 发现新版本 — 显示更新内容 + 下载链接（无自动覆盖）
     var html = '<span class="up-new">发现新版本 v' + escapeHtml(r.latest) + (r.publishedAt ? '（' + escapeHtml(r.publishedAt.slice(0, 10)) + '）' : '') + '</span>';
     if (r.notes) html += '<div class="up-notes">' + escapeHtml(r.notes).replace(/\n/g, '<br>') + '</div>';
-    html += '<button type="button" id="doUpdateBtn" class="up-dl" onclick="doAppUpdate()">🔄 立即更新覆盖</button>';
-    html += '<div id="updateProgress" class="up-progress"></div>';
-    html += '<div class="up-tip">点击后将自动下载并覆盖安装，无需手动操作</div>';
+    // 下载链接：直连 GitHub Release（手机端可能无法直接下载，见下方提示）
+    var dlUrl = (r.downloadUrl || UPDATE_SOURCE + '/releases/download/v' + r.latest + '/overtime-tracker.fpk');
+    html += '<a class="up-dl" href="' + escapeHtml(dlUrl) + '" target="_blank" rel="noopener" id="manualDlLink">⬇ 下载安装包 v' + escapeHtml(r.latest) + '</a>';
+    html += '<div class="up-tip" style="margin-top:8px"><b>安装方法：</b>电脑端下载 fpk 文件后，打开飞牛应用中心 → 手动安装 → 选择文件上传覆盖即可。</div>';
+    html += '<div class="up-tip">手机端如无法下载，请用电脑完成上述操作。</div>';
     info.innerHTML = html;
   }).catch(function(err) {
-    info.innerHTML = '<span class="up-err">检查失败：' + escapeHtml(err.message || String(err)) + '</span>';
+    info.innerHTML = '<span class="up-err">检查失败：' + escapeHtml(err.message || String(err)) + '</span>'
+      + '<br><span class="up-tip">可手动前往 <a href="' + UPDATE_SOURCE + '/releases" target="_blank" rel="noopener">GitHub 发布页</a> 下载</span>';
   });
 }
-
-// 执行一键更新：调用后端 /api/update 下载 fpk 并触发安装
-function doAppUpdate() {
-  var btn = $('doUpdateBtn');
-  var prog = $('updateProgress');
-  if (btn) { btn.disabled = true; btn.textContent = '正在下载…'; }
-  if (prog) prog.innerHTML = '<span class="up-loading">正在下载新版本（直连 / ghproxy 镜像自动择优），请稍候…</span>';
-
-  api('POST', '/api/update').then(function(r) {
-    if (!r || !r.ok) {
-      if (prog) prog.innerHTML = '<span class="up-err">更新失败：' + escapeHtml((r && r.error) || '未知错误') + '</span>';
-      if (btn) { btn.disabled = false; btn.textContent = '⬇ 重试'; }
-      return;
-    }
-    var kb = Math.round((r.fpkSize||0)/1024);
-    var msg = '✅ v' + escapeHtml(r.version) + ' 已下载（' + kb + ' KB）';
-    if (r.phase === 'installing') {
-      msg += '<br>🔧 已触发系统覆盖安装，应用即将自动重启更新…'
-           + '<br><span class="up-tip">若 1 分钟内未自动重启，请手动刷新或重开应用；也可下载安装包手动覆盖</span>';
-    } else {
-      // download-only：系统安装命令不可用，引导下载后手动覆盖
-      msg += '<br><span class="up-tip">系统安装命令不可用，请下载安装包后到 <b>飞牛应用中心 → 手动安装</b> 上传覆盖</span>';
-    }
-    // 无论自动安装与否，都提供「下载安装包」兜底按钮（HTTP 下载绕过管理员目录限制）
-    msg += '<br><a class="up-dl" href="' + API_BASE + '/api/update-download/' + escapeHtml(r.version) + '" download>⬇ 下载安装包（备用）</a>';
-    if (prog) prog.innerHTML = '<span class="up-latest">' + msg + '</span>';
-    if (btn) { btn.style.display = 'none'; }
-  }).catch(function(err) {
-    if (prog) prog.innerHTML = '<span class="up-err">更新异常：' + escapeHtml(err.message || String(err)) + '</span>';
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ 重试'; }
-  });
-}
-
 
 /* ============ 签到模块（自动签到，移植自便阅记 + QD） ============ */
 (function(){

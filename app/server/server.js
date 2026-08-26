@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.2.1';
+const APP_VERSION = '1.2.2';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -900,7 +900,7 @@ async function handleApi(req, res, apiPath, method) {
           const fp = path.join(BACKUP_DIR, f);
           try {
             const stat = fs.statSync(fp);
-            list.push({ name: f, size: stat.size, time: stat.mtime.toISOString(), date: f.replace('.json', '') });
+            list.push({ name: f, size: stat.size, time: localTimeStr(stat.mtime), date: f.replace('.json', '') });
           } catch (e) { /* skip */ }
         }
       }
@@ -1072,6 +1072,12 @@ function dateStamp(d) {
   return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
 }
 function pad2(n) { return String(n).length < 2 ? '0' + String(n) : String(n); }
+// 本地时间格式化（YYYY-MM-DD HH:mm:ss），用于备份列表展示
+function localTimeStr(d) {
+  if (!(d instanceof Date)) return '';
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate())
+    + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+}
 
 // 计算数据哈希（用于判断是否需要备份）
 function dataHash() {
