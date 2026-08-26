@@ -150,6 +150,12 @@ body{
 @media(max-width:719px){
   .layout-desktop{display:block}
   .layout-right{margin-top:var(--card-gap)}
+  .stats-grid{flex-direction:row;gap:10px}
+  .stat-card{padding:16px 14px}
+  .stat-val{font-size:24px}
+}
+@media(max-width:420px){
+  .stats-grid{flex-direction:column;gap:10px}
 }
 
 /* ---- 页面标题行 ---- */
@@ -292,40 +298,35 @@ body{
 .qr-month-name{font-size:13px;font-weight:600;color:var(--text);min-width:72px;flex-shrink:0}
 .qr-month-v{font-size:13px;font-weight:650;color:var(--text-sec);margin-left:auto}
 
-/* ==================== 统计卡片 — 统一全宽等高 ==================== */
-.stats-grid{display:flex;flex-direction:column;gap:12px}
+/* ==================== 统计卡片 — 双列并列渐变 ==================== */
+.stats-grid{display:flex;flex-direction:row;gap:14px}
 .stat-card{
   background:var(--surface);
-  border-radius:var(--r-card);padding:18px 18px;
-  border:1px solid var(--border-light);
-  transition:transform .2s,box-shadow .25s,border-color .2s;position:relative;overflow:hidden;
-  box-shadow:0 1px 3px rgba(108,99,255,.04),0 4px 12px rgba(108,99,255,.03)
-}
-.stat-card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  border-radius:var(--r-card) var(--r-card) 0 0;opacity:.8
-}
-.stat-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(108,99,255,.10),0 2px 8px rgba(108,99,255,.05);border-color:rgba(108,99,255,.12)}
-/* 左边框渐变条 — 活力风 */
-.stat-teal::before{background:linear-gradient(90deg,#00D2A8,#00F5C4)}
-.stat-blue::before{background:linear-gradient(90deg,#6C63FF,#8B7FFF)}
-.stat-amber::before{background:linear-gradient(90deg,#FFB347,#FFD060)}
-/* 紫色渐变总费用卡 — 活力粉紫 */
-.stat-gradient{
-  background:linear-gradient(135deg,#6C63FF,#FF6584);
+  border-radius:var(--r-card);padding:20px 18px;
   border:1px solid transparent;
-  box-shadow:0 6px 18px rgba(108,99,255,.16),0 3px 8px rgba(255,101,132,.08)
+  transition:transform .2s,box-shadow .25s .1s;position:relative;overflow:hidden;
+  flex:1;min-width:0;text-align:center
 }
-.stat-gradient:hover{box-shadow:0 10px 28px rgba(108,99,255,.22),0 5px 14px rgba(255,101,132,.12)}
-.stat-gradient::before{display:none}
-.stat-gradient .stat-label,.stat-gradient .stat-val,.stat-gradient .stat-sub{color:#fff}
-.stat-gradient .stat-sub{opacity:.85}
-/* 自定义费用卡片 — 添加后才显示，默认隐藏 */
-#statRecurringWrap.hidden{display:none}
-.stat-label{font-size:12.5px;color:var(--text-sec);font-weight:550;margin-bottom:8px}
-.stat-val{font-size:24px;font-weight:800;color:var(--text);line-height:1.15;letter-spacing:-.5px}
-.stat-unit{font-size:13px;font-weight:600;color:var(--text-sec);margin-left:3px}
-.stat-sub{font-size:11.5px;color:var(--text-light);margin-top:5px;font-weight:400}
+.stat-card::before{display:none}
+.stat-card:hover{transform:translateY(-2px)}
+/* 青绿渐变 — 时长卡 */
+.stat-teal-grad{
+  background:linear-gradient(135deg,#00D2A8,#00B4D8);
+  box-shadow:0 6px 20px rgba(0,210,168,.18),0 2px 8px rgba(0,180,216,.10)
+}
+.stat-teal-grad:hover{box-shadow:0 10px 30px rgba(0,210,168,.26),0 4px 12px rgba(0,180,216,.14)}
+/* 蓝紫渐变 — 加班费卡 */
+.stat-blue-grad{
+  background:linear-gradient(135deg,#6C63FF,#7C8AFF);
+  box-shadow:0 6px 20px rgba(108,99,255,.18),0 2px 8px rgba(124,138,255,.10)
+}
+.stat-blue-grad:hover{box-shadow:0 10px 30px rgba(108,99,255,.26),0 4px 12px rgba(124,138,255,.14)}
+/* 渐变卡统一白字 */
+.stat-teal-grad .stat-label,.stat-teal-grad .stat-val,.stat-teal-grad .stat-unit,
+.stat-blue-grad .stat-label,.stat-blue-grad .stat-val,.stat-blue-grad .stat-unit{color:#fff}
+.stat-label{font-size:13px;font-weight:600;margin-bottom:10px;opacity:.9}
+.stat-val{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-.5px}
+.stat-unit{font-size:14px;font-weight:600;margin-left:3px;opacity:.8}
 
 /* 设置内数据管理按钮 */
 .ghost-btn{
@@ -498,7 +499,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .info-card-ico svg{width:20px;height:20px}
 .info-card-body{flex:1;min-width:0}
 .info-card-label{font-size:12px;color:var(--text-light);font-weight:550;margin-bottom:2px}
-.info-card-val{font-size:18px;font-weight:700;color:var(--text)}
+.info-card-val{font-size:15px;font-weight:600;color:var(--text);line-height:1.65}
+.fee-item{padding:3px 0}
+.fee-item strong{color:var(--accent)}
 .info-card-edit{
   font-size:16px;color:var(--text-light);flex-shrink:0;
   transition:color .2s
@@ -602,11 +605,30 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     background:rgba(255,255,255,.08);color:#fff;
     box-shadow:none
   }
-  /* header 内 tab — 纯文字+底指示线，无背景块 */
-  .tab-bar-header .tab-item{ color:rgba(255,255,255,.55)!important;background:transparent!important;border:none!important;border-radius:0!important;padding:10px 6px 8px;font-size:14px;font-weight:500;gap:5px;position:relative }
-  .tab-bar-header .tab-item.active{ color:#fff!important;font-weight:700!important;background:transparent!important;box-shadow:none!important;border:none!important;border-radius:0!important }
-  .tab-bar-header .tab-item.active::after{ content:'';position:absolute;left:22%;right:22%;bottom:2px;height:3px;border-radius:2px;background:#fff }
-  .tab-bar-header .tab-item:hover{ color:rgba(255,255,255,.82)!important;background:transparent!important }
+  /* 窄屏：顶部 tab 移到底部，做成标准底部导航栏（图标在上、文字在下，独立实色栏） */
+  .tab-bar-header{
+    position:fixed;left:0;right:0;bottom:0;top:auto;z-index:80;
+    display:flex!important;
+    background:var(--surface-solid);
+    border-top:1px solid var(--border-light);
+    box-shadow:0 -3px 16px rgba(108,99,255,.07);
+    padding:7px var(--page-pad) calc(7px + env(safe-area-inset-bottom,0px));
+    gap:0
+  }
+  .tab-bar-header .tab-item{
+    flex-direction:column;gap:3px;flex:1;
+    color:var(--text-sec)!important;background:transparent!important;
+    border:none!important;border-radius:12px;
+    padding:4px 6px;font-size:11px;font-weight:600;line-height:1;
+    position:relative
+  }
+  .tab-bar-header .tab-item svg{width:23px;height:23px;opacity:.55}
+  .tab-bar-header .tab-item.active{ color:var(--accent)!important;font-weight:700!important;background:transparent!important }
+  .tab-bar-header .tab-item.active svg{opacity:1}
+  .tab-bar-header .tab-item.active::after{ display:none }
+  .tab-bar-header .tab-item:hover{ color:var(--text-sec)!important;background:transparent!important }
+  /* 主内容区底部留位，防止被底栏遮挡 */
+  .app-body{ padding-bottom:calc(78px + env(safe-area-inset-bottom,0px)) }
 }
 .tab-item svg{width:18px;height:18px;flex-shrink:0}
 .tab-item:active{transform:scale(.97)}
@@ -1065,26 +1087,15 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         <!-- 占位：与左侧标题行等高，使统计卡片与日历顶部对齐 -->
         <div class="right-spacer" aria-hidden="true"></div>
 
-        <!-- 统计卡片 2×2 -->
+        <!-- 统计卡片 — 双列并列 -->
         <section class="stats-grid" id="statsGrid">
-          <div class="stat-card stat-teal">
+          <div class="stat-card stat-gradient stat-teal-grad">
             <div class="stat-label" id="statHoursLabel">本月加班</div>
             <div class="stat-val" id="statHours">0<span class="stat-unit">h</span></div>
           </div>
-          <div class="stat-card stat-blue">
+          <div class="stat-card stat-gradient stat-blue-grad">
             <div class="stat-label" id="statCostLabel">本月加班费</div>
-            <div class="stat-val" id="statCost">0.00</div>
-          </div>
-          <!-- 自定义费用卡片：添加后才显示 -->
-          <div class="stat-card stat-amber" id="statRecurringWrap">
-            <div class="stat-label" id="statRecurringLabel">自定义费用</div>
-            <div class="stat-val" id="statRecurringVal">0.00</div>
-          </div>
-          <!-- 总费用（紫渐变） -->
-          <div class="stat-card stat-gradient" id="statTotalWrap">
-            <div class="stat-label" id="statTotalLabel">本月总费用</div>
-            <div class="stat-val" id="statTotal">0.00</div>
-            <div class="stat-sub" id="statTotalSub">加班费 + 额外费用</div>
+            <div class="stat-val" id="statCost">¥0.00</div>
           </div>
         </section>
 
@@ -1348,7 +1359,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.2.7</div>
+              <div class="row-value" id="verInline">v1.2.8</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1419,10 +1430,22 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           <label class="f-label" for="rateModalInput">默认每小时加班费（元）</label>
           <input type="number" id="rateModalInput" class="f-input" min="0" step="1" placeholder="例如：25">
         </div>
-        <div style="margin-top:14px;padding:10px 12px;background:var(--bg);border-radius:12px;font-size:12px;color:var(--text-light);line-height:1.6">
+        <div style="margin-top:6px;padding:8px 10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--text-light);line-height:1.55">
           未设定月份阶段时，所有月份统一使用此费率。
         </div>
-        <button type="button" class="submit-btn" onclick="saveRateModal()" style="margin-top:16px">保存</button>
+
+        <!-- 月份阶段设置 -->
+        <div style="margin-top:16px">
+          <div class="list-header" style="margin-bottom:10px">
+            <h3 style="font-size:15px;font-weight:700">月份阶段费率</h3>
+            <button type="button" id="rateToggle" style="padding:4px 8px;border:none;background:transparent;color:var(--text-sec);font-size:16px;cursor:pointer">▾</button>
+          </div>
+          <div id="monthlyRatesList"></div>
+          <button type="button" class="add-btn" id="addMonthRate" style="margin-top:8px">+ 添加阶段</button>
+          <div id="rateHint" class="rate-empty" style="margin-top:6px">不同月份可设不同费率，如调薪后新费率</div>
+        </div>
+
+        <button type="button" class="submit-btn" onclick="saveRateModal()" style="margin-top:16px;width:100%">保存</button>
       </div>
     </div>
   </div>
@@ -1709,6 +1732,8 @@ function closeModal() { var mo = $('modalOverlay'); if (mo) mo.className = 'moda
 function openRateModal() {
   var input = $('rateModalInput');
   if (input && state.settings) input.value = state.settings.hourlyRate || '';
+  renderMonthlyRates(true);
+  bindRateToggle();
   var mo = $('rateModalOverlay');
   if (mo) { mo.className = 'modal-overlay show'; if (input) try { input.focus(); } catch(e){} }
 }
@@ -1720,7 +1745,8 @@ function saveRateModal() {
   if (isNaN(rate) || rate < 0) { toast('请输入有效费率'); return; }
   if (!state.settings) state.settings = {};
   state.settings.hourlyRate = rate;
-  api('PUT', '/api/settings', { hourlyRate: rate }).then(function() {
+  applyStagesToMonthlyRates();
+  api('PUT', '/api/settings', { hourlyRate: rate, monthlyRates: state.settings.monthlyRates || {} }).then(function() {
     toast('已保存时薪');
     closeRateModal();
     refreshDisplayCards();
@@ -1786,7 +1812,7 @@ function refreshDisplayCards() {
     var rate = (state.settings && state.settings.hourlyRate) ? state.settings.hourlyRate : 0;
     el.textContent = rate > 0 ? ('¥' + rate + '/时') : '未设置';
   }
-  // 自定义费用摘要
+  // 自定义费用摘要 — 每项一行，清爽展示
   el = $('displayRecurring');
   if (el) {
     var fees = (state.settings && state.settings.recurringFees) || [];
@@ -1799,11 +1825,11 @@ function refreshDisplayCards() {
         var label = f.name || '费用';
         var amt = Number(f.amount) || 0;
         var cycleTag = f.cycle === 'quarterly' ? '/季' : '/月';
-        return label + ' ¥' + amt + cycleTag;
+        return '<div class="fee-item">' + escHtml(label) + ' <strong>¥' + amt + '</strong>' + escHtml(cycleTag) + '</div>';
       });
-      el.textContent = parts.join('、');
+      el.innerHTML = parts.join('');
       el.style.color = 'var(--text)';
-      el.style.fontWeight = '600';
+      el.style.fontWeight = '500';
     }
   }
 }
@@ -1845,62 +1871,24 @@ function renderSummary(scope) {
   ym = y + '-' + pad2(m + 1);
   labelPrefix = y + '年' + (m + 1) + '月';
 
-  var hours = 0, cost = 0, recurring = 0, grandTotal = 0, i, r, el, h;
+  var hours = 0, cost = 0, i, r, el, h;
   if (state.records) {
     for (i = 0; i < state.records.length; i++) {
       r = state.records[i];
       if (!r || !r.date) continue;
-      if (r.date.slice(0, 7) !== ym) continue; // 仅统计目标月份
+      if (r.date.slice(0, 7) !== ym) continue;
       hours += Number(r.hours) || 0;
       cost += Number(r.subtotal) || 0;
     }
-  }
-  // 周期性费用：按月度展示（后端 summary.monthlyRecurring 已是月折算值）
-  if (state.summary) {
-    recurring = state.summary.monthlyRecurring || 0;
-    grandTotal = cost + recurring;
-  } else {
-    grandTotal = cost;
   }
   h = Math.round(hours * 100) / 100;
   el = $('statHours'); if (el) el.innerHTML = h + '<span class="stat-unit">h</span>';
   el = $('statCost'); if (el) el.textContent = '¥' + money(cost);
 
-  // 自定义费用卡片：有数据才显示（对标要求）
-  var recWrap = $('statRecurringWrap');
-  var recVal = $('statRecurringVal');
-  var recLabel = $('statRecurringLabel');
-  var totalWrap = $('statTotalWrap');
-  // 动态构建费用名称标签
-  var fees = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
-  var feeNames = [];
-  for (var fi = 0; fi < fees.length; fi++) { if (fees[fi].name) feeNames.push(fees[fi].name); }
-  var displayLabel = feeNames.length > 0 ? feeNames.join(' / ') : '自定义费用';
-  if (recurring > 0 && recWrap) {
-    recWrap.className = 'stat-card stat-amber'; // 移除 .hidden
-    if (recVal) recVal.textContent = '¥' + money(recurring);
-    if (recLabel) recLabel.textContent = displayLabel;
-  } else if (recWrap) {
-    recWrap.className = 'stat-card stat-amber hidden';
-  }
-
-  el = $('statTotal'); if (el) el.textContent = '¥' + money(grandTotal);
   // 卡片标签：跟随当前统计月份
-  var lblHours = $('statHoursLabel'), lblCost = $('statCostLabel'), lblTotal = $('statTotalLabel');
+  var lblHours = $('statHoursLabel'), lblCost = $('statCostLabel');
   if (lblHours) lblHours.textContent = labelPrefix + '加班';
   if (lblCost) lblCost.textContent = labelPrefix + '加班费';
-  if (lblTotal) lblTotal.textContent = labelPrefix + '总费用';
-  // 总费用明细
-  var subEl = $('statTotalSub');
-  if (subEl) {
-    var parts = ['加班费 ¥' + money(cost)];
-    if (recurring > 0) {
-      var fees2 = (state.settings && state.settings.recurringFees) ? state.settings.recurringFees : [];
-      var names = fees2.length ? fees2.map(function(f){ return f.name || '费用'; }).join('+') : '自定义费用';
-      parts.push(names + ' ¥' + money(recurring));
-    }
-    subEl.textContent = parts.join(' + ');
-  }
 }
 
 /* ============ 查询功能：按月份 / 年份 / 自定义时间段 ============ */
@@ -2602,7 +2590,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.7';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.8';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
