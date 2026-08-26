@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.2.2';
+const APP_VERSION = '1.2.3';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -338,7 +338,7 @@ function ckMarkSlot(id, date, slot) { ck.scheduleLog = ck.scheduleLog || {}; con
 function ckBump() { ck.meta.additionsSinceBackup = (ck.meta.additionsSinceBackup || 0) + 1; ckSave(); }
 function ckLog(id, res) { const s = ck.sites.find(x => x.id === id); if (!s) return; s.lastResult = res; s.lastRun = ckDs(); if (res.ok) ckMarkDone(id); ckSave(); }
 async function ckCheckinSite(id) { const s = ck.sites.find(x => x.id === id); if (!s) return { ok: false, reason: '站点不存在' }; const res = await ckRun(s); ckLog(id, res); return res; }
-async function ckCheckinAll() { const targets = ck.sites.filter(s => s.enabled && !ckSiteDoneToday(s.id)); const out = { ok: 0, fail: 0, list: [] }; for (const s of targets) { const res = await ckRun(s); ckLog(s.id, res); if (res.ok) out.ok++; else out.fail++; out.list.push({ name: s.name, ok: res.ok, reason: res.reason || ('HTTP ' + res.status) }); await new Promise(r => setTimeout(r, 600)); } return out; }
+async function ckCheckinAll() { const targets = ck.sites.filter(s => s.enabled && !ckSiteDoneToday(s.id)); const out = { ok: 0, fail: 0, list: [] }; for (const s of targets) { const res = await ckRun(s); ckLog(s.id, res); if (res.ok) out.ok++; else out.fail++; out.list.push({ name: s.name, ok: res.ok, reason: res.reason || ('HTTP ' + res.status), details: res.details || null }); await new Promise(r => setTimeout(r, 600)); } return out; }
 async function ckCheckinAutoDaily() { const targets = ck.sites.filter(s => s.enabled && !s.schedule && !ckSiteDoneToday(s.id)); const out = { ok: 0, fail: 0, list: [] }; for (const s of targets) { const res = await ckRun(s); ckLog(s.id, res); if (res.ok) out.ok++; else out.fail++; out.list.push({ name: s.name, ok: res.ok, reason: res.reason || ('HTTP ' + res.status) }); await new Promise(r => setTimeout(r, 600)); } return out; }
 function ckDaily() { const t = ckDs(); if (ck.daily[t]) { delete ck.daily[t]; ckSave(); return { ok: true, undone: true }; } ck.daily[t] = Date.now(); ckBump(); ckSave(); return { ok: true, done: true }; }
 
@@ -910,11 +910,11 @@ async function handleApi(req, res, apiPath, method) {
     }
   }
 
-  // POST /api/backup — 手动触发一次备份
+  // POST /api/backup — 手动触发一次备份（强制，立即备份最新数据，含签到 + Cookie）
   if (head === 'backup' && method === 'POST') {
     try {
-      runBackup();
-      return sendJSON(res, 200, { ok: true, message: '备份完成' });
+      runBackup(true);
+      return sendJSON(res, 200, { ok: true, message: '已备份（含加班 + 签到数据及 Cookie）' });
     } catch (e) {
       return sendJSON(res, 500, { error: '备份失败: ' + e.message });
     }
@@ -951,6 +951,22 @@ async function handleApi(req, res, apiPath, method) {
       const fp = path.join(BACKUP_DIR, fname);
       if (!fs.existsSync(fp)) return sendJSON(res, 404, { error: '备份文件不存在' });
       const data = JSON.parse(fs.readFileSync(fp, 'utf8'));
+      // 新格式（v2）：{ kind:'overtime-backup', version:2, db, checkin } —— 同时恢复签到数据 + Cookie
+      if (data && data.kind === 'overtime-backup' && data.version === 2) {
+        if (data.db) {
+          db = data.db;
+          if (!db.settings) db.settings = JSON.parse(JSON.stringify(DEFAULT_DB.settings));
+          if (!Array.isArray(db.records)) db.records = [];
+          saveDB();
+        }
+        if (data.checkin) {
+          ck = ckNormalize(data.checkin);
+          ck.sites = ck.sites.map(s => (s.tpl ? ckExpandTemplate(s) : s));
+          ckSave();
+        }
+        return sendJSON(res, 200, { ok: true, message: '已恢复（含签到数据及 Cookie） ' + fname, records: (db.records || []).length });
+      }
+      // 旧格式（v1）：直接是 db（含 records 数组）
       if (!data || !Array.isArray(data.records)) {
         return sendJSON(res, 400, { error: '备份文件格式无效' });
       }
@@ -1079,10 +1095,10 @@ function localTimeStr(d) {
     + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
 }
 
-// 计算数据哈希（用于判断是否需要备份）
+// 计算数据哈希（用于判断是否需要备份）——含签到数据，Cookie 变更也应触发
 function dataHash() {
   try {
-    const s = JSON.stringify({ settings: db.settings, records: db.records });
+    const s = JSON.stringify({ settings: db.settings, records: db.records, checkin: ck });
     return crypto.createHash('md5').update(s).digest('hex').slice(0, 16);
   } catch (e) { return ''; }
 }
@@ -1090,7 +1106,11 @@ let lastBackupHash = '';
 
 function runBackup(force) {
   try {
-    // 数据没变且非强制 → 跳过
+    // 先把内存中的最新数据落盘，确保备份包含最新改动（含签到数据 / Cookie）
+    try { saveDB(); } catch (e) { console.error('[backup] saveDB failed:', e.message); }
+    try { ckSave(); } catch (e) { console.error('[backup] ckSave failed:', e.message); }
+
+    // 数据没变且非强制 → 跳过（手动备份 force=true 永远执行，保证拿到最新数据）
     const hash = dataHash();
     if (!force && hash && hash === lastBackupHash) {
       console.log('[backup] skipped — data unchanged');
@@ -1099,12 +1119,12 @@ function runBackup(force) {
     fs.mkdirSync(BACKUP_DIR, { recursive: true });
     const stamp = dateStamp(new Date());
     const dest = path.join(BACKUP_DIR, stamp + '.json');
-    if (fs.existsSync(DB_FILE)) {
-      fs.copyFileSync(DB_FILE, dest);
-    }
+    // 合并 db + checkin 为一份备份：加班数据、签到数据、站点 Cookie 一并本地备份
+    const payload = { kind: 'overtime-backup', version: 2, db: db, checkin: ck };
+    fs.writeFileSync(dest, JSON.stringify(payload, null, 2), 'utf8');
     lastBackupHash = hash;
     cleanupBackups();
-    console.log('[backup] done ' + stamp + (force ? ' (manual)' : ''));
+    console.log('[backup] done ' + stamp + (force ? ' (manual)' : '') + ' — db+checkin');
   } catch (e) {
     console.error('[backup] error:', e.message);
   }

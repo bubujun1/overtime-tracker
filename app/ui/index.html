@@ -73,6 +73,13 @@ body{
   background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));
   padding:18px var(--page-pad) 0;position:relative;overflow:hidden
 }
+/* 手机端：整个头部（含 tab）sticky 浮顶，滚动时固定 */
+@media (max-width:719px){
+  .app-header{
+    position:sticky;top:0;z-index:100;
+    overflow:visible
+  }
+}
 .app-header::before{
   content:'';position:absolute;top:-50%;right:-15%;width:220px;height:220px;border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.14),rgba(255,255,255,0) 70%)
@@ -96,9 +103,9 @@ body{
 .hdr-btn:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
 .hdr-btn:active{transform:scale(.90)}
 
-/* 窄屏：header + tab-bar 整体 sticky 浮顶；PC 端隐藏 header 内的 tab */
+/* 窄屏：header 内的 tab 三模块入口；PC 端隐藏 */
 .tab-bar-header{
-  display:flex;position:sticky;top:0;z-index:50;
+  display:flex!important;
   background:linear-gradient(135deg,var(--hdr-from),var(--hdr-to));
   padding:10px var(--page-pad) 12px;margin:10px calc(-1 * var(--page-pad)) 0;
   border-top:1px solid rgba(255,255,255,.18)
@@ -720,9 +727,12 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-hero .mine-save:hover{color:var(--hdr-from);transform:translateY(-1px)}
 
 .ck-quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px}
-.ck-quick-item{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:13px 10px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px}
+.ck-quick-item{border:1px solid var(--border);background:var(--surface);border-radius:14px;padding:13px 10px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;transition:all .16s;display:flex;align-items:center;justify-content:center;gap:6px;position:relative}
 .ck-quick-item:hover{border-color:var(--accent);background:rgba(0,122,255,.05);transform:translateY(-1px)}
 .ck-quick-item:active{transform:scale(.97)}
+.ck-qdel{position:absolute;top:2px;right:4px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.08);color:var(--text-sec);font-size:12px;line-height:18px;text-align:center;cursor:pointer;display:none;align-items:center;justify-content:center;transition:all .15s}
+.ck-quick-item:hover .ck-qdel{display:flex}
+.ck-qdel:hover{background:rgba(220,53,69,.12);color:#dc3545}
 
 .ck-empty{text-align:center;color:var(--text-light);font-size:13px;padding:24px 16px;line-height:1.7}
 
@@ -732,6 +742,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-site-main{flex:1;min-width:0;cursor:pointer}
 .ck-site-name{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px}
 .ck-site-sub{font-size:12px;color:var(--text-light);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ck-detail-list{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:11.5px;line-height:1.6;color:var(--text-sec)}
+.ck-detail-list span{white-space:nowrap}
+.ck-toast-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;line-height:1.7;max-height:200px;overflow:auto;text-align:left;word-break:break-all}
 .ck-site-act{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .ck-badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:600;white-space:nowrap}
 .ck-badge.ok{background:rgba(34,197,94,.14);color:var(--success)}
@@ -1038,10 +1051,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         <!-- 快速添加常用站点 -->
         <div class="group">
           <div class="group-title">快速添加<span class="group-hint">点一下接入常用站点</span></div>
-          <div class="group-card ck-quick">
-            <button type="button" class="ck-quick-item" data-add="tieba">🔥 百度贴吧</button>
-            <button type="button" class="ck-quick-item" data-add="bilibili-live">📺 B站直播</button>
-            <button type="button" class="ck-quick-item" data-add="discuz">🏷️ Discuz论坛</button>
+          <div class="group-card ck-quick" id="ckQuickGrid">
+            <button type="button" class="ck-quick-item" data-add="tieba">🔥 百度贴吧<span class="ck-qdel" data-hide="tieba" title="隐藏此推荐">×</span></button>
+            <button type="button" class="ck-quick-item" data-add="bilibili-live">📺 B站直播<span class="ck-qdel" data-hide="bilibili-live" title="隐藏此推荐">×</span></button>
+            <button type="button" class="ck-quick-item" data-add="discuz">🏷️ Discuz论坛<span class="ck-qdel" data-hide="discuz" title="隐藏此推荐">×</span></button>
             <button type="button" class="ck-quick-item" data-add="custom">🌐 自定义</button>
           </div>
         </div>
@@ -1139,8 +1152,12 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               </div>
             </div>
             <div class="ck-f-row">
-              <label for="ckFUrl">请求地址 URL</label>
-              <input type="text" id="ckFUrl" placeholder="https://...">
+              <label for="ckFUrl">请求地址 URL <span class="ck-hint">输入网址后点「识别」自动填充</span></label>
+              <div style="display:flex;gap:6px;align-items:center">
+                <input type="text" id="ckFUrl" placeholder="如 tieba.baidu.com 或完整 API 地址" style="flex:1">
+                <button type="button" id="ckAutoDetectBtn" class="mine-save" style="flex-shrink:0;padding:8px 14px;font-size:13px;white-space:nowrap">🔍 识别</button>
+              </div>
+              <span class="ck-hint" id="ckDetectHint" style="color:var(--success);display:none"></span>
             </div>
             <div class="ck-f-row" id="ckGetUrlRow">
               <label for="ckFGetUrl">抓表单页地址（formSign 用，可留空）</label>
@@ -1197,6 +1214,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               <button type="button" id="manualBackupBtn" class="ghost-btn" style="flex:1">立即备份</button>
               <button type="button" id="restoreBackupBtn" class="ghost-btn" style="flex:1">恢复备份</button>
             </div>
+            <div style="padding:0 16px 12px;font-size:11.5px;color:var(--text-light);line-height:1.5">「立即备份」会<b>立即</b>保存当前全部最新数据：加班记录、<b>签到配置与站点 Cookie（均本地存储）</b>，点击即备份一份当天快照。</div>
             <div id="backupTip" style="padding:0 16px 12px;font-size:11.5px;color:var(--text-light);line-height:1.5">无法选择文件？<a href="#" id="jsonRestoreLink" style="color:var(--accent);text-decoration:none">点击粘贴 JSON 恢复</a></div>
           </div>
         </div>
@@ -1235,14 +1253,6 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
               <div class="row-value" id="verInline">v1.1.1</div>
-            </div>
-            <div class="row-divider"></div>
-            <div class="row">
-              <div class="row-ico ico-gray" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="8" x2="12" y2="8"/></svg>
-              </div>
-              <div class="row-main"><div class="row-label">当前版本</div></div>
-              <div class="row-value" id="curVerInline">记加班 v1.1.1</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -2350,10 +2360,9 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.2.2';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.2.3';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
-(function(){ var cv = $('curVerInline'); if (cv) cv.textContent = '记加班 v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
 
 function escapeHtml(s) {
@@ -2455,6 +2464,10 @@ function checkForUpdate() {
     if(s.schedule) sub.push('⏰ '+(Array.isArray(s.schedule)?s.schedule.join(' / '):s.schedule));
     if(s.group) sub.push(s.group);
     if(s.lastResult){ if(s.lastResult.reason) sub.push(s.lastResult.reason); else if(s.lastResult.ok) sub.push('上次成功 · HTTP '+(s.lastResult.status||'')); }
+    var detailHtml='';
+    if(s.lastResult && s.lastResult.details && s.lastResult.details.length){
+      detailHtml='<div class="ck-detail-list">'+s.lastResult.details.map(function(d){ return '<span>'+escapeHtml(d)+'</span>'; }).join('')+'</div>';
+    }
     var subText=sub.join('　'); if(subText.length>64) subText=subText.slice(0,64)+'…';
     var enabled = s.enabled!==false;
     return '<div class="ck-site" style="'+(enabled?'':'opacity:.55')+'">'
@@ -2462,6 +2475,7 @@ function checkForUpdate() {
       + '<div class="ck-site-main" data-id="'+escapeHtml(s.id)+'">'
       +   '<div class="ck-site-name">'+escapeHtml(s.name)+(enabled?'':' <span class="ck-badge wait">已停用</span>')+' <span class="ck-badge '+status.cls+'">'+status.text+'</span></div>'
       +   '<div class="ck-site-sub">'+escapeHtml(subText)+'</div>'
+      +   detailHtml
       + '</div>'
       + '<div class="ck-site-act">'
       +   '<button class="ck-run-btn" data-id="'+escapeHtml(s.id)+'" title="立即签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></button>'
@@ -2484,9 +2498,10 @@ function checkForUpdate() {
     var btn=$('ckRunAll'); if(btn){ btn.disabled=true; btn.textContent='签到中…'; }
     ckApi('POST','/all').then(function(r){
       if(!r) return;
-      var msg='完成：成功 '+r.ok+'，失败 '+r.fail;
-      if(r.list){ var f=[]; r.list.forEach(function(x){ if(!x.ok) f.push(x.name); }); if(f.length) msg+='（'+f.join('、')+' 未成功）'; }
-      toast(msg);
+      var msg='✅ 成功 '+r.ok+'，❌ 失败 '+r.fail;
+      var detailLines=[];
+      if(r.list){ r.list.forEach(function(x){ if(x.details && x.details.length) detailLines.push('【'+x.name+'】'+x.details.join(' ')); else if(!x.ok) detailLines.push('【'+x.name+'】'+(x.reason||'失败')); }); }
+      toast(msg+(detailLines.length?'<div class="ck-toast-detail">'+escapeHtml(detailLines.join('\n')).replace(/\n/g,'<br>')+'</div>':''));
       return ckLoad();
     }).catch(function(e){ toast('批量签到异常:'+(e&&e.message||e)); }).then(function(){ if(btn){ btn.disabled=false; btn.textContent='一键全部签到'; } });
   }
@@ -2514,7 +2529,48 @@ function checkForUpdate() {
   function ckClear(){ if(!confirm('确定清空全部签到任务与记录？此操作不可撤销。')) return; ckApi('POST','/clear').then(function(){ toast('已清空'); return ckLoad(); }).catch(function(e){ toast('清空失败:'+(e&&e.message||e)); }); }
   function ckDeleteSite(id){ if(!confirm('删除「'+ckName(id)+'」这个签到任务？')) return; ckApi('DELETE','/site/'+id).then(function(){ toast('已删除'); return ckLoad(); }).catch(function(e){ toast('删除失败:'+(e&&e.message||e)); }); }
 
-  function ckOpenEditor(id, presetKey){
+  /* 快速推荐站点的隐藏/恢复（localStorage 持久化） */
+  var CK_QUICK_KEY = 'ck_hidden_quick';
+  function ckGetHiddenQuick(){ try{ var j=localStorage.getItem(CK_QUICK_KEY); return j?JSON.parse(j):[]; }catch(e){ return []; } }
+  function ckHideQuick(key){ var h=ckGetHiddenQuick(); if(h.indexOf(key)<0) h.push(key); localStorage.setItem(CK_QUICK_KEY, JSON.stringify(h)); ckApplyQuickHidden(); }
+  function ckShowQuick(key){ var h=ckGetHiddenQuick(); h=h.filter(function(k){ return k!==key; }); localStorage.setItem(CK_QUICK_KEY, JSON.stringify(h)); ckApplyQuickHidden(); }
+  function ckApplyQuickHidden(){ var h=ckGetHiddenQuick(); document.querySelectorAll('.ck-quick-item[data-add]').forEach(function(el){ var k=el.getAttribute('data-add'); el.style.display=(h.indexOf(k)>=0)?'none':''; }); }
+  function ckRestoreQuickHidden(){ ckApplyQuickHidden(); }
+
+  /* 网址自动识别：输入普通网址 → 自动填充 API 地址、请求头、类型 */
+  var CK_URL_RULES = [
+    { match: /tieba\.baidu\.com|baidu\.com.*tieba/, name: '百度贴吧', type: 'tiebaOneClick', method: 'POST', url: 'https://tieba.baidu.com/sign/add', headers: '{"Referer":"https://tieba.baidu.com/"}', hint: '已识别为「百度贴吧一键签到」，需粘贴含 BDUSS 的 Cookie' },
+    { match: /bilibili\.com|b23\.tv/, name: 'B站直播', type: 'api', method: 'POST', url: 'https://api.live.bilibili.com/xlive/web-ucenter/v1/sign/DoSign', headers: '{"Referer":"https://live.bilibili.com/"}', hint: '已识别为「B站直播签到」，需粘贴含 SESSDATA 与 bili_jct 的 Cookie' },
+    { match: /discuz|forum\.php/, name: 'Discuz 论坛', type: 'formSign', method: 'POST', url: '', getUrl: '', headers: '{}', hint: '已识别为 Discuz 论坛，请补充论坛地址（如 xxx.com/forum.php），并粘贴 Cookie' },
+    { match: /v2ex\.com/, name: 'V2EX', type: 'api', method: 'GET', url: 'https://www.v2ex.com/mission/daily', headers: '{"Referer":"https://www.v2ex.com/"}', hint: '已识别为 V2EX 每日登录奖励' },
+    { match: /steamcommunity\.com/, name: 'Steam', type: 'api', method: 'POST', url: 'https://store.steampowered.com/api/GetWalletBalance', headers: '{}', hint: '已识别为 Steam（示例地址，请按实际 API 调整）' },
+  ];
+  function ckAutoDetectUrl(){
+    var input=$('ckFUrl'); var hint=$('ckDetectHint');
+    if(!input) return;
+    var val=(input.value||'').trim().toLowerCase();
+    if(!val){ if(hint){hint.style.display='none';} toast('请先输入网址'); return; }
+    // 先尝试提取域名
+    var domain=val.replace(/^https?:\/\//,'').replace(/\/.*$/,'').replace(/:\d+$/,'');
+    for(var i=0;i<CK_URL_RULES.length;i++){
+      var rule=CK_URL_RULES[i];
+      if(rule.match.test(val)||rule.match.test(domain)){
+        // 填充字段
+        if(rule.url && !input.value.match(/^https?:\/\//i)) input.value = rule.url;
+        else if(rule.url) {/* 已有完整 URL 则不覆盖 */}
+        var t=$('ckFType'); if(t&&rule.type) t.value=rule.type;
+        var m=$('ckFMethod'); if(m&&rule.method) m.value=rule.method;
+        var h=$('ckFHeaders'); if(h&&rule.headers) h.value=rule.headers;
+        var g=$('ckFGetUrl'); if(g&&rule.getUrl!==undefined) g.value=rule.getUrl||'';
+        if(hint){ hint.textContent='✅ '+rule.hint; hint.style.display=''; }
+        ckToggleTypeRows();
+        toast('已识别：'+rule.name);
+        return;
+      }
+    }
+    if(hint){ hint.textContent='⚠️ 未能自动识别该网址，请手动填写完整 API 地址'; hint.style.display=''; color='var(--warning)'; }
+    toast('未能自动识别，请手动填写');
+  }  function ckOpenEditor(id, presetKey){
     ckEditId = id || null; ckSchedArr = []; ckEditReq = null;
     var site = id ? ckFind(id) : null;
     if(site){
@@ -2585,11 +2641,19 @@ function checkForUpdate() {
   function ckBind(){
     var ra=$('ckRunAll'); if(ra) ra.onclick=ckRunAll;
     var ab=$('ckAddBtn'); if(ab) ab.onclick=function(){ ckOpenEditor(null); };
-    Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){ el.onclick=function(){ ckOpenEditor(null, el.getAttribute('data-add')); }; });
+    // 快速添加：点击卡片打开编辑器；× 按钮隐藏推荐
+    Array.prototype.forEach.call(document.querySelectorAll('[data-add]'), function(el){
+      el.onclick=function(e){ if(e.target.classList.contains('ck-qdel')) return; ckOpenEditor(null, el.getAttribute('data-add')); };
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.ck-qdel'), function(el){
+      el.onclick=function(e){ e.stopPropagation(); var k=el.getAttribute('data-hide'); ckHideQuick(k); };
+    });
+    ckRestoreQuickHidden();
     var mc=$('ckModalClose'); if(mc) mc.onclick=ckCloseEditor;
     var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
     var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
     var ft=$('ckFType'); if(ft) ft.onchange=ckToggleTypeRows;
+    var ad=$('ckAutoDetectBtn'); if(ad) ad.onclick=ckAutoDetectUrl;
     var sa=$('ckSchedAddBtn'); if(sa) sa.onclick=function(){ var v=$('ckSchedAdd').value; if(v && ckSchedArr.indexOf(v)<0){ ckSchedArr.push(v); ckRenderSched(); } };
     var at=$('ckAutoTime'); if(at) at.onchange=ckSaveSettings;
     var ar=$('ckAutoRun'); if(ar) ar.onchange=ckSaveSettings;
