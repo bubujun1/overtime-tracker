@@ -139,30 +139,41 @@ body{
   flex:1;padding:0 var(--page-pad);margin-top:0;position:relative;z-index:2;
   max-width:none;margin-left:auto;margin-right:auto;width:100%
 }
-/* PC端：左右分栏（左侧导航+统计+费率 / 右侧日历全宽） */
-.layout-desktop{
-  display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;padding-top:16px
+/* PC端：左侧边栏(导航+统计) + 右侧内容(日历) */
+.sidebar-left{
+  display:flex;flex-direction:column;gap:0;
+  width:276px;flex-shrink:0
 }
-.layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-.layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-/* 左栏：统计+费率紧致排列 */
-.layout-right .stats-grid{flex-direction:column;gap:10px}
-.layout-right .stat-card{padding:14px 16px}
-.layout-right .stat-val{font-size:22px}
-.layout-right .rate-section{margin-top:0}
-.layout-right .rate-section{display:flex;flex-direction:column;gap:8px}
-.layout-right .info-card{padding:12px 14px}
-/* 右栏日历区 */
-.layout-left .page-title-row{padding:12px 4px 8px}
+.sidebar-stats{
+  display:flex;flex-direction:column;gap:var(--card-gap);
+  padding:14px 10px 6px
+}
+.sidebar-stats .stats-grid{flex-direction:column;gap:8px}
+.sidebar-stats .stat-card{padding:12px 14px}
+.sidebar-stats .stat-val{font-size:20px}
+.sidebar-stats .rate-section{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.sidebar-stats .info-card{padding:10px 12px}
+/* 右侧：日历区域 */
+.layout-desktop{
+  display:flex;flex-direction:column;align-items:center;padding-top:16px
+}
+.layout-cal{
+  width:auto;max-width:860px;width:100%
+}
 @media(max-width:719px){
-  .layout-desktop{display:block;grid-template-columns:none}
-  .layout-right{margin-top:var(--card-gap)}
+  /* 手机端：左侧栏不隐藏，只隐藏侧边导航（底部已有），保留统计卡片 */
+  .sidebar-left{display:flex;flex-direction:column;width:100%;gap:0}
+  .sidebar-left .tab-bar{display:none}
+  .sidebar-stats{padding:10px 12px}
+  .sidebar-stats .stats-grid{flex-direction:row;gap:8px}
+  .sidebar-stats .stat-card{padding:12px 14px}
+  .sidebar-stats .stat-val{font-size:22px}
+  .sidebar-stats .rate-section{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .layout-desktop{display:block}
+  .layout-cal{max-width:none;width:100%}
   .stats-grid{flex-direction:row;gap:10px}
   .stat-card{padding:16px 14px}
   .stat-val{font-size:24px}
-  /* 恢复手机端默认样式覆盖 */
-  .layout-right .stats-grid{flex-direction:row}
-  .layout-right .rate-section{display:grid;grid-template-columns:1fr 1fr}
 }
 
 /* ---- 页面标题行 ---- */
@@ -182,7 +193,24 @@ body{
 .hidden{display:none!important}
 
 /* ==================== 日历卡片 ==================== */
-.cal-card{padding:18px 16px}
+/* 精致化：圆角渐变品红外边框 + 四周留白（不铺满） */
+.cal-card{
+  position:relative;
+  padding:20px 18px;
+  border:none;
+  border-radius:22px;
+  margin:12px 10px;
+  background:var(--surface);
+  box-shadow:0 8px 28px rgba(192,38,211,.12),0 2px 10px rgba(108,99,255,.06);
+  overflow:visible
+}
+/* 渐变品红描边（圆角，不影响内部内容） */
+.cal-card::before{
+  content:"";position:absolute;inset:0;border-radius:22px;padding:2px;pointer-events:none;
+  background:linear-gradient(135deg,#ff8ad1 0%,#ec4fb4 46%,#b0328f 100%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude
+}
 .cal-nav-row{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:14px}
 .cal-arrow{
   width:36px;height:36px;border-radius:50%;border:1.5px solid var(--border);
@@ -210,9 +238,9 @@ body{
 /* 日历网格 —— 修复手机跑偏：固定比例 + 自适应高度 */
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;width:100%}
 .cal-cell{
-  position:relative;aspect-ratio:1 / 1.1;min-height:52px;border-radius:var(--r-cell);
+  position:relative;aspect-ratio:1.65 / 1;min-height:42px;border-radius:var(--r-cell);
   background:var(--surface-solid);border:1px solid var(--border-light);
-  padding:5px 4px 4px;cursor:pointer;overflow:hidden;
+  padding:4px 3px 3px;cursor:pointer;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;
   transition:transform .18s,box-shadow .2s,border-color .18s,background .2s
 }
@@ -223,19 +251,20 @@ body{
 .cal-num{font-size:14px;font-weight:650;line-height:1.2;color:var(--text);display:block;text-align:center}
 /* 节假日名 */
 .cal-hname{font-size:9.5px;color:var(--cal-ho-text);line-height:1.2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-/* 加班角标 — 居中置底 */
+/* 加班时间角标 — 底部居中（PC端） */
 .cal-ot-badge{
   font-size:9px;font-weight:700;color:#fff;
   background:linear-gradient(135deg,#6C63FF,#8B7FFF);padding:1.5px 6px;border-radius:8px;
   line-height:1.4;min-height:0;display:inline-block;text-align:center;
   box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
 }
-/* 备注文字 — 加班单元格内显示 */
+/* 备注文字 — 中间居中（PC端），纯文字无装饰 */
 .cal-note{
-  font-size:8px;font-weight:500;color:var(--accent);line-height:1.2;
-  display:block;text-align:center;margin-top:2px;
+  font-size:9.5px;font-weight:600;color:#b03a5c;line-height:1.3;
+  display:flex;flex:1 1 auto;align-items:center;justify-content:center;
+  text-align:center;width:100%;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
-  opacity:.8
+  margin-top:1px
 }
 
 /* 单元格状态色 */
@@ -249,16 +278,19 @@ body{
 .cal-cell.cal-out{opacity:.22;cursor:default;background:transparent!important;border-color:transparent!important}
 .cal-cell.cal-out:hover{transform:none;box-shadow:none;border-color:transparent!important}
 
-/* 手机端日历适配 —— 关键修复 */
+/* 手机端日历适配 —— 方正格子，不显示备注 */
 @media(max-width:420px){
-  .cal-cell{aspect-ratio:1 / 1;min-height:44px;padding:4px 3px 3px}
+  .cal-cell{aspect-ratio:1 / 1;min-height:44px;padding:3px 2px 2px;border-radius:10px}
   .cal-num{font-size:13px}.cal-hname{font-size:8.5px}
   .cal-ot-badge{font-size:8px;padding:1px 5px;border-radius:6px}
-  .cal-grid{gap:4px}.cal-week-hdr{gap:4px}
-  .cal-card{padding:14px 10px}
+  .cal-grid{gap:6px}.cal-week-hdr{gap:6px}
+  .cal-card{padding:14px 10px;margin:8px 4px;border-radius:18px}
+  .cal-card::before{border-radius:18px}
+  /* 手机版不显示备注 */
+  .cal-note{display:none!important}
 }
 @media(max-width:360px){
-  .cal-cell{min-height:38px;padding:3px 2px 2px}
+  .cal-cell{min-height:38px;padding:2px 2px 1px;border-radius:8px}
   .cal-num{font-size:12px}
 }
 
@@ -765,7 +797,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 @media(min-width:640px){
   :root{--page-pad:22px;--card-gap:18px}
   .app-header{padding:36px var(--page-pad) 24px}
-  .cal-cell{min-height:56px}
+  .cal-cell{min-height:46px}
   .stat-val{font-size:26px}
   .layout-desktop{gap:18px}
 }
@@ -773,26 +805,24 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   :root{--page-pad:24px;--card-gap:18px}
   .app-header{padding:36px var(--page-pad) 24px}
   .header-text h1{font-size:21px}
-  .cal-cell{min-height:58px}
+  .cal-cell{min-height:48px}
   .cal-num{font-size:14.5px}
   .cal-ot-badge{font-size:9.5px;padding:1.5px 6px}
   .stat-val{font-size:26px}
   .modal-dialog{max-width:420px;padding:26px 24px 24px}
-  /* 桌面端：模块导航变左侧竖排 + 左栏统计区 */
-  .app-main{display:flex;align-items:flex-start;gap:20px;padding:0 var(--page-pad)}
+  /* 桌面端：左侧边栏(导航+统计) + 右侧日历 */
+  .app-main{display:flex;align-items:flex-start;gap:24px;padding:0 var(--page-pad)}
   .app-body{max-width:none;margin:0;flex:1;min-width:0;padding:0}
+  .sidebar-left{display:flex}
   .tab-bar{
-    display:flex;position:sticky;top:24px;flex-direction:column;align-items:stretch;
-    width:260px;flex-shrink:0;gap:6px;
-    background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
-    border-bottom:none;padding:0;margin:0
+    display:flex;flex-direction:column;align-items:stretch;
+    gap:6px;background:transparent;
+    border-bottom:none;padding:12px 8px 10px;margin:0
   }
-  .tab-item{flex:none;width:100%;justify-content:flex-start;padding:12px 16px;font-size:14.5px}
-  .tab-item svg{width:19px;height:19px}
+  .tab-item{flex:none;width:100%;justify-content:flex-start;padding:11px 14px;font-size:14px}
+  .tab-item svg{width:18px;height:18px}
   .tab-item:hover{background:var(--bg)}
-  .tab-item.active{box-shadow:var(--shadow-glass)}
-  /* PC端左栏统计+信息卡紧致竖排 */
-  .layout-desktop{grid-template-columns:260px 1fr;gap:18px}
+  .tab-item.active{box-shadow:var(--shadow-glass);background:var(--surface);border-radius:12px}
 }
 @media(min-width:900px){
   :root{--page-pad:20px}  /* 中宽 PC 适度留白 */
@@ -801,20 +831,18 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   :root{--page-pad:18px;--card-gap:18px}
   .app-body{max-width:1400px}
   .app-header{padding:28px var(--page-pad) 20px}
-  .cal-cell{min-height:60px}
+  .cal-cell{min-height:50px}
   .cal-num{font-size:15px}
   .cal-ot-badge{font-size:10px;padding:2px 7px}
   .stat-val{font-size:26px}
-  .tab-bar{width:260px}
-  .layout-desktop{grid-template-columns:260px 1fr;gap:20px}
+  .layout-cal{max-width:900px}
 }
 @media(min-width:1440px){
   :root{--page-pad:20px;--card-gap:20px}
   .app-body{max-width:1600px}
-  .cal-cell{min-height:64px}
+  .cal-cell{min-height:52px}
   .stat-val{font-size:28px}
-  .tab-bar{width:260px}
-  .layout-desktop{grid-template-columns:260px 1fr;gap:22px}
+  .layout-cal{max-width:960px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* ============ 签到模块专属样式（复用全局变量，保持视觉一致） ============ */
@@ -909,14 +937,48 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ck-adv>summary:hover{color:var(--accent)}
 .ck-adv .ck-f-row{padding:0 14px}
 .ck-adv .ck-f-row:last-child{padding-bottom:12px}
-.ck-sec{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-top:4px;text-transform:uppercase}
-.ck-modal-foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--border-light)}
-.ck-modal-foot .mine-save{margin:0;flex:1}
-.ck-modal-foot .ghost-btn{flex:1;margin:0}
+.ck-sec{font-size:12.5px;font-weight:600;color:var(--text-sec);margin-top:2px;display:flex;align-items:center;gap:8px}
+.ck-sec::before{content:'';width:3px;height:13px;border-radius:2px;background:var(--accent);opacity:.65}
+.ck-modal-foot{display:flex;align-items:center;gap:12px;padding:16px 20px;border-top:1px solid var(--border-light)}
+/* 删除按钮 — 文字式危险按钮（左对齐，与右侧操作组分离） */
+.ck-foot-del{
+  margin-right:auto;background:none;border:none;
+  color:var(--danger);font-size:14px;font-weight:500;
+  padding:10px 16px;border-radius:8px;cursor:pointer;transition:all .15s
+}
+.ck-foot-del:hover{background:rgba(239,68,68,.06);color:#d63a3a}
+.ck-foot-del:active{background:rgba(239,68,68,.1);transform:scale(.97)}
+/* 右侧操作组：取消 + 保存 等宽并列 */
+.ck-foot-actions{display:flex;gap:10px;flex-shrink:0}
+/* 统一按钮规格：长方形圆角，固定最小宽度，等高 */
+.ck-foot-actions .ghost-btn,
+.ck-foot-actions .mine-save{
+  flex:none;width:100px;margin:0;display:inline-flex;align-items:center;justify-content:center;
+  padding:11px 0;border-radius:8px;font-size:14px;font-weight:600;letter-spacing:.5px;
+  box-sizing:border-box;transition:all .15s;-webkit-tap-highlight-color:transparent
+}
+/* 取消 — 描边式 */
+.ck-foot-actions .ghost-btn{
+  border:1.5px solid var(--border);background:var(--surface-solid);color:var(--text-sec)
+}
+.ck-foot-actions .ghost-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(99,102,255,.04)}
+.ck-foot-actions .ghost-btn:active{transform:scale(.97);background:var(--bg)}
+/* 保存 — 填充主色 */
+.ck-foot-actions .mine-save{
+  border:none;background:linear-gradient(135deg,#6C63FF,#7C6FFF);color:#fff;
+  box-shadow:0 3px 12px rgba(108,99,255,.22)
+}
+.ck-foot-actions .mine-save:hover{box-shadow:0 5px 18px rgba(108,99,255,.32);transform:translateY(-1px)}
+.ck-foot-actions .mine-save:active{transform:scale(.97)}
 
 @media (max-width:520px){
   .ck-f-grid{grid-template-columns:1fr}
   .ck-quick{grid-template-columns:1fr 1fr}
+  /* 手机端弹窗按钮等比缩小 */
+  .ck-modal-foot{padding:14px 16px;gap:10px}
+  .ck-foot-del{font-size:13px;padding:9px 14px}
+  .ck-foot-actions .ghost-btn,
+  .ck-foot-actions .mine-save{width:88px;padding:10px 0;font-size:13px;border-radius:8px}
 }
 </style>
 <script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
@@ -954,8 +1016,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     </nav>
   </header>
 
-  <!-- 主区域：手机竖向（模块在顶）/ 桌面横向（模块在左） -->
+  <!-- 主区域：PC端左侧边栏(导航+统计) / 右侧内容(日历) -->
   <div class="app-main">
+  <!-- PC端左侧栏：导航 + 统计 + 费率 -->
+  <aside class="sidebar-left" id="sidebarLeft">
   <!-- 模块导航 -->
   <nav class="tab-bar" id="tabBar">
     <button type="button" class="tab-item active" data-tab="overtime">
@@ -972,14 +1036,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
     </button>
   </nav>
 
-  <!-- 主内容区 -->
-  <main class="app-body">
-    <!-- 加班 -->
-    <section class="tab-pane active" id="paneOvertime">
-    <div class="layout-desktop">
-
-      <!-- 统计卡片 + 费率信息（日历上方） -->
-      <div class="layout-right">
+  <!-- 统计卡片 + 费率信息（导航下方） -->
+  <div class="sidebar-stats" id="sidebarStats">
 
         <!-- 统计卡片 — 双列并列 -->
         <section class="stats-grid" id="statsGrid">
@@ -1020,10 +1078,17 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </section>
 
-      </div><!-- /.layout-right (stats+rate) -->
+      </div><!-- /.sidebar-stats (stats+rate) -->
+  </aside><!-- /.sidebar-left -->
 
-      <!-- 日历（全宽） -->
-      <div class="layout-left">
+  <!-- 主内容区：日历 -->
+  <main class="app-body">
+    <!-- 加班 -->
+    <section class="tab-pane active" id="paneOvertime">
+    <div class="layout-desktop">
+
+      <!-- 日历（右侧，宽度受控） -->
+      <div class="layout-cal">
 
         <div class="page-title-row">
           <span class="page-emoji" aria-hidden="true">&#x1F4B0;</span>
@@ -1118,7 +1183,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </section>
 
-      </div><!-- /.layout-left (calendar) -->
+      </div><!-- /.layout-cal (calendar) -->
 
     </div><!-- /.layout-desktop -->
     </section><!-- /#paneOvertime -->
@@ -1237,7 +1302,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
               <label for="ckFUrl">网站地址 <span class="ck-hint">输入域名，点「识别」自动找到签到接口</span></label>
               <div class="ck-url-flex">
                 <input type="text" id="ckFUrl" placeholder="如 bilibili.com / tieba.baidu.com / 52pojie.cn">
-                <button type="button" id="ckAutoDetectBtn" class="ck-detect-btn">🔍 识别并填充</button>
+                <button type="button" id="ckAutoDetectBtn" class="ck-detect-btn">🔍 识别</button>
               </div>
               <span class="ck-hint" id="ckDetectHint" style="display:none"></span>
             </div>
@@ -1272,11 +1337,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             </div>
           </div>
           <div class="ck-modal-foot">
-            <button type="button" class="ghost-btn" id="ckModalCancel">取消</button>
-            <div style="display:flex;gap:8px;flex:1;justify-content:flex-end">
-              <button type="button" class="ghost-btn" id="ckModalDel" style="display:none;color:var(--danger)">删除</button>
-              <button type="button" class="mine-save" id="ckModalRun" style="display:none;background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:12px;font-size:14px;cursor:pointer">▶ 立即签到</button>
-              <button type="button" mine-save id="ckModalSave">保存</button>
+            <button type="button" class="ck-foot-del" id="ckModalDel" style="display:none">删除</button>
+            <div class="ck-foot-actions">
+              <button type="button" class="ghost-btn" id="ckModalCancel">取消</button>
+              <button type="button" class="mine-save" id="ckModalSave">保存</button>
             </div>
           </div>
         </div>
@@ -1353,7 +1417,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.3.0</div>
+              <div class="row-value" id="verInline">v1.3.1</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1638,9 +1702,11 @@ function buildDayMap() {
     r = state.records[i];
     d = (r && r.date) ? r.date : '';
     if (!d) continue;
-    if (!map[d]) map[d] = { hours: 0, count: 0 };
+    if (!map[d]) map[d] = { hours: 0, count: 0, note: '' };
     map[d].hours += Number(r.hours) || 0;
     map[d].count += 1;
+    /* 保留最后一条非空备注 */
+    if (r.note && r.note.trim()) map[d].note = r.note.trim();
   }
   return map;
 }
@@ -1693,14 +1759,15 @@ function renderCalendar() {
       if (dateStr === today) cls += ' cal-today';
       hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
       otBadge = (rec && rec.hours > 0) ? '<span class="cal-ot-badge">' + (Math.round(rec.hours * 100) / 100) + 'h</span>' : '';
-      /* 备注显示：有加班记录且有备注时，在角标下方显示截断备注 */
+      /* 备注显示：有加班记录且有备注时，在日期下方居中显示（PC端） */
       var noteEl = '';
       if (rec && rec.note && rec.note.trim()) {
         var ntxt = escHtml(rec.note.trim());
         if (ntxt.length > 8) ntxt = ntxt.slice(0, 7) + '…';
         noteEl = '<span class="cal-note" title="' + escHtml(rec.note.trim()) + '">' + ntxt + '</span>';
       }
-      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + (rec && rec.note ? ' | '+escHtml(rec.note) : '') + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + otBadge + noteEl + '</div>');
+      /* 渲染顺序：日期数字 → 节假日名 → 备注(居中) → 加班时间(底部) */
+      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + (rec && rec.note ? ' | '+escHtml(rec.note) : '') + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + noteEl + otBadge + '</div>');
     }
     daysEl = $('calDays');
     if (daysEl) daysEl.innerHTML = cells.join('');
@@ -2393,6 +2460,9 @@ function bindTabs() {
         }
         if (t === 'settings') { loadBackupList(); renderRecurring(); }
         if (t === 'checkin') { if (window.ckLoad) window.ckLoad(); }
+        /* 统计卡片只在加班tab显示 */
+        var ss = $('sidebarStats');
+        if (ss) ss.style.display = (t === 'overtime') ? '' : 'none';
         try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e) {}
       };
     })(items[i]);
@@ -2591,7 +2661,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.3.0';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.3.1';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
@@ -2792,9 +2862,8 @@ function checkForUpdate() {
   }  function ckOpenEditor(id, presetKey){
     ckEditId = id || null; ckSchedArr = []; ckEditReq = null;
     var site = id ? ckFind(id) : null;
-    var delBtn=$('ckModalDel'), runBtn=$('ckModalRun');
+    var delBtn=$('ckModalDel');
     if(delBtn) delBtn.style.display=site?'':'none';
-    if(runBtn) runBtn.style.display=site?'':'none';
     if(site){
       $('ckModalTitle').textContent='编辑签到任务';
       $('ckFName').value=site.name||''; $('ckFEmoji').value=site.emoji||''; $('ckFGroup').value=site.group||'';
@@ -2907,7 +2976,6 @@ function checkForUpdate() {
     var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
     var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
     var md=$('ckModalDel'); if(md) md.onclick=function(){ if(ckEditId){ ckDeleteSite(ckEditId); ckCloseEditor(); } };
-    var mr=$('ckModalRun'); if(mr) mr.onclick=function(){ if(ckEditId){ ckRunOne(ckEditId, mr); } };
     var dc=$('ckDetailClose'); if(dc) dc.onclick=ckCloseDetail;
     var ft=$('ckFType'); if(ft) ft.onchange=ckToggleTypeRows;
     var ad=$('ckAutoDetectBtn'); if(ad) ad.onclick=ckAutoDetectUrl;
