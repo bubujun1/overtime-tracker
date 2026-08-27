@@ -139,23 +139,30 @@ body{
   flex:1;padding:0 var(--page-pad);margin-top:0;position:relative;z-index:2;
   max-width:none;margin-left:auto;margin-right:auto;width:100%
 }
-/* PC端：单列布局（导航左侧 + 内容区含统计+日历） */
+/* PC端：左右分栏（左侧导航+统计+费率 / 右侧日历全宽） */
 .layout-desktop{
-  display:flex;flex-direction:column;gap:var(--card-gap);padding-top:16px
+  display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;padding-top:16px
 }
 .layout-left{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
 .layout-right{display:flex;flex-direction:column;gap:var(--card-gap);min-width:0}
-/* 右栏占位符：PC新布局下隐藏（统计已移到日历上方） */
-.right-spacer{display:none}
+/* 左栏：统计+费率紧致排列 */
+.layout-right .stats-grid{flex-direction:column;gap:10px}
+.layout-right .stat-card{padding:14px 16px}
+.layout-right .stat-val{font-size:22px}
+.layout-right .rate-section{margin-top:0}
+.layout-right .rate-section{display:flex;flex-direction:column;gap:8px}
+.layout-right .info-card{padding:12px 14px}
+/* 右栏日历区 */
+.layout-left .page-title-row{padding:12px 4px 8px}
 @media(max-width:719px){
-  .layout-desktop{display:block}
+  .layout-desktop{display:block;grid-template-columns:none}
   .layout-right{margin-top:var(--card-gap)}
   .stats-grid{flex-direction:row;gap:10px}
   .stat-card{padding:16px 14px}
   .stat-val{font-size:24px}
-}
-@media(max-width:420px){
-  .stats-grid{flex-direction:column;gap:10px}
+  /* 恢复手机端默认样式覆盖 */
+  .layout-right .stats-grid{flex-direction:row}
+  .layout-right .rate-section{display:grid;grid-template-columns:1fr 1fr}
 }
 
 /* ---- 页面标题行 ---- */
@@ -771,12 +778,12 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .cal-ot-badge{font-size:9.5px;padding:1.5px 6px}
   .stat-val{font-size:26px}
   .modal-dialog{max-width:420px;padding:26px 24px 24px}
-  /* 桌面端：模块导航变左侧竖排 */
+  /* 桌面端：模块导航变左侧竖排 + 左栏统计区 */
   .app-main{display:flex;align-items:flex-start;gap:20px;padding:0 var(--page-pad)}
   .app-body{max-width:none;margin:0;flex:1;min-width:0;padding:0}
   .tab-bar{
     display:flex;position:sticky;top:24px;flex-direction:column;align-items:stretch;
-    width:172px;flex-shrink:0;gap:6px;
+    width:260px;flex-shrink:0;gap:6px;
     background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;
     border-bottom:none;padding:0;margin:0
   }
@@ -784,10 +791,8 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .tab-item svg{width:19px;height:19px}
   .tab-item:hover{background:var(--bg)}
   .tab-item.active{box-shadow:var(--shadow-glass)}
-  /* PC端统计卡片+信息卡横排两列（在日历上方） */
-  .stats-grid{gap:14px}
-  .rate-section{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0}
-  .rate-section .info-card{height:100%}
+  /* PC端左栏统计+信息卡紧致竖排 */
+  .layout-desktop{grid-template-columns:260px 1fr;gap:18px}
 }
 @media(min-width:900px){
   :root{--page-pad:20px}  /* 中宽 PC 适度留白 */
@@ -800,14 +805,16 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .cal-num{font-size:15px}
   .cal-ot-badge{font-size:10px;padding:2px 7px}
   .stat-val{font-size:26px}
-  .tab-bar{width:180px}
+  .tab-bar{width:260px}
+  .layout-desktop{grid-template-columns:260px 1fr;gap:20px}
 }
 @media(min-width:1440px){
   :root{--page-pad:20px;--card-gap:20px}
   .app-body{max-width:1600px}
   .cal-cell{min-height:64px}
   .stat-val{font-size:28px}
-  .tab-bar{width:192px}
+  .tab-bar{width:260px}
+  .layout-desktop{grid-template-columns:260px 1fr;gap:22px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* ============ 签到模块专属样式（复用全局变量，保持视觉一致） ============ */
@@ -833,19 +840,17 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 
 .ck-empty{text-align:center;color:var(--text-light);font-size:13px;padding:24px 16px;line-height:1.7}
 
-.ck-site{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border-light)}
+/* 签到站点卡片 — 小巧精简 */
+.ck-site{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;transition:background .15s}
+.ck-site:hover{background:var(--bg)}
 .ck-site:last-child{border-bottom:none}
-.ck-site-emoji{width:36px;height:36px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.ck-site-main{flex:1;min-width:0;cursor:pointer;min-width:0;overflow:hidden}
-.ck-site-name{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;flex-wrap:wrap;row-gap:2px}
-.ck-site-name span{white-space:nowrap}
-.ck-site-sub{font-size:11.5px;color:var(--text-light);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ck-detail-list{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:5px;font-size:11.5px;line-height:1.6;color:var(--text-sec)}
-.ck-detail-list span{white-space:nowrap}
-.ck-detail-btn{font-size:11px;padding:2px 8px;border-radius:999px;background:rgba(0,122,255,.08);color:var(--accent);cursor:pointer;white-space:nowrap;transition:all .15s;display:inline-flex;align-items:center;gap:2px}
-.ck-detail-btn:hover{background:rgba(0,122,255,.16)}
-.ck-toast-detail{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;line-height:1.7;max-height:200px;overflow:auto;text-align:left;word-break:break-all}
-.ck-site-act{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.ck-site.ck-disabled{opacity:.45}
+.ck-site-fav{width:28px;height:28px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.ck-fav{width:22px;height:22px;border-radius:5px;object-fit:contain}
+.ck-fav-fallback{font-size:16px;line-height:1}
+.ck-site-main{flex:1;min-width:0;cursor:pointer;overflow:hidden}
+.ck-site-name{font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 签到详情/弹窗内操作按钮（保留供弹窗使用） */
 .ck-badge{font-size:10px;padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
 .ck-badge.ok{background:rgba(34,197,94,.14);color:var(--success)}
 .ck-badge.fail{background:rgba(239,68,68,.14);color:var(--danger)}
@@ -1268,7 +1273,11 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
           <div class="ck-modal-foot">
             <button type="button" class="ghost-btn" id="ckModalCancel">取消</button>
-            <button type="button" class="mine-save" id="ckModalSave">保存</button>
+            <div style="display:flex;gap:8px;flex:1;justify-content:flex-end">
+              <button type="button" class="ghost-btn" id="ckModalDel" style="display:none;color:var(--danger)">删除</button>
+              <button type="button" class="mine-save" id="ckModalRun" style="display:none;background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:12px;font-size:14px;cursor:pointer">▶ 立即签到</button>
+              <button type="button" mine-save id="ckModalSave">保存</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2673,11 +2682,10 @@ function checkForUpdate() {
     sites.forEach(function(s){ html += ckSiteHtml(s, today); });
     if(list){
       list.innerHTML=html;
-      Array.prototype.forEach.call(list.querySelectorAll('.ck-site-main'), function(el){ el.onclick=function(){ ckOpenEditor(el.getAttribute('data-id')); }; });
-      Array.prototype.forEach.call(list.querySelectorAll('.ck-run-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckRunOne(el.getAttribute('data-id'), el); }; });
-      Array.prototype.forEach.call(list.querySelectorAll('.ck-del-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckDeleteSite(el.getAttribute('data-id')); }; });
-      Array.prototype.forEach.call(list.querySelectorAll('.ck-detail-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckShowDetail(el.getAttribute('data-id')); }; });
-      Array.prototype.forEach.call(list.querySelectorAll('.ck-toggle-btn'), function(el){ el.onclick=function(e){ e.stopPropagation(); ckToggleEnabled(el.getAttribute('data-id'), el); }; });
+      /* 整个卡片点击 → 打开编辑弹窗 */
+      Array.prototype.forEach.call(list.querySelectorAll('.ck-site'), function(el){
+        el.onclick=function(){ ckOpenEditor(el.getAttribute('data-id')); };
+      });
     }
     var st = ckState.settings || {};
     var at=$('ckAutoTime'); if(at) at.value=st.autoDaily||'09:00';
@@ -2688,27 +2696,19 @@ function checkForUpdate() {
   function ckSiteHtml(s, today){
     var log = ckState.siteLogs && ckState.siteLogs[s.id];
     var done = !!(log && log[today]);
-    var status = done ? {cls:'ok',text:'今日已签'} : (s.lastResult && s.lastResult.ok===false) ? {cls:'fail',text:'上次失败'} : {cls:'wait',text:'待签到'};
-    var sub=[];
-    if(s.schedule) sub.push('⏰ '+(Array.isArray(s.schedule)?s.schedule.join(' / '):s.schedule));
-    if(s.group) sub.push(s.group);
-    if(s.lastResult){ if(s.lastResult.reason) sub.push(s.lastResult.reason); else if(s.lastResult.ok) sub.push('上次成功 · HTTP '+(s.lastResult.status||'')); }
-    var detailBtn='';
-    if(s.lastResult && s.lastResult.details && s.lastResult.details.length){
-      detailBtn=' <span class="ck-detail-btn" data-id="'+escapeHtml(s.id)+'" title="点击查看签到详情">📋 详情 '+s.lastResult.details.length+'条</span>';
-    }
-    var subText=sub.join('　'); if(subText.length>64) subText=subText.slice(0,64)+'…';
+    var status = done ? {cls:'ok',text:'已签'} : (s.lastResult && s.lastResult.ok===false) ? {cls:'fail',text:'失败'} : {cls:'wait',text:'待签'};
     var enabled = s.enabled!==false;
-    return '<div class="ck-site" style="'+(enabled?'':'opacity:.55')+'">'
-      + '<div class="ck-site-emoji">'+escapeHtml(s.emoji||'🌐')+'</div>'
+    /* 从网址提取域名用于 favicon */
+    var domain = '';
+    if(s.url){ try{ domain = new URL(s.url).hostname.replace('www.',''); }catch(e){} }
+    var favIcon = domain ? '<img class="ck-fav" src="https://www.google.com/s2/favicons?domain='+encodeURIComponent(domain)+'&sz=32" alt="" loading="lazy" onerror="this.style.display:none">' : '<span class="ck-fav-fallback">'+escapeHtml(s.emoji||'🌐')+'</span>';
+    /* 名称去掉"签到"后缀 */
+    var displayName = s.name;
+    if(displayName) displayName = displayName.replace(/签到\s*$/,'').trim();
+    return '<div class="ck-site' + (enabled?'':' ck-disabled') + '" data-id="'+escapeHtml(s.id)+'">'
+      + '<div class="ck-site-fav">'+favIcon+'</div>'
       + '<div class="ck-site-main" data-id="'+escapeHtml(s.id)+'">'
-      +   '<div class="ck-site-name">'+escapeHtml(s.name)+(enabled?'':' <span class="ck-badge wait">已停用</span>')+' <span class="ck-badge '+status.cls+'">'+status.text+'</span>'+detailBtn+'</div>'
-      +   '<div class="ck-site-sub">'+escapeHtml(subText)+'</div>'
-      + '</div>'
-      + '<div class="ck-site-act">'
-      +   '<button class="ck-toggle-btn '+(enabled?'on':'off')+'" data-id="'+escapeHtml(s.id)+'" title="'+(enabled?'点击停用':'点击启用')+'"><span class="ck-toggle-slider"></span></button>'
-      +   '<button class="ck-run-btn" data-id="'+escapeHtml(s.id)+'" title="立即签到"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg></button>'
-      +   '<button class="ck-del-btn" data-id="'+escapeHtml(s.id)+'" title="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>'
+      +   '<div class="ck-site-name">'+escapeHtml(displayName||s.name)+' <span class="ck-badge '+status.cls+'">'+status.text+'</span></div>'
       + '</div></div>';
   }
 
@@ -2792,6 +2792,9 @@ function checkForUpdate() {
   }  function ckOpenEditor(id, presetKey){
     ckEditId = id || null; ckSchedArr = []; ckEditReq = null;
     var site = id ? ckFind(id) : null;
+    var delBtn=$('ckModalDel'), runBtn=$('ckModalRun');
+    if(delBtn) delBtn.style.display=site?'':'none';
+    if(runBtn) runBtn.style.display=site?'':'none';
     if(site){
       $('ckModalTitle').textContent='编辑签到任务';
       $('ckFName').value=site.name||''; $('ckFEmoji').value=site.emoji||''; $('ckFGroup').value=site.group||'';
@@ -2903,6 +2906,8 @@ function checkForUpdate() {
     var mc=$('ckModalClose'); if(mc) mc.onclick=ckCloseEditor;
     var mca=$('ckModalCancel'); if(mca) mca.onclick=ckCloseEditor;
     var ms=$('ckModalSave'); if(ms) ms.onclick=ckSaveEditor;
+    var md=$('ckModalDel'); if(md) md.onclick=function(){ if(ckEditId){ ckDeleteSite(ckEditId); ckCloseEditor(); } };
+    var mr=$('ckModalRun'); if(mr) mr.onclick=function(){ if(ckEditId){ ckRunOne(ckEditId, mr); } };
     var dc=$('ckDetailClose'); if(dc) dc.onclick=ckCloseDetail;
     var ft=$('ckFType'); if(ft) ft.onchange=ckToggleTypeRows;
     var ad=$('ckAutoDetectBtn'); if(ad) ad.onclick=ckAutoDetectUrl;
