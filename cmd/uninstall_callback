@@ -1,6 +1,5 @@
 #!/bin/bash
 # 卸载后回调：根据用户在卸载向导中的选择决定是否删除数据
-# 对齐 hermes-agent 的「保留用户数据 / 完全删除」选项
 set -u
 
 APPNAME="overtime-tracker"

@@ -1,13 +1,10 @@
 {
   "name": "overtime-tracker-server",
-  "version": "1.0.0",
+  "version": "1.3.5",
   "private": true,
   "description": "记加班后端服务（零依赖 Node.js）",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
   }
 }
