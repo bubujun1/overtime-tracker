@@ -162,6 +162,8 @@ body{
 }
 @media(max-width:719px){
   /* 手机端：左侧栏不隐藏，只隐藏侧边导航（底部已有），保留统计卡片 */
+  .app-main{flex-direction:column}
+  .app-body{order:-1}
   .sidebar-left{display:flex;flex-direction:column;width:100%;gap:0}
   .sidebar-left .tab-bar{display:none}
   .sidebar-stats{padding:10px 12px}
@@ -1417,7 +1419,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.3.1</div>
+              <div class="row-value" id="verInline">v1.3.2</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1470,7 +1472,21 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         <button type="button" class="modal-close" id="queryModalClose" aria-label="close">&times;</button>
       </div>
       <div id="queryModalBody" style="padding:0 22px 8px">
-        <!-- 查询控件由 JS 从 queryCard 移入 -->
+        <div class="query-row">
+          <select id="queryMode" class="query-select">
+            <option value="month">按月</option>
+            <option value="year">按年</option>
+            <option value="range">自定义区间</option>
+          </select>
+          <input type="month" id="queryMonth" class="query-input" style="display:none">
+          <button type="button" id="queryMonthTrigger" class="query-trigger-btn">选择月份</button>
+          <select id="queryYear" class="query-select" style="display:none"></select>
+          <input type="date" id="queryStart" class="query-input" style="display:none">
+          <span id="queryRangeSep" style="display:none;color:var(--text-light)">至</span>
+          <input type="date" id="queryEnd" class="query-input" style="display:none">
+          <button type="button" id="queryBtn" class="query-btn">查询</button>
+        </div>
+        <div id="queryResult" class="query-result"></div>
       </div>
       <div id="queryModalResultWrap" style="padding:0 22px 18px;display:none"></div>
     </div>
@@ -2104,12 +2120,8 @@ function bindQueryEvents() {
   var qClose = $('queryModalClose');
   var qBody = $('queryModalBody');
   var qResultWrap = $('queryModalResultWrap');
-  var qCard = $('queryCard');
-  if (qBtn && qOverlay && qCard && qBody) {
+  if (qBtn && qOverlay && qBody) {
     qBtn.onclick = function() {
-      // 把查询控件移入弹窗
-      var qr = qCard.querySelector('.query-row');
-      if (qr && !qBody.contains(qr)) { qBody.appendChild(qr); }
       syncVisibility();
       qOverlay.className = 'modal-overlay show';
       // 聚焦模式选择
@@ -2117,27 +2129,12 @@ function bindQueryEvents() {
     };
     function closeQueryModal() {
       qOverlay.className = 'modal-overlay';
-      // 把结果移回（可选，保留在弹窗也行）
-      var resBox = $('queryResult');
-      if (resBox && qResultWrap && resBox.parentNode !== qResultWrap) {
-        qResultWrap.appendChild(resBox);
-        qResultWrap.style.display = resBox.className.indexOf('show') !== -1 ? '' : 'none';
-      }
     }
     if (qClose) qClose.onclick = closeQueryModal;
     if (qOverlay) qOverlay.onclick = function(e) { if (e.target === qOverlay) closeQueryModal(); };
   }
 
-  // 查询完成后把结果移入弹窗
-  var _origRun = runQuery;
-  runQuery = function() {
-    _origRun();
-    var resBox = $('queryResult');
-    if (resBox && qResultWrap && qOverlay) {
-      qResultWrap.appendChild(resBox);
-      qResultWrap.style.display = '';
-    }
-  };
+  // 查询结果 div 已静态位于弹窗内，runQuery 内部直接切换 .show 显示，无需移节点
 }
 function renderRecurring() {
   var rl = $('recurringList');
@@ -2661,7 +2658,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.3.1';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.3.2';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
@@ -2779,7 +2776,9 @@ function checkForUpdate() {
       + '<div class="ck-site-fav">'+favIcon+'</div>'
       + '<div class="ck-site-main" data-id="'+escapeHtml(s.id)+'">'
       +   '<div class="ck-site-name">'+escapeHtml(displayName||s.name)+' <span class="ck-badge '+status.cls+'">'+status.text+'</span></div>'
-      + '</div></div>';
+      + '</div>'
+      + '<button class="ck-run-btn" onclick="event.stopPropagation();ckRunOne(\''+escapeHtml(s.id)+'\',this)" title="立即签到" aria-label="签到">▶</button>'
+      + '</div>';
   }
 
   function ckName(id){ var s=ckFind(id); return s?s.name:'站点'; }
