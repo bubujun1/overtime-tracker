@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.3.4';
+const APP_VERSION = '1.3.5';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -39,6 +39,7 @@ function loadDB() {
       const data = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
       if (!data.settings) data.settings = JSON.parse(JSON.stringify(DEFAULT_DB.settings));
       if (!Array.isArray(data.records)) data.records = [];
+      else data.records = data.records.map(normalizeRecord).filter(Boolean); // 加载时归一化（含日期格式修复）
       if (!Array.isArray(data.settings.presets)) data.settings.presets = [];
       return data;
     }
@@ -453,12 +454,7 @@ function ckTick() {
   for (const s of ck.sites) {
     if (!s.enabled || !s.schedule) continue;
     const slots = ckToSlots(s.schedule);
-    for (const slot of slots) {
-      if (hm >= slot && !ckSlotDone(s.id, today, slot)) {
-        ckCheckinSite(s.id).then((res) => { if (res && res.ok) ckMarkSlot(s.id, today, slot); })
-          .catch((e) => { console.error('[checkin] slot run failed:', s.id, e && e.message || e); });
-      }
-    }
+    for (const slot of slots) { if (hm >= slot && !ckSlotDone(s.id, today, slot)) { ckMarkSlot(s.id, today, slot); ckCheckinSite(s.id); } }
   }
 }
 function startCheckinScheduler() { ckLoad(); setInterval(ckTick, 30000); setInterval(ckSave, 60000); console.log('[checkin] scheduler started (30s, auto=' + ck.settings.autoRun + ')'); }
@@ -494,17 +490,21 @@ function readBody(req) {
   });
 }
 
-function localISODate(d) {
-  d = d || new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return y + '-' + m + '-' + day;
+// 归一化日期字符串：容忍非补零（2026-9-4）、带时间后缀（ISO 时间戳）、首尾空格，统一输出 YYYY-MM-DD
+function normDateStr(v) {
+  if (typeof v !== 'string' || !v.trim()) return '';
+  const s = v.trim();
+  const m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  if (m) return m[1] + '-' + String(Number(m[2])).padStart(2, '0') + '-' + String(Number(m[3])).padStart(2, '0');
+  const d = new Date(s);
+  if (!isNaN(d.getTime())) return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  return '';
 }
+
 function normalizeRecord(r) {
   if (!r || typeof r !== 'object') return null;
   const id = (typeof r.id === 'string' && r.id) ? r.id : crypto.randomUUID();
-  const date = (typeof r.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.date)) ? r.date : localISODate();
+  const date = normDateStr(r.date) || new Date().toISOString().slice(0, 10);
   const hours = round2(Number(r.hours) || 0);
   const note = (typeof r.note === 'string') ? r.note : '';
   const items = Array.isArray(r.items)
@@ -536,7 +536,7 @@ function getMonthlyRate(dateStr) {
 function serveStatic(res, urlPath) {
   let rel = urlPath === '/' ? '/index.html' : urlPath;
   const filePath = path.normalize(path.join(UI_DIR, rel));
-  if (!filePath.startsWith(UI_DIR + path.sep)) {
+  if (!filePath.startsWith(UI_DIR)) {
     res.writeHead(403); res.end('Forbidden'); return;
   }
   if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
@@ -620,28 +620,39 @@ async function checkUpdate() {
     { url: 'https://ghproxy.net/https://raw.githubusercontent.com/' + REPO + '/main/fnpack.json', type: 'fnpack' },
     { url: 'https://cdn.jsdelivr.net/gh/' + REPO + '@main/fnpack.json', type: 'fnpack' }
   ];
-  const probe = (s) => new Promise((resolve) => {
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 8000);
-    fetch(s.url, { signal: ctrl.signal, headers: { 'User-Agent': 'overtime-tracker', 'Accept': 'application/json' } })
-      .then((r) => { clearTimeout(timer); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then((j) => {
-        if (s.type === 'fnpack') {
-          const app = j['overtime-tracker'] || (j.apps && j.apps['overtime-tracker']) || j;
-          resolve({ latest: app.version, downloadUrl: app.download_url || null, publishedAt: null, notes: (app.history && (app.history['v' + app.version] || Object.values(app.history || {}).join('\n'))) || '' });
-        } else {
-          const asset = (j.assets || []).find((a) => String(a.name).toLowerCase().endsWith('.fpk'));
-          resolve({ latest: j.tag_name, downloadUrl: asset ? asset.browser_download_url : null, publishedAt: j.published_at || null, notes: j.body || '' });
-        }
-      })
-      .catch((e) => { clearTimeout(timer); console.error('[check-update] source failed:', s.url, e.message); resolve(null); });
-  });
-  const results = await Promise.all(sources.map(probe));
-  const found = results.find((x) => x && x.latest);
-  if (!found) {
+  let latest = null, downloadUrl = null, publishedAt = null, notes = '';
+  for (const s of sources) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      const r = await fetch(s.url, {
+        signal: ctrl.signal,
+        headers: { 'User-Agent': 'overtime-tracker', 'Accept': 'application/json' }
+      });
+      clearTimeout(timer);
+      if (!r.ok) continue;
+      const j = await r.json();
+      if (s.type === 'fnpack') {
+        const app = j['overtime-tracker'] || (j.apps && j.apps['overtime-tracker']) || j;
+        latest = app.version;
+        downloadUrl = app.download_url || null;
+        const hist = app.history || {};
+        notes = hist['v' + app.version] || Object.values(hist).join('\n') || '';
+      } else {
+        latest = j.tag_name;
+        publishedAt = j.published_at || null;
+        notes = j.body || '';
+        const asset = (j.assets || []).find((a) => String(a.name).toLowerCase().endsWith('.fpk'));
+        downloadUrl = asset ? asset.browser_download_url : null;
+      }
+      if (latest) break;
+    } catch (e) {
+      console.error('[check-update] source failed:', s.url, e.message);
+    }
+  }
+  if (!latest) {
     return { ok: false, error: '无法连接更新服务器，请检查网络后重试', current };
   }
-  const latest = found.latest, downloadUrl = found.downloadUrl, publishedAt = found.publishedAt, notes = found.notes;
   return {
     ok: true,
     current,
@@ -705,8 +716,76 @@ async function handleApi(req, res, apiPath, method) {
     }
   }
 
-  // 一键覆盖安装路由已移除：原实现无鉴权且会 install-fpk 覆盖自身。
-  // 请通过「检查更新」下载 fpk 后到飞牛应用中心手动覆盖安装。
+  // 一键更新：下载新版本 .fpk，并用 fnOS 官方 appcenter-cli 直接覆盖安装（真·自动更新）
+  if (head === 'update' && method === 'POST') {
+    try {
+      const info = await checkUpdate();
+      if (!info.ok) return sendJSON(res, 200, { ok: false, error: info.error, phase: 'check' });
+      if (!info.hasUpdate) return sendJSON(res, 200, { ok: false, error: '当前已是最新版本 v' + info.current, phase: 'check' });
+      if (!info.downloadUrl) return sendJSON(res, 200, { ok: false, error: '未获取到下载地址', phase: 'check' });
+
+      const updateDir = path.join(VAR_DIR, 'updates');
+      fs.mkdirSync(updateDir, { recursive: true });
+      const fpkPath = path.join(updateDir, 'overtime-tracker-' + info.latest + '.fpk');
+
+      const candidates = mirrorCandidates(info.downloadUrl);
+      console.log('[update] download candidates:', candidates);
+      let buf = null, usedUrl = null, lastErr = null;
+      for (const cand of candidates) {
+        try {
+          const dlCtrl = new AbortController();
+          const dlTimer = setTimeout(() => dlCtrl.abort(), 120000); // 2 分钟超时
+          const dlRes = await fetch(cand, {
+            signal: dlCtrl.signal,
+            headers: { 'User-Agent': 'overtime-tracker-updater' }
+          });
+          clearTimeout(dlTimer);
+          if (!dlRes.ok || !dlRes.body) { lastErr = 'HTTP ' + dlRes.status; continue; }
+          buf = Buffer.from(await dlRes.arrayBuffer());
+          usedUrl = cand;
+          break;
+        } catch (e) { lastErr = e.message; }
+      }
+      if (!buf) {
+        return sendJSON(res, 200, { ok: false, error: '下载失败（已尝试直连与 ghproxy 镜像）：' + (lastErr || '未知'), phase: 'download' });
+      }
+
+      fs.writeFileSync(fpkPath, buf);
+      console.log('[update] downloaded via', usedUrl, buf.length, 'bytes ->', fpkPath);
+
+      // 解析 fnOS 安装命令（appcenter-cli install-fpk <path>）
+      const cmd = resolveInstallCmd();
+      if (!cmd) {
+        // 系统无安装命令：仅完成下载，交前端提供「下载安装包」按钮（HTTP 流式下载绕过管理员目录限制）
+        return sendJSON(res, 200, {
+          ok: true,
+          phase: 'download-only',
+          version: info.latest,
+          fpkPath: fpkPath,
+          fpkSize: buf.length,
+          message: '已下载，但系统安装命令不可用，请点击下方按钮下载安装包后到飞牛应用中心手动覆盖'
+        });
+      }
+
+      // 先回包，再延迟触发安装，确保本次响应送达（安装会重启本服务）
+      const resp = {
+        ok: true,
+        phase: 'installing',
+        version: info.latest,
+        fpkPath: fpkPath,
+        fpkSize: buf.length,
+        install: { bin: cmd.bin, sudo: cmd.sudo },
+        message: '已触发覆盖安装，应用将自动重启更新'
+      };
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify(resp));
+      setTimeout(() => { runInstall(cmd, fpkPath); }, 600);
+      return;
+    } catch (e) {
+      return sendJSON(res, 200, { ok: false, error: '更新失败: ' + e.message, phase: 'unknown' });
+    }
+  }
+
   // 下载安装包到浏览器（绕过飞牛文件选择器无法访问管理员目录的限制，作为手动安装的安全通道）
   // 关键修复：WebView 内直连 GitHub 会被 CORS 拦截、<a download> 跨域失效 → 改为「后端同域中转」：
   // 本地无缓存时由 NAS 服务端代下载 GitHub 安装包（NAS 可达 github.com），再同源流式推回浏览器，彻底绕开跨域问题。
@@ -826,34 +905,22 @@ async function handleApi(req, res, apiPath, method) {
     const mode = (req.headers['x-import-mode'] || 'replace').toString().trim().toLowerCase();
     try {
       if (mode === 'merge') {
-        // 合并模式：
-        //  - 有 id 的记录按 id 覆盖（同名 id 替换，不新增）
-        //  - 无 id / 新 id 记录用「日期+时长+备注+费用」内容指纹去重，
-        //    避免重复导入/重导备份导致数据翻倍；保留原有记录顺序
+        // 合并模式：以 id 去重，导入的记录覆盖同名 id，其余追加
         const incomingRecords = Array.isArray(incoming.records) ? incoming.records : [];
-        const fingerprint = (r) => {
-          const rr = (r && typeof r === 'object') ? r : {};
-          const items = Array.isArray(rr.items) ? rr.items.map((it) => (it && (it.name || '') + ':' + (it.amount || 0))).join('|') : '';
-          return (rr.date || '') + '\u0000' + (rr.hours != null ? rr.hours : '') + '\u0000' + (rr.note || '') + '\u0000' + items;
-        };
-        const out = db.records.slice();
         const byId = {};
-        out.forEach((r) => { if (r && r.id) byId[r.id] = r; });
-        const haveFp = new Set(out.map(fingerprint));
-        for (let i = 0; i < incomingRecords.length; i++) {
+        let i;
+        for (i = 0; i < db.records.length; i++) byId[db.records[i].id] = db.records[i];
+        let merged = 0;
+        for (i = 0; i < incomingRecords.length; i++) {
           const rec = normalizeRecord(incomingRecords[i]);
           if (!rec) continue;
-          if (rec.id && byId[rec.id]) {            // 按 id 覆盖（保留顺序）
-            const idx = out.findIndex((x) => x.id === rec.id);
-            if (idx >= 0) out[idx] = rec; else out.push(rec);
-            continue;
-          }
-          const fp = fingerprint(rec);             // 无 id / 新 id：内容指纹去重
-          if (haveFp.has(fp)) continue;
-          haveFp.add(fp);
-          out.push(rec);
+          byId[rec.id] = rec;
+          merged++;
         }
-        db.records = out;
+        db.records = [];
+        for (const k in byId) {
+          if (Object.prototype.hasOwnProperty.call(byId, k)) db.records.push(byId[k]);
+        }
         if (incoming.settings && typeof incoming.settings === 'object') {
           if (typeof incoming.settings.hourlyRate === 'number') db.settings.hourlyRate = round2(incoming.settings.hourlyRate);
           if (Array.isArray(incoming.settings.presets)) {
@@ -934,7 +1001,7 @@ async function handleApi(req, res, apiPath, method) {
       catch { return sendJSON(res, 400, { error: 'invalid json' }); }
       const rec = {
         id: crypto.randomUUID(),
-        date: typeof r.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.date) ? r.date : localISODate(),
+        date: normDateStr(r.date) || new Date().toISOString().slice(0, 10),
         hours: round2(Number(r.hours) || 0),
         note: typeof r.note === 'string' ? r.note : '',
         items: Array.isArray(r.items)
@@ -959,7 +1026,7 @@ async function handleApi(req, res, apiPath, method) {
       try { r = JSON.parse((await readBody(req)) || '{}'); }
       catch { return sendJSON(res, 400, { error: 'invalid json' }); }
       const rec = db.records[idx];
-      if (typeof r.date === 'string' && r.date) rec.date = r.date;
+      if (typeof r.date === 'string' && normDateStr(r.date)) rec.date = normDateStr(r.date);
       if (typeof r.hours === 'number') rec.hours = round2(r.hours);
       if (typeof r.note === 'string') rec.note = r.note;
       if (Array.isArray(r.items)) {
@@ -1173,6 +1240,7 @@ process.on('SIGINT', () => {
 /* ====== 自动备份（每日 06:00，数据变化时才备份，保留最近 3 份）====== */
 const BACKUP_DIR = path.join(DATA_DIR, 'backups');
 const BACKUP_KEEP_DAYS = 3;
+const BACKUP_HASH_FILE = path.join(BACKUP_DIR, '.lasthash'); // 持久化上次备份哈希，重启不丢
 
 function dateStamp(d) {
   return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
@@ -1185,14 +1253,25 @@ function localTimeStr(d) {
     + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
 }
 
-// 计算数据哈希（用于判断是否需要备份）——含签到数据，Cookie 变更也应触发
+// 计算数据哈希（用于判断是否需要备份）——只统计「有效数据」：加班记录 + 设置 + 签到站点配置（含 Cookie）。
+// 签到运行状态（lastRun/lastResult/siteLogs/scheduleLog/daily/meta）每天随调度器变化，不计入，
+// 否则「仅数据变化时备份」永远不成立（签到日志天天变 → 天天备份）。
 function dataHash() {
   try {
-    const s = JSON.stringify({ settings: db.settings, records: db.records, checkin: ck });
+    const ckCore = {
+      settings: ck.settings,
+      sites: (ck.sites || []).map((s) => ({ id: s.id, name: s.name, emoji: s.emoji, group: s.group, schedule: s.schedule, enabled: s.enabled, demo: s.demo, tpl: s.tpl, cookie: s.cookie, req: s.req })),
+    };
+    const s = JSON.stringify({ settings: db.settings, records: db.records, checkin: ckCore });
     return crypto.createHash('md5').update(s).digest('hex').slice(0, 16);
   } catch (e) { return ''; }
 }
 let lastBackupHash = '';
+
+function readSavedBackupHash() {
+  try { return fs.existsSync(BACKUP_HASH_FILE) ? fs.readFileSync(BACKUP_HASH_FILE, 'utf8').trim() : ''; }
+  catch (e) { return ''; }
+}
 
 function runBackup(force) {
   try {
@@ -1202,7 +1281,8 @@ function runBackup(force) {
 
     // 数据没变且非强制 → 跳过（手动备份 force=true 永远执行，保证拿到最新数据）
     const hash = dataHash();
-    if (!force && hash && hash === lastBackupHash) {
+    const savedHash = readSavedBackupHash();
+    if (!force && hash && (hash === lastBackupHash || hash === savedHash)) {
       console.log('[backup] skipped — data unchanged');
       return;
     }
@@ -1212,8 +1292,8 @@ function runBackup(force) {
     // 合并 db + checkin 为一份备份：加班数据、签到数据、站点 Cookie 一并本地备份
     const payload = { kind: 'overtime-backup', version: 2, db: db, checkin: ck };
     fs.writeFileSync(dest, JSON.stringify(payload, null, 2), 'utf8');
-    try { fs.chmodSync(dest, 0o600); } catch (e) { /* ignore */ }
     lastBackupHash = hash;
+    try { fs.writeFileSync(BACKUP_HASH_FILE, hash, 'utf8'); } catch (e) { /* ignore */ }
     cleanupBackups();
     console.log('[backup] done ' + stamp + (force ? ' (manual)' : '') + ' — db+checkin');
   } catch (e) {
