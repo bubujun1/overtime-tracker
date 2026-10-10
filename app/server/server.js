@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.3.6';
+const APP_VERSION = '1.3.7';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -52,7 +52,8 @@ function loadDB() {
 function saveDB() {
   try {
     fs.mkdirSync(DATA_DIR, { recursive: true });
-    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+    // 紧凑序列化（无缩进）：JSON.parse 不受格式影响，可减少约一半磁盘写入量
+    fs.writeFileSync(DB_FILE, JSON.stringify(db), 'utf8');
     return true;
   } catch (e) {
     console.error('saveDB error:', e.message);
@@ -533,6 +534,9 @@ function getMonthlyRate(dateStr) {
   return db.settings.hourlyRate || 0;
 }
 
+// 静态文件内存缓存：同一文件反复请求不再重复读盘；mtime 变化自动失效（更新应用后立即生效）
+const staticCache = new Map(); // filePath -> { mtimeMs, buf }
+
 function serveStatic(res, urlPath) {
   let rel = urlPath === '/' ? '/index.html' : urlPath;
   const filePath = path.normalize(path.join(UI_DIR, rel));
@@ -548,9 +552,15 @@ function serveStatic(res, urlPath) {
     }
     res.writeHead(404); res.end('Not Found'); return;
   }
+  const st = fs.statSync(filePath);
+  let entry = staticCache.get(filePath);
+  if (!entry || entry.mtimeMs !== st.mtimeMs) {
+    entry = { mtimeMs: st.mtimeMs, buf: fs.readFileSync(filePath) };
+    staticCache.set(filePath, entry);
+  }
   const ext = path.extname(filePath).toLowerCase();
   res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
-  res.end(fs.readFileSync(filePath));
+  res.end(entry.buf);
 }
 
 function serveDebug(res) {
@@ -609,8 +619,14 @@ function mirrorCandidates(url) {
 
 // 检查 GitHub 上的最新版本（对齐 fnos-hermes-agent 的「更新页自动拉取版本对比」）
 // 优先读 fnpack.json（第三方源索引，无 API 限流），失败再退回 GitHub Releases API
+// 检查更新结果缓存：页面每次打开前端都会调一次 /api/check-update，
+// 若每次都探测 4 个外网源（单源 8s 超时）既慢又浪费；5 分钟内直接复用结果
+const CU_CACHE_TTL = 5 * 60 * 1000;
+let cuCache = { at: 0, result: null };
+
 async function checkUpdate() {
   const current = APP_VERSION;
+  if (cuCache.result && Date.now() - cuCache.at < CU_CACHE_TTL) return cuCache.result;
   const REPO = 'bubujun1/overtime-tracker';
   // NAS 网络实测：raw.githubusercontent 与 api.github.com 可达；jsdelivr/ghproxy 不稳定或被拦截。
   // 故优先走 NAS 可达源，镜像仅作最后兜底，避免每次「检查更新」先空等两个 8s 超时。
@@ -653,7 +669,7 @@ async function checkUpdate() {
   if (!latest) {
     return { ok: false, error: '无法连接更新服务器，请检查网络后重试', current };
   }
-  return {
+  const result = {
     ok: true,
     current,
     latest,
@@ -662,6 +678,8 @@ async function checkUpdate() {
     publishedAt: publishedAt || null,
     notes: String(notes || '').slice(0, 600)
   };
+  cuCache = { at: Date.now(), result };
+  return result;
 }
 
 // 解析 fnOS 官方安装命令 appcenter-cli（记加班在 fnOS 以高权限运行，可直接用它安装/升级自身）
@@ -703,6 +721,205 @@ function runInstall(cmd, fpkPath) {
   }
 }
 
+/* ==================== 节假日数据（自动同步） ====================
+ * 数据落 holidays.json（与 db.json 同目录），格式与前端 HOLIDAYS 同构：
+ *   { _meta: { updatedAt, perYear: { '2026': { fetchedAt, source } } }, '2026': { ranges, names, workdays } }
+ * 数据源优先级（任一成功即止）：
+ *   ① holiday-cn（NateScarlet/holiday-cn，逐字同步国务院公告，raw.githubusercontent 直连）
+ *   ② timor.tech（国内节假日 API）
+ *   ③ holiday-cn 走 jsdelivr 镜像（raw 不可达时兜底）
+ * 同步策略（2026-10-10 依据历年国务院发布规律定制：无需频繁同步，只在窗口期确保同步）：
+ *   - 服务启动 5 秒后 + 每 24 小时自检一次同步时机（自检是本地计算，不产生网络请求）：
+ *     ① 年份数据缺失：自前一年 10 月 20 日起【每周一次】，12 月 20 日仍未同步改为【每天一次】
+ *        直到拉到（历年发布：2020→11-21、2021→11-25、2022→10-25、2023→12-08、
+ *        2024→10-25、2025→11-12、2026→11-04，均在前一年 10 月下旬~12 月上旬）
+ *     ② 年份已有数据：仅当下一个假期开始日前 60 天内、且该假期季尚未刷新过时，刷新一次
+ *   - 前端翻到无数据的年份时懒加载触发（POST /api/holidays/update，用户主动查看视为显式请求）
+ *   - 设置页「更新节假日数据」手动触发（force=true 强制全部刷新）
+ *   - 拉取失败时保留本地已有数据，绝不覆盖为空
+ * ================================================================ */
+const HOLIDAYS_FILE = path.join(DATA_DIR, 'holidays.json');
+const HOLIDAY_SOURCES = [
+  { name: 'holiday-cn', build: (y) => 'https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/' + y + '.json', fmt: 'holidaycn' },
+  { name: 'timor.tech', build: (y) => 'https://timor.tech/api/holiday/year/' + y, fmt: 'timor' },
+  { name: 'holiday-cn(jsdelivr)', build: (y) => 'https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/' + y + '.json', fmt: 'holidaycn' },
+  { name: 'holiday-cn(api.github)', build: (y) => 'https://api.github.com/repos/NateScarlet/holiday-cn/contents/' + y + '.json', fmt: 'holidaycn-b64' }
+];
+let holidaysCache = null;
+
+function loadHolidays() {
+  if (holidaysCache) return holidaysCache;
+  try { holidaysCache = JSON.parse(fs.readFileSync(HOLIDAYS_FILE, 'utf8')); }
+  catch (e) { holidaysCache = { _meta: { updatedAt: 0, perYear: {} } }; }
+  if (!holidaysCache._meta || typeof holidaysCache._meta !== 'object') holidaysCache._meta = { updatedAt: 0, perYear: {} };
+  if (!holidaysCache._meta.perYear) holidaysCache._meta.perYear = {};
+  return holidaysCache;
+}
+
+function saveHolidays() {
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(HOLIDAYS_FILE, JSON.stringify(holidaysCache, null, 2), 'utf8'); }
+  catch (e) { console.error('[holidays] 保存失败：', e.message); }
+}
+
+function hlToYMD(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function hlIsNextDay(a, b) { const t = new Date(a + 'T00:00:00'); t.setDate(t.getDate() + 1); return hlToYMD(t) === b; }
+function hlDaysBetween(fromStr, toStr) {
+  const a = new Date(fromStr + 'T00:00:00'), b = new Date(toStr + 'T00:00:00');
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+// 归并连续休息日为 ranges（前端 getDayInfo 按区间匹配），区间首日作为节日名
+function hlBuildYearData(offMap, workList) {
+  const off = Object.keys(offMap).sort();
+  const ranges = [];
+  let start = null, end = null;
+  for (const d of off) {
+    if (start === null) { start = d; end = d; continue; }
+    if (hlIsNextDay(end, d)) { end = d; }
+    else { ranges.push([start, end]); start = d; end = d; }
+  }
+  if (start !== null) ranges.push([start, end]);
+  const names = {};
+  for (const rg of ranges) names[rg[0]] = offMap[rg[0]] || '';
+  return { ranges: ranges, names: names, workdays: workList.slice().sort() };
+}
+
+function hlParseHolidayCn(obj, year) {
+  if (!obj || !Array.isArray(obj.days)) return null;
+  const offMap = {}, work = [];
+  for (const it of obj.days) {
+    const d = normDateStr(it.date);
+    if (!d || !d.startsWith(String(year))) continue;
+    if (it.isOffDay === true) offMap[d] = String(it.name || '').trim();
+    else if (it.isOffDay === false) work.push(d);
+  }
+  if (Object.keys(offMap).length === 0) return null;
+  return hlBuildYearData(offMap, work);
+}
+
+function hlParseTimor(obj, year) {
+  if (!obj || !obj.holiday || typeof obj.holiday !== 'object') return null;
+  const offMap = {}, work = [];
+  for (const k of Object.keys(obj.holiday)) {
+    const it = obj.holiday[k] || {};
+    const d = normDateStr(it.date || (String(year) + '-' + k));
+    if (!d || !d.startsWith(String(year))) continue;
+    if (it.holiday === true) offMap[d] = String(it.name || '').trim();
+    else if (it.holiday === false) work.push(d);
+  }
+  if (Object.keys(offMap).length === 0) return null;
+  return hlBuildYearData(offMap, work);
+}
+
+async function fetchHolidayYear(year) {
+  for (const src of HOLIDAY_SOURCES) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      const r = await fetch(src.build(year), { signal: ctrl.signal, headers: { 'User-Agent': 'overtime-tracker/' + APP_VERSION } });
+      clearTimeout(timer);
+      if (!r.ok) { console.log('[holidays] ' + src.name + ' ' + year + ' HTTP ' + r.status); continue; }
+      let obj = await r.json();
+      if (src.fmt === 'holidaycn-b64') {
+        // api.github contents 接口：content 为 base64 编码的文件正文
+        obj = JSON.parse(Buffer.from(String(obj.content || '').replace(/\s/g, ''), 'base64').toString('utf8'));
+      }
+      const data = src.fmt === 'timor' ? hlParseTimor(obj, year) : hlParseHolidayCn(obj, year);
+      if (!data) { console.log('[holidays] ' + src.name + ' ' + year + ' 数据格式异常'); continue; }
+      return { data: data, source: src.name };
+    } catch (e) { console.log('[holidays] ' + src.name + ' ' + year + ' 失败: ' + e.message); }
+  }
+  return null;
+}
+
+// 判断某年是否需要同步（不 force、非用户显式请求时使用）
+// 【发布规律调研，2026-10-10 基于中国政府网原始通知核实】
+//   2020→2019-11-21｜2021→2020-11-25｜2022→2021-10-25｜2023→2022-12-08｜
+//   2024→2023-10-25｜2025→2024-11-12｜2026→2025-11-04
+//   ⇒ 次年安排均在前一年 10 月下旬 ~ 12 月上旬发布（最早 10-25 提前 68 天，最晚 12-08 提前 24 天）
+// ① 年份数据缺失（频率用户 2026-10-10 定稿）：自前一年 10 月 20 日起【每周一次】；
+//    到 12 月 20 日仍未同步则改为【每天一次】，直到拉到为止
+//    （依据：历年发布集中在前一年 11 月，每周一次足以在公布后 7 天内拉到；
+//      最晚发布日 12-08，若 12-20 仍无数据说明异常，加密到每天排查）
+// ② 年份已有数据：仅当下一个假期开始日在 60 天内、且该假期季（窗口）尚未刷新过时，刷新一次
+//    （兜底国务院临时调整安排的极端情况）
+const HL_WEEKLY_MS = 7 * 86400000;   // 每周一次
+const HL_DAILY_MS = 20 * 3600000;    // 每天一次（留 4 小时余量防定时器抖动重复请求）
+function yearNeedsSync(year, hl, today) {
+  const data = hl[year];
+  if (!data) {
+    if (today < (year - 1) + '-10-20') return false;         // 发布窗口未到
+    const info = hl._meta.perYear[year] || {};
+    const last = info.lastTry || 0;
+    if (today <= (year - 1) + '-12-19') {                     // 10-20 ~ 12-19：每周一次
+      return !last || (Date.now() - last) >= HL_WEEKLY_MS;
+    }
+    // 12-20 起：每天一次，直到同步成功
+    return !last || (Date.now() - last) >= HL_DAILY_MS;
+  }
+  const ranges = data.ranges || [];
+  for (const rg of ranges) {
+    if (rg[0] > today && hlDaysBetween(today, rg[0]) <= 60) {
+      const info = hl._meta.perYear[year] || {};
+      return info.window !== rg[0]; // 该假期季已刷新过则跳过
+    }
+  }
+  return false;
+}
+
+// 该年数据中下一个未开始的假期区间开始日（作为「假期季」标识，防止同一季重复刷新）
+function hlNextWindow(data, today) {
+  const ranges = (data && data.ranges) || [];
+  for (const rg of ranges) { if (rg[0] > today) return rg[0]; }
+  return '';
+}
+
+// 更新指定年份；force=false 时按 yearNeedsSync 过滤（节假日到来前两个月才真正发起网络请求）
+async function updateHolidays(years, force, explicit) {
+  const hl = loadHolidays();
+  const results = [];
+  const today = hlToYMD(new Date());
+  for (const y of years) {
+    const info = hl._meta.perYear[y];
+    if (!force && !explicit && !yearNeedsSync(y, hl, today)) {
+      results.push({ year: y, skipped: true, source: info ? info.source : '' });
+      continue;
+    }
+    const got = await fetchHolidayYear(y);
+    const now = Date.now();
+    if (got) {
+      hl[y] = got.data;
+      hl._meta.perYear[y] = { fetchedAt: now, source: got.source, window: hlNextWindow(got.data, today), lastTry: now };
+      results.push({ year: y, ok: true, source: got.source, ranges: got.data.ranges.length, workdays: got.data.workdays.length });
+      console.log('[holidays] ' + y + ' 已更新 via ' + got.source);
+    } else {
+      // 失败也记录 lastTry：供「每周/每天」限频判断，避免窗口期内重复空试
+      hl._meta.perYear[y] = Object.assign({}, info || {}, { lastTry: now });
+      if (hl[y]) {
+        results.push({ year: y, ok: false, error: '拉取失败，保留本地已有数据', source: info ? info.source : '' });
+      } else {
+        results.push({ year: y, ok: false, error: '所有数据源均不可达（若为下一年安排，将于 10-20 起每周、12-20 起每天自动重试直到拉到）' });
+      }
+    }
+  }
+  hl._meta.updatedAt = Date.now();
+  saveHolidays();
+  return results;
+}
+
+function holidayTargetYears() {
+  const y = new Date().getFullYear();
+  return [y, y + 1, y + 2];
+}
+
+function scheduleHolidaySync() {
+  // 启动 5 秒后 + 每 24 小时自检一次；自检为本地计算，仅在发布窗口（前一年 10-20 起）
+  // 或假期前 60 天窗口内才发起网络同步
+  setTimeout(() => { updateHolidays(holidayTargetYears(), false).catch((e) => console.error('[holidays] 自动更新失败:', e.message)); }, 5000);
+  setInterval(() => { updateHolidays(holidayTargetYears(), false).catch(() => {}); }, 24 * 3600 * 1000);
+  console.log('[holidays] auto-sync scheduled (startup + every 24h, years=' + holidayTargetYears().join(',') + ')');
+}
+
 async function handleApi(req, res, apiPath, method) {
   const parts = apiPath.split('/').filter(Boolean);
   const head = parts[0];
@@ -713,6 +930,38 @@ async function handleApi(req, res, apiPath, method) {
       return sendJSON(res, 200, r);
     } catch (e) {
       return sendJSON(res, 200, { ok: false, error: '检查更新失败: ' + e.message, current: APP_VERSION });
+    }
+  }
+
+  // 节假日数据：读取本地缓存（纯读，不触发外网请求）
+  if (head === 'holidays' && parts.length === 1 && method === 'GET') {
+    const hl = loadHolidays();
+    const data = {};
+    for (const k of Object.keys(hl)) { if (k !== '_meta') data[k] = hl[k]; }
+    return sendJSON(res, 200, { ok: true, meta: { updatedAt: hl._meta.updatedAt, perYear: hl._meta.perYear }, data: data });
+  }
+
+  // 节假日数据：手动/懒加载更新。body 可选 { years:[2027], force:true }；
+  // 显式指定 years 视为用户主动请求（绕过发布窗口限制）；不传 years 默认 [当年, +1, +2]，
+  // 由 yearNeedsSync 按发布规律过滤（前一年 10-20 起补新年份 / 假期前 60 天刷新已有年份）
+  if (head === 'holidays' && parts[1] === 'update' && method === 'POST') {
+    let body = {};
+    try { const raw = await readBody(req); if (raw && raw.trim()) body = JSON.parse(raw); } catch (e) { /* 容忍空 body */ }
+    let explicit = false;
+    let years = holidayTargetYears();
+    if (Array.isArray(body.years) && body.years.length) {
+      years = body.years.map(Number).filter((y) => y >= 2020 && y <= 2100);
+      if (!years.length) years = holidayTargetYears();
+      else explicit = true;
+    }
+    try {
+      const results = await updateHolidays(years, !!body.force, explicit);
+      const hl = loadHolidays();
+      const data = {};
+      for (const k of Object.keys(hl)) { if (k !== '_meta') data[k] = hl[k]; }
+      return sendJSON(res, 200, { ok: true, results: results, meta: { updatedAt: hl._meta.updatedAt, perYear: hl._meta.perYear }, data: data });
+    } catch (e) {
+      return sendJSON(res, 200, { ok: false, error: '节假日更新失败: ' + e.message });
     }
   }
 
@@ -1336,6 +1585,7 @@ function scheduleDailyBackup() {
 function start() {
   scheduleDailyBackup();
   startCheckinScheduler();
+  scheduleHolidaySync();
   if (SOCKET_PATH) {
     try { fs.unlinkSync(SOCKET_PATH); } catch (e) { /* ignore */ }
     server.listen(SOCKET_PATH, () => {

@@ -711,6 +711,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
 .ico-green{background:linear-gradient(135deg,#22c55e,#4ade80)}
 .ico-blue{background:linear-gradient(135deg,#3b82f6,#60a5fa)}
 .ico-violet{background:linear-gradient(135deg,#8b5cf6,#a78bfa)}
+.ico-red{background:linear-gradient(135deg,#ef4444,#f87171)}
 .ico-gray{background:linear-gradient(135deg,#94a3b8,#cbd5e1)}
 .row-main{flex:1;min-width:0}
 .row-label{font-size:15px;font-weight:550;color:var(--text)}
@@ -1388,6 +1389,23 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </div>
 
+        <!-- 节假日数据（自动同步） -->
+        <div class="group">
+          <div class="group-title">节假日数据<span class="group-hint">自动同步法定节假日与调休</span></div>
+          <div class="group-card">
+            <div class="row" style="cursor:default">
+              <div class="row-ico ico-red" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="row-main"><div class="row-label">同步状态</div><div class="row-value" id="holYearsInline" style="font-size:12px;color:var(--text-light)">加载中…</div></div>
+            </div>
+            <div style="padding:4px 16px 12px">
+              <button type="button" id="holUpdateBtn" class="ghost-btn" style="width:100%;border-color:var(--accent);color:var(--accent)">立即更新节假日数据</button>
+            </div>
+            <div style="padding:0 16px 12px;font-size:11.5px;color:var(--text-light);line-height:1.5">无需频繁同步：国务院历年于<b>前一年 10 月下旬~12 月上旬</b>公布次年安排，应用自<b>前一年 10 月 20 日起每周检查一次</b>，<b>12 月 20 日仍未同步则改为每天一次</b>，直到拉到；已同步年份仅在<b>假期开始前 60 天内</b>刷新一次（兜底临时调整）。翻到未同步的年份、或点上方「立即更新节假日数据」按钮，也会立即拉取。数据源依次尝试：holiday-cn（国务院公告同步）→ timor.tech → jsdelivr → api.github，任一成功即可，拉取失败时保留本地已有数据。</div>
+          </div>
+        </div>
+
         <!-- 自定义费用 -->
         <!-- 数据文件（迁移 / 分享） -->
         <div class="group">
@@ -1421,7 +1439,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.3.6</div>
+              <div class="row-value" id="verInline">v1.3.7</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1582,6 +1600,64 @@ var HOLIDAYS = {
   }
 };
 
+/* ====== 节假日数据同步（后端自动/手动更新 + 前端合并） ======
+ * 后端 holidays.json 缓存 → GET /api/holidays 启动时拉取合并；
+ * 翻到无数据年份 → 懒加载 POST /api/holidays/update；
+ * 设置页可手动「更新节假日数据」。合并失败时静默保留内置数据。 */
+function applyHolidayData(data) {
+  if (!data) return false;
+  var changed = false;
+  for (var y in data) {
+    if (!Object.prototype.hasOwnProperty.call(data, y)) continue;
+    var it = data[y];
+    if (!it || !it.ranges || !it.ranges.length) continue;
+    HOLIDAYS[y] = { ranges: it.ranges, names: it.names || {}, workdays: it.workdays || [] };
+    changed = true;
+  }
+  return changed;
+}
+function hlFmtTime(ts) {
+  if (!ts) return '';
+  var d = new Date(ts);
+  return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+function holRefreshInfo(meta) {
+  var el = $('holYearsInline'); if (!el) return;
+  var years = [], y;
+  for (y in HOLIDAYS) { if (Object.prototype.hasOwnProperty.call(HOLIDAYS, y) && /^\d{4}$/.test(y)) years.push(y); }
+  years.sort();
+  var txt = years.length ? ('已含 ' + years.join('、') + ' 年') : '暂无数据';
+  if (meta && meta.perYear) {
+    var latest = 0, src = '';
+    for (var yy in meta.perYear) { var p = meta.perYear[yy]; if (p && p.fetchedAt > latest) { latest = p.fetchedAt; src = p.source || ''; } }
+    if (latest) txt += ' · ' + hlFmtTime(latest) + '更新' + (src ? ('（' + src + '）') : '');
+  }
+  el.textContent = txt;
+}
+function loadHolidaysRemote(silent) {
+  try {
+    fetch(API_BASE + '/api/holidays').then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.ok) {
+        if (applyHolidayData(j.data)) renderCalendar();
+        holRefreshInfo(j.meta);
+      }
+    }).catch(function () { /* 静默：用内置数据兜底 */ });
+  } catch (e) { /* ignore */ }
+}
+function holUpdate(force, cb) {
+  return fetch(API_BASE + '/api/holidays/update', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ force: !!force })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (j && j.ok) {
+      if (applyHolidayData(j.data)) renderCalendar();
+      holRefreshInfo(j.meta);
+    }
+    if (cb) cb((j && j.ok) ? null : ((j && j.error) || '更新失败'), j);
+    return j;
+  }).catch(function (e) { if (cb) cb((e && e.message) || '更新失败'); });
+}
+
 var state = {
   settings: { hourlyRate: 50 },
   records: [],
@@ -1698,7 +1774,7 @@ function getDayInfo(dateStr) {
   if (h) {
     if (h.workdays) {
       for (i = 0; i < h.workdays.length; i++) {
-        if (h.workdays[i] === dateStr) return { type: 'weekday', name: '', dow: dow };
+        if (h.workdays[i] === dateStr) return { type: 'weekday', name: '', dow: dow, workday: true };
       }
     }
     if (h.ranges) {
@@ -1745,11 +1821,16 @@ function escHtml(s) {
 
 function renderCalendar() {
   var now, y, m, firstDow, daysInMonth, daysInPrev, today, dayMap;
-  var titleEl, daysEl, cells, startOffset, i, dateObj, out, dateStr, info, rec, cls, hname, otBadge, hy;
+  var titleEl, daysEl, cells, startOffset, i, dateObj, out, dateStr, info, rec, cls, hname, otBadge;
   try {
     now = new Date();
     if (!calState.year || calState.year === 0) { calState.year = now.getFullYear(); calState.month = now.getMonth(); }
     y = calState.year; m = calState.month;
+    /* 懒加载：翻到无节假日数据的年份时自动向后端拉取（明年/后年数据未同步也能及时补上） */
+    if (!HOLIDAYS[String(y)]) {
+      if (!calState.hlReq) calState.hlReq = {};
+      if (!calState.hlReq[y]) { calState.hlReq[y] = true; holUpdate(false); }
+    }
     firstDow = new Date(y, m, 1).getDay();
     daysInMonth = new Date(y, m + 1, 0).getDate();
     daysInPrev = new Date(y, m, 0).getDate();
@@ -1773,10 +1854,9 @@ function renderCalendar() {
       else if (info.type === 'weekend') cls += ' cal-we';
       if (rec && (rec.hours > 0 || rec.count > 0)) cls += ' cal-ot';
       if (!out && info.type === 'weekday') {
-        hy = HOLIDAYS[String(y)];
-        if (hy && hy.workdays) { for (var wi = 0; wi < hy.workdays.length; wi++) { if (hy.workdays[wi] === dateStr) { cls += ' cal-wd'; break; } } }
-        // 普通工作日加淡色框（非补班日）
-        if (cls.indexOf('cal-wd') === -1 && cls.indexOf('cal-ot') === -1) cls += ' cal-wk';
+        // 补班日（getDayInfo 已判定，workday 标志）加框；普通工作日加淡色框
+        if (info.workday) cls += ' cal-wd';
+        else if (cls.indexOf('cal-ot') === -1) cls += ' cal-wk';
       }
       if (dateStr === today) cls += ' cal-today';
       hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
@@ -2619,6 +2699,18 @@ function bindDataButtons() {
   if (cu) cu.onclick = checkForUpdate;
   checkForUpdate(); // 页面加载自动检查更新（对齐 fnos-hermes-agent 的自动拉取）
 
+  // 节假日数据：手动更新（强制刷新当年~后两年）
+  var hlb = $('holUpdateBtn');
+  if (hlb) hlb.onclick = function() {
+    hlb.style.opacity = '0.6';
+    toast('正在更新节假日数据…');
+    holUpdate(true, function(err) {
+      hlb.style.opacity = '';
+      if (err) toast('节假日更新失败: ' + err);
+      else toast('✓ 节假日数据已更新');
+    });
+  };
+
   // 备份按钮
   var mbb = $('manualBackupBtn');
   if (mbb) mbb.onclick = function() {
@@ -2653,7 +2745,8 @@ function apiRaw(method, url, body, mode) {
   var opt = { method: method };
   opt.headers = { 'Content-Type': 'application/json' };
   if (mode) opt.headers['X-Import-Mode'] = mode;
-  opt.body = JSON.stringify(body);
+  // GET/HEAD 不允许携带 body（fetch 规范会抛 TypeError，部分 WebView 静默容忍）
+  if (body !== undefined && method !== 'GET' && method !== 'HEAD') opt.body = JSON.stringify(body);
   return fetch(fullUrl, opt).then(function(res) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
@@ -2664,16 +2757,13 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.3.6';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.3.7';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, function(c) {
-    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-  });
-}
+// 与 escHtml 同一实现（历史双份，统一委托，避免两套转义逻辑漂移）
+function escapeHtml(s) { return escHtml(s); }
 
 // 检查更新：调用后端 /api/check-update（后端代理 GitHub，绕开 WebView CORS）
 // 仅展示版本信息与下载链接，不提供一键覆盖安装
@@ -2998,11 +3088,10 @@ function checkForUpdate() {
 })();
 
 function refresh() {
-  return api('GET','/api/state').then(function(data) {
-    if (data) { if (data.settings) state.settings = data.settings; if (data.records) state.records = data.records; }
-    return api('GET','/api/summary');
-  }).then(function(sum) {
-    if (sum) state.summary = sum;
+  // /api/state 与 /api/summary 无依赖，并行请求（原串行两次往返，首屏延迟翻倍）
+  return Promise.all([api('GET', '/api/state'), api('GET', '/api/summary')]).then(function(rs) {
+    if (rs[0]) { if (rs[0].settings) state.settings = rs[0].settings; if (rs[0].records) state.records = rs[0].records; }
+    if (rs[1]) state.summary = rs[1];
     syncSettingsInputs(); renderRecurring(); renderCalendar(); renderSummary(); bindQueryEvents();
   }).catch(function(err) {
     toast('\u52A0\u8F7D\u5931\u8D25:' + ((err&&err.message)?err.message:String(err)));
@@ -3013,6 +3102,7 @@ function init() {
   var isDark = document.documentElement.getAttribute('data-theme') === 'dark', tt = $('themeToggle'), moon, sun;
   if (tt) { moon = tt.querySelector('.ico-moon'); sun = tt.querySelector('.ico-sun'); if (moon) moon.style.display = isDark?'none':''; if (sun) sun.style.display = isDark?'':'none'; }
   bindEvents(); bindTabs(); resetForm(); refresh();
+  loadHolidaysRemote(true); // 启动即拉取后端节假日缓存并合并到日历
   if (window.ckLoad) window.ckLoad();
 }
 
