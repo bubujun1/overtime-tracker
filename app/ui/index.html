@@ -17,13 +17,20 @@
   --hdr-from: #6C63FF; --hdr-to: #FF6584;
   --accent: #6C63FF; --accent-hover: #5a52e0;
   --success: #00D2A8; --danger: #FF6584; --warning: #FFB347;
-  /* 日历色 — 活力柔和 */
-  --cal-ho-bg: rgba(255,107,129,.10); --cal-ho-border: rgba(255,107,129,.30); --cal-ho-text: #e84555;
-  --cal-wd-bg: rgba(255,179,71,.09); --cal-wd-border: rgba(255,179,71,.25);
-  --cal-we-bg: rgba(0,210,168,.07); --cal-we-border: rgba(0,210,168,.20);
-  --cal-ot-bg: rgba(108,99,255,.08); --cal-ot-border: rgba(108,99,255,.28); --cal-ot-text: #6C63FF;
+  /* 日历色 — 白净为底、淡色块+统一边框区分，数字着色，对比度保证看清 */
+  --cal-ho-bg: rgba(59,130,246,.10); --cal-ho-border: rgba(59,130,246,.22); --cal-ho-text: #64748b;
+  --cal-wd-bg: rgba(100,116,139,.10); --cal-wd-border: rgba(100,116,139,.28); --cal-wd-text: #475569;
+  --cal-we-bg: rgba(59,130,246,.06); --cal-we-border: rgba(59,130,246,.30);
+  --cal-ot-bg: rgba(108,99,255,.10); --cal-ot-border: rgba(108,99,255,.28); --cal-ot-text: #6C63FF;
+  --cal-leave-bg: rgba(56,189,248,.12); --cal-leave-border: rgba(56,189,248,.38); --cal-leave-text: #0284c7;
+  --cal-otwe-bg: rgba(245,158,11,.10); --cal-otwe-border: rgba(245,158,11,.32); --cal-otwe-text: #d97706;
+  --cal-otho-bg: rgba(239,68,68,.10); --cal-otho-border: rgba(239,68,68,.32); --cal-otho-text: #dc2626;
+  --cal-num-rest: #2563eb;      /* 周末/节假日数字：蓝（加深保证可读） */
+  --cal-flag-rest: #3b82f6;     /* 休 标 */
+  --cal-flag-wd: #f59e0b;       /* 补 标 */
   --cal-wk-bg: rgba(108,99,255,.03); --cal-wk-border: rgba(108,99,255,.12);
-  --cal-today-ring: #FF6584;
+  --cal-cell-border: rgba(100,116,139,.20); /* 格子统一细边框 */
+  --cal-today-ring: #3b82f6;
   /* 统计卡片色 */
   --stat-teal: #00D2A8; --stat-blue: #6C63FF; --stat-amber: #FFB347;
   --stat-grad-from: #6C63FF; --stat-grad-to: #FF6584;
@@ -42,12 +49,19 @@
   --hdr-from: #7C6FFF; --hdr-to: #FF7A9D;
   --accent: #8B7FFF; --accent-hover: #6C63FF;
   --success: #00EAB5; --danger: #FF7A9D; --warning: #FFC04D;
-  --cal-ho-bg: rgba(255,122,157,.10); --cal-ho-border: rgba(255,122,157,.25); --cal-ho-text: #FF7A9D;
-  --cal-wd-bg: rgba(255,192,77,.07); --cal-wd-border: rgba(255,192,77,.18);
-  --cal-we-bg: rgba(0,234,181,.06); --cal-we-border: rgba(0,234,181,.16);
-  --cal-ot-bg: rgba(139,127,255,.09); --cal-ot-border: rgba(139,127,255,.24); --cal-ot-text: #8B7FFF;
+  --cal-ho-bg: rgba(96,165,250,.14); --cal-ho-border: rgba(96,165,250,.28); --cal-ho-text: #94a3b8;
+  --cal-wd-bg: rgba(148,163,184,.12); --cal-wd-border: rgba(148,163,184,.28); --cal-wd-text: #cbd5e1;
+  --cal-we-bg: rgba(96,165,250,.10); --cal-we-border: rgba(96,165,250,.35);
+  --cal-ot-bg: rgba(139,127,255,.16); --cal-ot-border: rgba(139,127,255,.34); --cal-ot-text: #8B7FFF;
+  --cal-leave-bg: rgba(56,189,248,.16); --cal-leave-border: rgba(56,189,248,.40); --cal-leave-text: #38bdf8;
+  --cal-otwe-bg: rgba(245,158,11,.16); --cal-otwe-border: rgba(245,158,11,.38); --cal-otwe-text: #fbbf24;
+  --cal-otho-bg: rgba(248,113,113,.16); --cal-otho-border: rgba(248,113,113,.40); --cal-otho-text: #f87171;
+  --cal-num-rest: #60a5fa;
+  --cal-flag-rest: #60a5fa;
+  --cal-flag-wd: #f59e0b;
   --cal-wk-bg: rgba(139,127,255,.03); --cal-wk-border: rgba(139,127,255,.11);
-  --cal-today-ring: #FF7A9D;
+  --cal-cell-border: rgba(148,163,184,.25);
+  --cal-today-ring: #60a5fa;
   --stat-teal: #00EAB5; --stat-blue: #8B7FFF; --stat-amber: #FFC04D;
   --stat-grad-from: #8B7FFF; --stat-grad-to: #FF7A9D;
   --shadow-sm: 0 2px 10px rgba(0,0,0,.26), 0 1px 3px rgba(0,0,0,.14);
@@ -232,16 +246,19 @@ body{
 .dot-wd{background:var(--cal-wd-bg);border:1.5px solid var(--cal-wd-border)}
 .dot-we{background:var(--cal-we-bg);border:1.5px solid var(--cal-we-border)}
 .dot-ot{background:var(--cal-ot-bg);border:1.5px solid var(--cal-ot-border)}
+.dot-ot-we{background:var(--cal-otwe-bg);border:1.5px solid var(--cal-otwe-border)}
+.dot-ot-ho{background:var(--cal-otho-bg);border:1.5px solid var(--cal-otho-border)}
+.dot-leave{background:var(--cal-leave-bg);border:1.5px solid var(--cal-leave-border)}
 
 /* 星期头 */
 .cal-week-hdr{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:6px;padding:0 2px}
 .cal-week-hdr span{text-align:center;font-size:12.5px;font-weight:600;color:var(--text-light);padding:6px 0;letter-spacing:.5px}
 
 /* 日历网格 —— 修复手机跑偏：固定比例 + 自适应高度 */
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;width:100%}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;width:100%}
 .cal-cell{
   position:relative;aspect-ratio:1.65 / 1;min-height:42px;border-radius:var(--r-cell);
-  background:var(--surface-solid);border:1px solid var(--border-light);
+  background:var(--surface-solid);border:1px solid var(--cal-cell-border);
   padding:4px 3px 3px;cursor:pointer;overflow:hidden;
   display:flex;flex-direction:column;align-items:center;
   transition:transform .18s,box-shadow .2s,border-color .18s,background .2s
@@ -249,9 +266,10 @@ body{
 .cal-cell:hover{transform:translateY(-2px) scale(1.02);box-shadow:var(--shadow-md);z-index:2;border-color:var(--accent);background:var(--surface)}
 .cal-cell:active{transform:scale(.96)}
 
-/* 日期数字 — 居中置顶 */
+/* 日期数字 — 居中置顶；周末/节假日数字着蓝色（系统日历风） */
 .cal-num{font-size:14px;font-weight:650;line-height:1.2;color:var(--text);display:block;text-align:center}
-/* 节假日名 */
+.cal-cell.cal-we .cal-num,.cal-cell.cal-ho .cal-num{color:var(--cal-num-rest)}
+/* 节假日名/农历 — 灰色小字（参考系统日历） */
 .cal-hname{font-size:9.5px;color:var(--cal-ho-text);line-height:1.2;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 /* 加班时间角标 — 底部居中（PC端） */
 .cal-ot-badge{
@@ -260,6 +278,10 @@ body{
   line-height:1.4;min-height:0;display:inline-block;text-align:center;
   box-shadow:0 2px 6px rgba(99,102,241,.25);margin-top:auto
 }
+/* 加班时长徽章按日类型配色：工作日紫 / 休息日橙 / 节假日红 */
+.cal-cell.cal-ot .cal-ot-badge{background:linear-gradient(135deg,#6C63FF,#8B7FFF)}
+.cal-cell.cal-ot-we .cal-ot-badge{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.cal-cell.cal-ot-ho .cal-ot-badge{background:linear-gradient(135deg,#ef4444,#f87171)}
 /* 备注文字 — 中间居中（PC端），纯文字无装饰 */
 .cal-note{
   font-size:9.5px;font-weight:600;color:#b03a5c;line-height:1.3;
@@ -268,26 +290,66 @@ body{
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
   margin-top:1px
 }
+/* 休/补 右上角小圆标（系统日历风：休=蓝、补=橙） */
+.cal-rest-flag,.cal-wd-flag{
+  position:absolute;top:1.5px;right:2.5px;width:13px;height:13px;border-radius:50%;
+  font-size:8.5px;font-weight:700;color:#fff;line-height:1;
+  display:grid;place-items:center;pointer-events:none
+}
+.cal-rest-flag{background:var(--cal-flag-rest)}
+.cal-wd-flag{background:var(--cal-flag-wd)}
 
-/* 单元格状态色 */
-.cal-cell.cal-ho{background:var(--cal-ho-bg);border-color:var(--cal-ho-border)}
-.cal-cell.cal-wd{background:var(--cal-wd-bg);border-color:var(--cal-wd-border)}
-.cal-cell.cal-we{background:var(--cal-we-bg);border-color:var(--cal-we-border)}
-.cal-cell.cal-ot{background:var(--cal-ot-bg);border-color:var(--cal-ot-border);border-width:1.5px}
-/* 普通工作日：淡色边框（非纯白） */
-.cal-cell.cal-wk{background:var(--cal-wk-bg);border-color:var(--cal-wk-border)}
-.cal-cell.cal-today{outline:2.5px solid var(--cal-today-ring);outline-offset:-2px;z-index:1;box-shadow:0 0 0 4px rgba(244,63,94,.10)}
+/* 单元格状态色 —— 白底 + 统一细边框，淡底区分类型 */
+.cal-cell.cal-ho{background:var(--cal-ho-bg)}
+.cal-cell.cal-wd{background:var(--cal-wd-bg)}
+.cal-cell.cal-we{background:var(--cal-we-bg)}
+.cal-cell.cal-ot{background:var(--cal-ot-bg)}
+.cal-cell.cal-ot-we{background:var(--cal-otwe-bg)}
+.cal-cell.cal-ot-ho{background:var(--cal-otho-bg)}
+/* 请假日：淡青底（边框统一，类型靠底色与徽章区分） */
+.cal-cell.cal-leave{background:var(--cal-leave-bg)}
+.cal-leave-badge{
+  font-size:9px;font-weight:700;color:var(--cal-leave-text);
+  background:var(--cal-leave-bg);border:1px solid var(--cal-leave-border);
+  padding:1.5px 6px;border-radius:8px;line-height:1.4;min-height:0;
+  display:inline-block;text-align:center;max-width:96%;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto
+}
+/* 表单类型分段切换（加班/请假） */
+.type-seg{display:flex;gap:0;border:1.5px solid var(--border);border-radius:var(--r-btn);overflow:hidden;background:var(--surface-solid)}
+.type-btn{flex:1;padding:9px 0;font-size:13px;font-weight:600;border:none;background:transparent;color:var(--text-sec);cursor:pointer;transition:all .18s ease;touch-action:manipulation}
+.fee-preview{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:var(--bg);border-radius:10px;font-size:12.5px;color:var(--text-light)}
+.stat-breakdown{display:flex;flex-wrap:wrap;gap:6px 12px;padding:10px 2px 2px;font-size:11.5px;color:var(--text-sec)}
+.bk-item{display:inline-flex;align-items:center;gap:5px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-dot{width:8px;height:8px;border-radius:50%;flex:none}
+.bk-weekday{background:#6C63FF}.bk-weekend{background:#f59e0b}.bk-holiday{background:#ef4444}.bk-leave{background:#38bdf8}
+.bk-empty{color:var(--text-light)}
+.mult-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mult-cell{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--text-sec)}
+.mult-cell input{width:100%;min-width:0;padding:8px 10px;border:1px solid var(--border-light);border-radius:9px;font-size:14px;background:var(--card);color:var(--text)}
+.fee-preview b{color:var(--cal-ot-text);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type-btn.active{background:var(--cal-ot-bg);color:var(--cal-ot-text)}
+.type-btn[data-t="leave"].active{background:var(--cal-leave-bg);color:var(--cal-leave-text)}
+.type-btn + .type-btn{border-left:1.5px solid var(--border)}
+/* 普通工作日：无底色（边框与其他格子统一） */
+.cal-cell.cal-wk{background:transparent}
+.cal-cell.cal-today{outline:2px solid var(--cal-today-ring);outline-offset:-2px;z-index:1;background:var(--surface-solid)}
 .cal-cell.cal-out{opacity:.22;cursor:default;background:transparent!important;border-color:transparent!important}
 .cal-cell.cal-out:hover{transform:none;box-shadow:none;border-color:transparent!important}
 
-/* 手机端日历适配 —— 方正格子，不显示备注 */
+/* 手机端日历适配 —— 方正格子，白卡简洁，不显示备注 */
 @media(max-width:420px){
   .cal-cell{aspect-ratio:1 / 1;min-height:44px;padding:3px 2px 2px;border-radius:10px}
-  .cal-num{font-size:13px}.cal-hname{font-size:8.5px}
+  .cal-num{font-size:13.5px}.cal-hname{font-size:8.5px}
   .cal-ot-badge{font-size:8px;padding:1px 5px;border-radius:6px}
-  .cal-grid{gap:6px}.cal-week-hdr{gap:6px}
-  .cal-card{padding:14px 10px;margin:8px 4px;border-radius:18px}
-  .cal-card::before{border-radius:18px}
+  .cal-rest-flag,.cal-wd-flag{width:12px;height:12px;font-size:8px;top:1px;right:2px}
+  .cal-grid{gap:9px}.cal-week-hdr{gap:9px}
+  /* 白卡 + 细边框：去掉品红渐变描边（系统日历风） */
+  .cal-card{padding:14px 10px 12px;margin:8px 4px;border-radius:18px;border:1px solid var(--border-light);box-shadow:var(--shadow-sm)}
+  .cal-card::before{display:none}
+  /* 月份标题大字加粗（参考系统日历「10月」） */
+  .cal-month{font-size:21px;font-weight:800}
+  .cal-arrow{width:32px;height:32px}
   /* 手机版不显示备注 */
   .cal-note{display:none!important}
 }
@@ -401,6 +463,7 @@ body{
 .modal-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:200;
   display:flex;align-items:center;justify-content:center;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;
   opacity:0;pointer-events:none;transition:opacity .25s ease
 }
 .modal-overlay.show{opacity:1;pointer-events:auto}
@@ -408,7 +471,8 @@ body{
   background:var(--surface-solid);
   border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.15),0 8px 24px rgba(0,0,0,.08);
   width:94%;max-width:400px;
-  max-height:88vh;overflow-y:auto;padding:24px 22px 22px;
+  margin:auto; /* 配合 overlay 滚动：放得下时居中，放不下时随 overlay 滚动，顶部不被裁剪 */
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:24px 22px 22px;
   transform:translateY(20px) scale(.96);transition:transform .3s cubic-bezier(.16,1,.3,1);
   border:1px solid rgba(0,0,0,.04)
 }
@@ -985,6 +1049,71 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
   .ck-foot-actions .ghost-btn,
   .ck-foot-actions .mine-save{width:88px;padding:10px 0;font-size:13px;border-radius:8px}
 }
+
+/* ===== 全局溢出防护：文本不出容器、页面无横向滚动 ===== */
+html, body { max-width: 100%; overflow-x: hidden; }
+.row-main { min-width: 0; }
+.row-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-value { max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.info-card-body { min-width: 0; }
+.info-card-label, .info-card-val { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+input, select, textarea { max-width: 100%; }
+.f-input { min-width: 0; width: 100%; }
+.fee-preview span { flex: none; }
+.modal-dialog:not(.ck-modal-dialog):not(.ck-detail-dialog) { max-width: min(400px, calc(100vw - 28px)); max-height: calc(100vh - 32px); max-height: calc(100dvh - 32px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* ===== 手机端记录弹窗极简：只留 类型/日期/时长(+预设)，键盘弹出后一屏完成添加 ===== */
+@media (max-width: 520px) {
+  /* 隐藏备注/时薪/当日类型/费用预览（保存逻辑仍读取其值，编辑时原值保留不丢） */
+  #fgNote, #fgRate, #fgDayType, #fgFee { display: none !important; }
+  /* 请假模式需要填请假类型：恢复备注输入框（批量结束日期由内联样式切换，不受极简规则影响） */
+  #recordForm[data-type="leave"] #fgNote { display: block !important; }
+  .modal-dialog:not(.ck-modal-dialog):not(.ck-detail-dialog) { padding: 14px 16px; border-radius: 14px; }
+  .modal-header { margin-bottom: 10px; }
+  .modal-header h3 { font-size: 16px; }
+  .modal-close { width: 30px; height: 30px; font-size: 17px; }
+  .f-group { margin-bottom: 10px; }
+  .f-label { font-size: 12px; margin-bottom: 5px; }
+  .f-input { padding: 9px 12px; font-size: 16px; }
+  .type-btn { padding: 9px 0; font-size: 13px; }
+  #hoursQuick .chip { padding: 4px 12px; }
+  .submit-btn { padding: 11px 0; font-size: 14.5px; margin-top: 2px; }
+}
+
+/* ===== 小米15等主流手机（≤520px）全面适配：显示简洁 + 输入方便 ===== */
+@media (max-width: 520px) {
+  /* 页边距与卡片间距收紧，内容区更宽 */
+  :root { --page-pad: 14px; --card-gap: 12px; }
+  /* 输入方便：所有输入控件字号≥16px（防聚焦自动放大、更好点按）；数字键盘已由 inputmode 保证 */
+  .cycle-select, .query-select, .query-input, .ck-f-grid input, .ck-f-grid select { font-size: 16px; }
+  input[type="date"] { min-height: 42px; }
+  /* 显示简洁：统计卡 2×2 网格，不再一行挤压 */
+  .sidebar-stats .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sidebar-stats .stat-card { padding: 12px; }
+  .sidebar-stats .stat-val { font-size: 20px; }
+  .stat-card { padding: 14px 12px; }
+  .stat-val { font-size: 22px; }
+  /* 标题行收紧 */
+  .page-title-row { padding: 12px 2px 8px; }
+  /* 日历图例紧凑防溢出 */
+  .cal-legend { gap: 8px 12px; margin-bottom: 10px; }
+  .bk-item { font-size: 11px; }
+  /* 弹窗遮罩适配手势条/挖孔（安全区） */
+  .modal-overlay {
+    padding: 12px calc(12px + env(safe-area-inset-right, 0px))
+             calc(12px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+  }
+  /* 多余元素剔除（选择性瘦身，功能全保留）：头部与签到横幅收紧 */
+  .app-header { padding-top: 12px; }
+  .ck-hero { padding: 14px 16px; margin-bottom: 14px; gap: 12px; }
+  .ck-sub { font-size: 12.5px; }
+}
+@media (min-width: 700px) {
+  /* PC 端：弹窗紧凑居中，不再随窗口拉伸 */
+  .modal-overlay { padding: 24px; }
+}
+.stat-val, .stat-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.query-select, .query-input, .query-btn { min-width: 0; }
 </style>
 <script>try{var t=localStorage.getItem('jb-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 </head>
@@ -1056,6 +1185,9 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
           </div>
         </section>
 
+        <!-- 分类汇总：按日类型拆分时长与金额（含请假天数） -->
+        <section class="stat-breakdown" id="statBreakdown" aria-label="分类汇总"></section>
+
         <!-- 计费设置（信息展示态 — 点击弹窗编辑） -->
         <section class="rate-section">
           <!-- 时薪卡片：点击弹窗修改 -->
@@ -1120,7 +1252,10 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
             <span class="legend-item"><span class="dot dot-ho"></span>法定节假日</span>
             <span class="legend-item"><span class="dot dot-wd"></span>补班日</span>
             <span class="legend-item"><span class="dot dot-we"></span>周末</span>
-            <span class="legend-item"><span class="dot dot-ot"></span>有加班</span>
+            <span class="legend-item"><span class="dot dot-ot"></span>工作日加班</span>
+            <span class="legend-item"><span class="dot dot-ot-we"></span>休息日加班</span>
+            <span class="legend-item"><span class="dot dot-ot-ho"></span>节假日加班</span>
+            <span class="legend-item"><span class="dot dot-leave"></span>请假</span>
           </div>
 
           <div class="cal-week-hdr">
@@ -1439,7 +1574,7 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><polyline points="21 3 21 9 15 9"/></svg>
               </div>
               <div class="row-main"><div class="row-label">检查更新</div></div>
-              <div class="row-value" id="verInline">v1.3.7</div>
+              <div class="row-value" id="verInline">v1.3.9</div>
             </div>
           </div>
           <div id="updateInfo" class="update-info mine-update"></div>
@@ -1460,21 +1595,50 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
       </div>
       <form id="recordForm" autocomplete="off">
         <div class="f-group">
+          <label class="f-label">类型</label>
+          <div class="type-seg" id="typeSeg">
+            <button type="button" class="type-btn active" data-t="overtime">加班</button>
+            <button type="button" class="type-btn" data-t="leave">请假</button>
+          </div>
+        </div>
+        <div class="f-group">
           <label for="fDate" class="f-label">日期</label>
           <input type="date" id="fDate" required class="f-input">
         </div>
-        <div class="f-group">
+        <div class="f-group" id="fgLeaveEnd" style="display:none">
+          <label for="fLeaveEnd" class="f-label">结束日期 <span class="f-hint">批量录入，可选</span></label>
+          <input type="date" id="fLeaveEnd" class="f-input">
+          <label style="display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12.5px;color:var(--text-sec);cursor:pointer">
+            <input type="checkbox" id="skipWeekend" checked style="width:15px;height:15px;accent-color:var(--accent)"> 跳过双休日（调休上班日不跳过）
+          </label>
+        </div>
+        <div class="f-group" id="fgHours">
           <label for="fHours" class="f-label">加班时长（小时）</label>
           <input type="number" id="fHours" min="0" step="0.5" inputmode="decimal" placeholder="例如 3.5" required class="f-input">
+          <div class="chip-row" style="margin:8px 0 0" id="hoursQuick">
+            <button type="button" class="chip" data-h="2">2 小时</button>
+            <button type="button" class="chip" data-h="8">8 小时</button>
+          </div>
         </div>
-        <div class="f-group">
-          <label for="fNote" class="f-label">备注 <span class="f-hint">可选</span></label>
+        <div class="f-group" id="fgNote">
+          <label for="fNote" class="f-label">备注 <span class="f-hint" id="noteHint">可选</span></label>
           <input type="text" id="fNote" maxlength="60" placeholder="例如 项目上线支持" class="f-input">
         </div>
-        <div class="f-group">
-          <label class="f-label">费用组成条目 <span class="f-hint">自由添加</span></label>
-          <div id="itemList" class="item-list"></div>
-          <button type="button" id="addItem" class="add-btn">+ 添加费用条目</button>
+        <div class="f-group" id="fgRate">
+          <label for="fRate" class="f-label">时薪（元/小时） <span class="f-hint">留空用默认</span></label>
+          <input type="number" id="fRate" min="0" step="0.5" inputmode="decimal" placeholder="默认时薪" class="f-input">
+        </div>
+        <div class="f-group" id="fgDayType">
+          <label for="fDayType" class="f-label">当日类型 <span class="f-hint">特殊排班可改</span></label>
+          <select id="fDayType" class="f-input">
+            <option value="auto">自动（按节假日库判定）</option>
+            <option value="weekday">工作日档</option>
+            <option value="weekend">休息日（周末）档</option>
+            <option value="holiday">法定节假日档</option>
+          </select>
+        </div>
+        <div class="f-group" id="fgFee" style="display:none">
+          <div class="fee-preview"><span>加班费预览</span><b id="feePreviewVal">¥0.00</b></div>
         </div>
         <button type="submit" class="submit-btn" id="submitBtn">添加记录</button>
       </form>
@@ -1523,6 +1687,15 @@ input[type="month"].stage-to{opacity:0;position:absolute;pointer-events:none;hei
         <div class="f-group">
           <label class="f-label" for="rateModalInput">默认每小时加班费（元）</label>
           <input type="number" id="rateModalInput" class="f-input" min="0" step="1" placeholder="例如：25">
+        </div>
+        <!-- 加班费倍率（按日类型三档，可自行调整） -->
+        <div class="f-group">
+          <label class="f-label">加班费倍率</label>
+          <div class="mult-grid">
+            <div class="mult-cell"><span>工作日</span><input type="number" id="multWeekday" min="1" step="0.5" inputmode="decimal"></div>
+            <div class="mult-cell"><span>休息日</span><input type="number" id="multWeekend" min="1" step="0.5" inputmode="decimal"></div>
+            <div class="mult-cell"><span>节假日</span><input type="number" id="multHoliday" min="1" step="0.5" inputmode="decimal"></div>
+          </div>
         </div>
         <div style="margin-top:6px;padding:8px 10px;background:var(--bg);border-radius:10px;font-size:12px;color:var(--text-light);line-height:1.55">
           未设定月份阶段时，所有月份统一使用此费率。
@@ -1789,6 +1962,49 @@ function getDayInfo(dateStr) {
   return { type: type, name: name, dow: dow };
 }
 
+/* ====== 加班费计算：日类型 → 倍率档 → 时薪×倍率×时长 ====== */
+// 生效日类型：单日手动改写（特殊排班）优先，否则按节假日库自动判定
+function effectiveDayType(dateStr) {
+  var ov = (state.settings && state.settings.dayOverrides) ? state.settings.dayOverrides[dateStr] : null;
+  if (ov === 'weekday' || ov === 'weekend' || ov === 'holiday') return ov;
+  return getDayInfo(dateStr).type; // 'weekday' | 'weekend' | 'holiday'
+}
+// 倍率：settings.mult 可配置，缺省 1.5 / 2 / 3
+function multForDayType(dt) {
+  var m = (state.settings && state.settings.mult) ? state.settings.mult : {};
+  var def = { weekday: 1.5, weekend: 2, holiday: 3 };
+  var v = Number(m[dt]);
+  return (v > 0) ? v : def[dt];
+}
+// 时薪：与后端 getMonthlyRate 同逻辑 —— 当月 monthlyRates → 最近的历史月份 → 默认时薪
+function rateForDate(dateStr) {
+  var s = state.settings || {};
+  var rates = s.monthlyRates || {};
+  var m = String(dateStr || '').slice(0, 7);
+  if (m && rates[m] != null && !isNaN(rates[m])) return Number(rates[m]) || 0;
+  var keys = Object.keys(rates).filter(function(k){ return m && k < m && rates[k] != null && !isNaN(rates[k]); }).sort();
+  if (keys.length) return Number(rates[keys[keys.length - 1]]) || 0;
+  return Number(s.hourlyRate) || 0;
+}
+var DAYTYPE_LABEL = { weekday: '工作日', weekend: '休息日', holiday: '法定节假日' };
+// 表单内加班费实时预览：时长 × 时薪 × 倍率，并回显当前档位
+function updateFeePreview() {
+  var el = $('feePreviewVal'), fg = $('fgFee');
+  if (!el || !fg) return;
+  var isLeave = (getFormType() === 'leave');
+  fg.style.display = isLeave ? 'none' : '';
+  if (isLeave) return;
+  var date = $('fDate') ? $('fDate').value : '';
+  var hours = parseFloat($('fHours') ? $('fHours').value : '') || 0;
+  var rateInput = $('fRate') ? parseFloat($('fRate').value) : NaN;
+  var rate = (isNaN(rateInput) ? 0 : rateInput) || rateForDate(date);
+  var dtSel = $('fDayType') ? $('fDayType').value : 'auto';
+  var dt = (dtSel === 'auto' && date) ? effectiveDayType(date) : (dtSel === 'auto' ? 'weekday' : dtSel);
+  var mult = multForDayType(dt);
+  var fee = Math.round(hours * rate * mult * 100) / 100;
+  el.textContent = '¥' + fee.toFixed(2) + '（' + (DAYTYPE_LABEL[dt] || dt) + ' ' + mult + '× · ' + rate + '元/h × ' + hours + 'h）';
+}
+
 function buildDayMap() {
   var map = {}, i, r, d;
   if (!state.records) return map;
@@ -1800,9 +2016,10 @@ function buildDayMap() {
        否则统计按月前缀能匹配、日历按完整日期精确匹配会全部落空（9月记录日历不显示的根因） */
     var dm = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(d.trim());
     d = dm ? (dm[1] + '-' + pad2(Number(dm[2])) + '-' + pad2(Number(dm[3]))) : d.slice(0, 10);
-    if (!map[d]) map[d] = { hours: 0, count: 0, note: '' };
+    if (!map[d]) map[d] = { hours: 0, count: 0, note: '', leave: 0 };
     map[d].hours += Number(r.hours) || 0;
     map[d].count += 1;
+    if (r.type === 'leave') map[d].leave += 1;
     /* 保留最后一条非空备注 */
     if (r.note && r.note.trim()) map[d].note = r.note.trim();
   }
@@ -1852,24 +2069,40 @@ function renderCalendar() {
       if (out) cls += ' cal-out';
       else if (info.type === 'holiday') cls += ' cal-ho';
       else if (info.type === 'weekend') cls += ' cal-we';
-      if (rec && (rec.hours > 0 || rec.count > 0)) cls += ' cal-ot';
-      if (!out && info.type === 'weekday') {
-        // 补班日（getDayInfo 已判定，workday 标志）加框；普通工作日加淡色框
+      /* 四类加班标记：按生效日类型分色 —— 工作日延时(紫)/休息日(橙)/法定节假日(红)；请假(青)优先级按下方规则 */
+      var isLeave = !!(rec && rec.leave > 0 && !(rec.hours > 0));
+      var otDayType = (rec && rec.hours > 0 && !isLeave) ? effectiveDayType(dateStr) : null;
+      if (otDayType === 'weekend') cls += ' cal-ot-we';
+      else if (otDayType === 'holiday') cls += ' cal-ot-ho';
+      else if (otDayType) cls += ' cal-ot';
+      if (isLeave) cls += ' cal-leave';
+      if (!out && info.type === 'weekday' && !otDayType && !isLeave) {
+        // 补班日（getDayInfo 已判定，workday 标志）加框；普通工作日加淡色框（正常班）
         if (info.workday) cls += ' cal-wd';
-        else if (cls.indexOf('cal-ot') === -1) cls += ' cal-wk';
+        else cls += ' cal-wk';
       }
       if (dateStr === today) cls += ' cal-today';
       hname = (info.name) ? '<span class="cal-hname">' + escHtml(info.name) + '</span>' : '';
+      /* 右上角小圆标（系统日历风）：补班日=橙「补」；周末/法定节假日=蓝「休」 */
+      var wdFlag = (!out && info.workday) ? '<span class="cal-wd-flag">补</span>' : '';
+      var restFlag = (!out && !info.workday && (info.type === 'weekend' || info.type === 'holiday')) ? '<span class="cal-rest-flag">休</span>' : '';
       otBadge = (rec && rec.hours > 0) ? '<span class="cal-ot-badge">' + (Math.round(rec.hours * 100) / 100) + 'h</span>' : '';
-      /* 备注显示：有加班记录且有备注时，在日期下方居中显示（PC端） */
+      /* 请假徽章：显示请假类型（取备注前 4 字，如「年假」），青色——手机端也可见 */
+      var leaveBadge = '';
+      if (isLeave && rec.note && rec.note.trim()) {
+        var ltxt = escHtml(rec.note.trim());
+        if (ltxt.length > 4) ltxt = ltxt.slice(0, 4) + '…';
+        leaveBadge = '<span class="cal-leave-badge">' + ltxt + '</span>';
+      }
+      /* 备注显示：非请假日且有备注时，在日期下方居中显示（PC端；请假日已用徽章显示类型） */
       var noteEl = '';
-      if (rec && rec.note && rec.note.trim()) {
+      if (rec && rec.note && rec.note.trim() && !isLeave) {
         var ntxt = escHtml(rec.note.trim());
         if (ntxt.length > 8) ntxt = ntxt.slice(0, 7) + '…';
         noteEl = '<span class="cal-note" title="' + escHtml(rec.note.trim()) + '">' + ntxt + '</span>';
       }
-      /* 渲染顺序：日期数字 → 节假日名 → 备注(居中) → 加班时间(底部) */
-      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + (rec && rec.note ? ' | '+escHtml(rec.note) : '') + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + noteEl + otBadge + '</div>');
+      /* 渲染顺序：日期数字 → 节假日名 → 备注(居中) → 请假/加班徽章(底部) */
+      cells.push('<div class="' + cls + '" role="gridcell" data-date="' + dateStr + '" title="' + dateStr + (rec && rec.note ? ' | '+escHtml(rec.note) : '') + '"><span class="cal-num">' + dateObj.getDate() + '</span>' + hname + wdFlag + restFlag + noteEl + leaveBadge + otBadge + '</div>');
     }
     daysEl = $('calDays');
     if (daysEl) daysEl.innerHTML = cells.join('');
@@ -1878,17 +2111,24 @@ function renderCalendar() {
 
 function openModal(dateStr, existingRecord) {
   resetForm();
+  setFormType(existingRecord && existingRecord.type === 'leave' ? 'leave' : 'overtime');
   var fd = $('fDate'); if (fd && dateStr) fd.value = dateStr;
   if (existingRecord) {
     state.editingId = existingRecord.id;
     if (fd) fd.value = existingRecord.date || '';
     var fh = $('fHours'); if (fh) fh.value = existingRecord.hours || 0;
     var fn = $('fNote'); if (fn) fn.value = existingRecord.note || '';
-    var il = $('itemList'); if (il) il.innerHTML = '';
-    var items = existingRecord.items || [];
-    for (var j = 0; j < items.length; j++) addItemRow(items[j].name, items[j].amount);
+    // 时薪：有快照用快照，否则留空走默认
+    var fr = $('fRate'); if (fr) fr.value = (existingRecord.rate != null && existingRecord.rate !== '') ? existingRecord.rate : '';
+    // 当日类型：该日期被手动改写过则回显改写值，否则自动
+    var ft = $('fDayType');
+    if (ft) {
+      var ov = (state.settings && state.settings.dayOverrides) ? state.settings.dayOverrides[existingRecord.date || dateStr] : null;
+      ft.value = (ov === 'weekday' || ov === 'weekend' || ov === 'holiday') ? ov : 'auto';
+    }
     var mt = $('modalTitle'); if (mt) mt.textContent = '\u7F16\u8F91\u52A0\u73ED\u8BB0\u5F55';
     var sb = $('submitBtn'); if (sb) sb.textContent = '\u4FDD\u5B58\u4FEE\u6539';
+    var fgE = $('fgLeaveEnd'); if (fgE) fgE.style.display = 'none'; /* 编辑单条时不支持批量 */
   } else {
     var mt2 = $('modalTitle'); if (mt2) mt2.textContent = '\u6DFB\u52A0\u52A0\u73ED\u8BB0\u5F55';
     var sb2 = $('submitBtn'); if (sb2) sb2.textContent = '\u6DFB\u52A0\u8BB0\u5F55';
@@ -1902,6 +2142,12 @@ function closeModal() { var mo = $('modalOverlay'); if (mo) mo.className = 'moda
 function openRateModal() {
   var input = $('rateModalInput');
   if (input && state.settings) input.value = state.settings.hourlyRate || '';
+  // 三档倍率回显（未配置时显示默认 1.5/2/3）
+  var defs = { weekday: 1.5, weekend: 2, holiday: 3 };
+  var cur = (state.settings && state.settings.mult) ? state.settings.mult : {};
+  ['Weekday', 'Weekend', 'Holiday'].forEach(function(k) {
+    var el = $('mult' + k); if (el) el.value = (Number(cur[k.toLowerCase()]) > 0) ? Number(cur[k.toLowerCase()]) : defs[k.toLowerCase()];
+  });
   renderMonthlyRates(true);
   bindRateToggle();
   var mo = $('rateModalOverlay');
@@ -1913,11 +2159,20 @@ function saveRateModal() {
   if (!input) return;
   var rate = parseFloat(input.value);
   if (isNaN(rate) || rate < 0) { toast('请输入有效费率'); return; }
+  // 三档倍率：非法值回落默认
+  var defs = { weekday: 1.5, weekend: 2, holiday: 3 };
+  var mult = {};
+  ['weekday', 'weekend', 'holiday'].forEach(function(k) {
+    var el = $('mult' + k.charAt(0).toUpperCase() + k.slice(1));
+    var v = el ? parseFloat(el.value) : NaN;
+    mult[k] = (!isNaN(v) && v > 0) ? v : defs[k];
+  });
   if (!state.settings) state.settings = {};
   state.settings.hourlyRate = rate;
+  state.settings.mult = mult;
   applyStagesToMonthlyRates();
-  api('PUT', '/api/settings', { hourlyRate: rate, monthlyRates: state.settings.monthlyRates || {} }).then(function() {
-    toast('已保存时薪');
+  api('PUT', '/api/settings', { hourlyRate: rate, monthlyRates: state.settings.monthlyRates || {}, mult: mult }).then(function() {
+    toast('已保存时薪与倍率');
     closeRateModal();
     refreshDisplayCards();
     renderSummary();
@@ -2042,6 +2297,9 @@ function renderSummary(scope) {
   labelPrefix = y + '年' + (m + 1) + '月';
 
   var hours = 0, cost = 0, i, r, el, h;
+  // 分类汇总：按日类型（记录快照优先，否则按节假日库判定）拆分时长/金额；请假日单独计数
+  var byType = { weekday: { hours: 0, cost: 0 }, weekend: { hours: 0, cost: 0 }, holiday: { hours: 0, cost: 0 } };
+  var leaveDays = 0;
   if (state.records) {
     for (i = 0; i < state.records.length; i++) {
       r = state.records[i];
@@ -2049,11 +2307,28 @@ function renderSummary(scope) {
       if (r.date.slice(0, 7) !== ym) continue;
       hours += Number(r.hours) || 0;
       cost += Number(r.subtotal) || 0;
+      if (r.type === 'leave') { leaveDays += 1; continue; }
+      var dt = (r.dayType === 'weekday' || r.dayType === 'weekend' || r.dayType === 'holiday') ? r.dayType : effectiveDayType(r.date);
+      if (!byType[dt]) dt = 'weekday';
+      byType[dt].hours += Number(r.hours) || 0;
+      byType[dt].cost += Number(r.subtotal) || 0;
     }
   }
   h = Math.round(hours * 100) / 100;
   el = $('statHours'); if (el) el.innerHTML = h + '<span class="stat-unit">h</span>';
   el = $('statCost'); if (el) el.textContent = '¥' + money(cost);
+
+  // 渲染分类汇总行（仅有内容的档位 + 请假）
+  var bk = $('statBreakdown');
+  if (bk) {
+    var parts = [], k;
+    for (k in byType) {
+      if (!byType[k].hours && !byType[k].cost) continue;
+      parts.push('<span class="bk-item"><i class="bk-dot bk-' + k + '"></i>' + DAYTYPE_LABEL[k] + ' ' + (Math.round(byType[k].hours * 100) / 100) + 'h · ¥' + money(byType[k].cost) + '</span>');
+    }
+    if (leaveDays) parts.push('<span class="bk-item"><i class="bk-dot bk-leave"></i>请假 ' + leaveDays + ' 天</span>');
+    bk.innerHTML = parts.length ? parts.join('') : '<span class="bk-item bk-empty">本月暂无记录</span>';
+  }
 
   // 卡片标签：跟随当前统计月份
   var lblHours = $('statHoursLabel'), lblCost = $('statCostLabel');
@@ -2111,7 +2386,7 @@ function runQuery() {
 
   // ---- 逐月汇总 ----
   var monthMap = {}; // { 'YYYY-MM': { hours, cost, cnt } }
-  var totalHours = 0, totalCost = 0, totalCnt = 0, i, r;
+  var totalHours = 0, totalCost = 0, totalCnt = 0, leaveDays = 0, i, r;
   if (state.records) {
     for (i = 0; i < state.records.length; i++) {
       r = state.records[i];
@@ -2119,6 +2394,7 @@ function runQuery() {
       var rm = r.date.slice(0, 7);
       if (rm < ymStart || rm > ymEnd) continue;
       var h = Number(r.hours) || 0, c = Number(r.subtotal) || 0;
+      if (r.type === 'leave') leaveDays++;
       if (!monthMap[rm]) monthMap[rm] = { hours: 0, cost: 0, cnt: 0 };
       monthMap[rm].hours += h;
       monthMap[rm].cost += c;
@@ -2156,6 +2432,7 @@ function runQuery() {
     '<div class="qr-grid">' +
       '<div class="qr-item"><span class="qr-k">加班费</span><span class="qr-v">¥' + money(totalCost) + '</span></div>' +
       '<div class="qr-item"><span class="qr-k">加班时长</span><span class="qr-v">' + totalHours + 'h</span></div>' +
+      (leaveDays > 0 ? '<div class="qr-item"><span class="qr-k">请假</span><span class="qr-v">' + leaveDays + ' 天</span></div>' : '') +
       '<div class="qr-item"><span class="qr-k">合计</span><span class="qr-v accent">¥' + money(grand) + '</span></div>' +
     '</div>' +
     (totalCnt ? '' : '<div class="qr-tip">该区间暂无加班记录</div>');
@@ -2231,26 +2508,39 @@ function renderRecurring() {
   rl.innerHTML = html;
 }
 
-function addItemRow(name, amount) {
-  var list = $('itemList'); if (!list) return;
-  var row = document.createElement('div'); row.className = 'item-row';
-  row.innerHTML = '<input type="text" class="it-name" placeholder="\u8D39\u7528\u540D\u79F0" value="' + escHtml(name||'') + '"><input type="number" class="it-amt" min="0" step="0.5" placeholder="\u91D1\u989D" value="' + (amount!=null?amount:'') + '"><button type="button" class="del" title="\u5220\u9664">\u00D7</button>';
-  var delBtn = row.querySelector('.del');
-  if (delBtn) delBtn.onclick = function() { row.parentNode.removeChild(row); };
-  list.appendChild(row);
-}
-function collectItems() {
-  var rows = $('itemList') ? $('itemList').querySelectorAll('.item-row') : [], items = [], i, r, nameInput, amtInput, name, amt;
-  for (i = 0; i < rows.length; i++) { r = rows[i]; nameInput = r.querySelector('.it-name'); amtInput = r.querySelector('.it-amt'); name = nameInput ? nameInput.value.trim() : ''; amt = amtInput ? parseFloat(amtInput.value) : NaN; if (name || !isNaN(amt)) items.push({ name: name||'\u8D39\u7528', amount: isNaN(amt)?0:Math.round(amt*100)/100 }); }
-  return items;
-}
 function resetForm() {
   state.editingId = null;
   var form = $('recordForm'); if (form) form.reset();
   var fd = $('fDate'); if (fd) fd.value = new Date().toISOString().slice(0, 10);
-  var il = $('itemList'); if (il) il.innerHTML = '';
+  var fe = $('fLeaveEnd'); if (fe) fe.value = '';
+  var sw = $('skipWeekend'); if (sw) sw.checked = true;
+  var fr = $('fRate'); if (fr) fr.value = '';
+  var ft = $('fDayType'); if (ft) ft.value = 'auto';
   var mt = $('modalTitle'); if (mt) mt.textContent = '\u6DFB\u52A0\u52A0\u73ED\u8BB0\u5F55';
   var sb = $('submitBtn'); if (sb) sb.textContent = '\u6DFB\u52A0\u8BB0\u5F55';
+  setFormType('overtime');
+}
+
+/* 表单类型切换：加班 / 请假（请假时隐藏时长与费用条目，时长固定 0） */
+function setFormType(t) {
+  var seg = $('typeSeg'); if (!seg) return;
+  var btns = seg.querySelectorAll('.type-btn'), i;
+  for (i = 0; i < btns.length; i++) btns[i].className = 'type-btn' + (btns[i].getAttribute('data-t') === t ? ' active' : '');
+  var isLeave = (t === 'leave');
+  var fgH = $('fgHours'), fgR = $('fgRate'), fgD = $('fgDayType'), fgE = $('fgLeaveEnd'), fh = $('fHours'), fn = $('fNote'), nh = $('noteHint');
+  if (fgH) fgH.style.display = isLeave ? 'none' : '';
+  if (fgR) fgR.style.display = isLeave ? 'none' : '';
+  if (fgD) fgD.style.display = isLeave ? 'none' : '';
+  if (fgE) fgE.style.display = isLeave ? '' : 'none'; /* 请假批量录入：结束日期区间 */
+  if (fh) { if (isLeave) fh.removeAttribute('required'); else fh.setAttribute('required', ''); }
+  if (fn) fn.placeholder = isLeave ? '例如 年假 / 事假 / 病假' : '例如 项目上线支持';
+  if (nh) nh.textContent = isLeave ? '请假类型' : '可选';
+  $('recordForm').setAttribute('data-type', t);
+  updateFeePreview();
+}
+function getFormType() {
+  var f = $('recordForm');
+  return (f && f.getAttribute('data-type') === 'leave') ? 'leave' : 'overtime';
 }
 function syncSettingsInputs() {
   var sr = $('sRate');
@@ -2477,7 +2767,20 @@ function bindEvents() {
     if (moon) moon.style.display = (next==='dark')?'none':'';
     if (sun) sun.style.display = (next==='dark')?'':'none';
   };
-  var ai = $('addItem'); if (ai) ai.onclick = function() { addItemRow('', ''); };
+  // 加班费实时预览：日期/时长/时薪/日类型任一变化即刷新
+  ['fDate', 'fHours', 'fRate', 'fDayType'].forEach(function(id) {
+    var el2 = $(id); if (!el2) return;
+    el2.addEventListener('input', updateFeePreview);
+    el2.addEventListener('change', updateFeePreview);
+  });
+  // 时长快速预设：点 2 / 8 小时直接填入并刷新费用预览
+  var hoursQuick = $('hoursQuick');
+  if (hoursQuick) hoursQuick.addEventListener('click', function(e) {
+    var btn = e.target.closest('.chip'); if (!btn) return;
+    var fh = $('fHours'); if (!fh) return;
+    fh.value = btn.getAttribute('data-h');
+    updateFeePreview();
+  });
   // 自定义费用弹窗：添加按钮
   var rma = $('recurringModalAdd');
   if (rma) rma.onclick = function() {
@@ -2496,16 +2799,61 @@ function bindEvents() {
       renderRecurringModalList();
     }
   };
+  // 类型切换（加班/请假）
+  var seg = $('typeSeg');
+  if (seg) seg.onclick = function(e) {
+    var b = e.target.closest ? e.target.closest('.type-btn') : null;
+    if (b) setFormType(b.getAttribute('data-t') === 'leave' ? 'leave' : 'overtime');
+  };
   var rf = $('recordForm');
   if (rf) rf.onsubmit = function(e) {
     e.preventDefault();
     var fDateEl = $('fDate'), fHoursEl = $('fHours'), fNoteEl = $('fNote');
     var date = fDateEl ? fDateEl.value : '', hours = parseFloat(fHoursEl ? fHoursEl.value : '0');
+    var isLeave = (getFormType() === 'leave');
+    if (isLeave) hours = 0; // 请假不计时长
     if (!date || isNaN(hours) || hours < 0) { toast('\u8BF7\u586B\u5199\u6709\u6548\u7684\u65E5\u671F\u4E0E\u65F6\u957F'); return; }
-    var payload = { date: date, hours: Math.round(hours*100)/100, note: fNoteEl?fNoteEl.value.trim():'', items: collectItems() };
+    // 请假批量录入：填了结束日期则按区间一次录入（如陪产假 15 天）
+    var endRaw = $('fLeaveEnd') ? $('fLeaveEnd').value : '';
+    if (isLeave && endRaw) {
+      if (endRaw < date) { toast('\u7ED3\u675F\u65E5\u671F\u4E0D\u80FD\u65E9\u4E8E\u5F00\u59CB\u65E5\u671F'); return; }
+      var skipWk = $('skipWeekend') ? $('skipWeekend').checked : false;
+      var existMap = {}; if (state.records) { for (var ei = 0; ei < state.records.length; ei++) existMap[state.records[ei].date] = 1; }
+      var days = [], cur = new Date(date + 'T00:00:00'), endDate = new Date(endRaw + 'T00:00:00'), guard = 0;
+      while (cur <= endDate && guard < 62) {
+        var ds = cur.getFullYear() + '-' + pad2(cur.getMonth() + 1) + '-' + pad2(cur.getDate());
+        if (!(skipWk && getDayInfo(ds).type === 'weekend') && !existMap[ds]) days.push(ds);
+        cur.setDate(cur.getDate() + 1); guard++;
+      }
+      if (!days.length) { toast('\u8BE5\u671F\u95F4\u65E0\u9700\u5F55\u5165\uFF08\u5747\u5DF2\u6709\u8BB0\u5F55\u6216\u5747\u4E3A\u4F11\u606F\u65E5\uFF09'); return; }
+      var batchNote = fNoteEl ? fNoteEl.value.trim() : '';
+      Promise.all(days.map(function(ds) {
+        return api('POST', '/api/records', { date: ds, hours: 0, note: batchNote, type: 'leave', items: [], rate: null, dayType: null, mult: null });
+      })).then(function() {
+        toast('\u5DF2\u5F55\u5165\u8BF7\u5047 ' + days.length + ' \u5929');
+        closeModal(); return refresh();
+      }).catch(function(err) { toast('\u6279\u91CF\u5F55\u5165\u5931\u8D25:' + (err.message || err)); });
+      return;
+    }
+    // 日类型：自动 = 按节假日库判定（并清除该日的手动改写）；手动选择 = 写入改写表（特殊排班）
+    var dtSel = $('fDayType') ? $('fDayType').value : 'auto';
+    var dt = (dtSel === 'auto') ? effectiveDayType(date) : dtSel;
+    // 时薪：留空用当月生效费率，填写则单条覆盖
+    var rateRaw = $('fRate') ? parseFloat($('fRate').value) : NaN;
+    var rate = (!isNaN(rateRaw) && rateRaw > 0) ? Math.round(rateRaw * 100) / 100 : null;
+    var mult = isLeave ? null : multForDayType(dt);
+    var payload = { date: date, hours: Math.round(hours*100)/100, note: fNoteEl?fNoteEl.value.trim():'', type: isLeave ? 'leave' : 'overtime', items: [], rate: isLeave ? null : rate, dayType: isLeave ? null : dt, mult: mult };
+    // 同步单日类型改写（仅加班记录且选择非自动时写入；选自动则清除该日改写）
+    var ovSync = null;
+    if (!isLeave) {
+      var curOv = (state.settings && state.settings.dayOverrides) ? state.settings.dayOverrides[date] : null;
+      var wantOv = (dtSel === 'auto') ? null : dtSel;
+      if (curOv !== wantOv) ovSync = { dayOverrides: (function(){ var o = {}; o[date] = wantOv; return o; })() };
+    }
     var submitFn = function() {
-      if (state.editingId) return api('PUT','/api/records/'+state.editingId,payload).then(function(){toast('\u5DF2\u66F4\u65B0\u8BB0\u5F55');});
-      else return api('POST','/api/records',payload).then(function(){toast('\u5DF2\u6DFB\u52A0\u8BB0\u5F55');});
+      var main = (state.editingId ? api('PUT','/api/records/'+state.editingId,payload).then(function(){toast(isLeave?'\u5DF2\u4FDD\u5B58\u8BF7\u5047':'\u5DF2\u66F4\u65B0\u8BB0\u5F55');})
+                                  : api('POST','/api/records',payload).then(function(){toast(isLeave?'\u5DF2\u6DFB\u52A0\u8BF7\u5047':'\u5DF2\u6DFB\u52A0\u8BB0\u5F55');}));
+      return ovSync ? main.then(function(){ return api('PUT','/api/settings',ovSync); }) : main;
     };
     submitFn().then(function(){ closeModal(); return refresh(); }).catch(function(err){ toast('\u64CD\u4F5C\u5931\u8D25:'+(err.message||err)); });
   };
@@ -2757,7 +3105,7 @@ function api(method, url, body, mode) {
   return apiRaw(method, url, body, null);
 }
 
-var APP_VERSION = '1.3.7';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
+var APP_VERSION = '1.3.9';   // 当前版本（与 server.js / manifest / fnpack.json 保持同步）
 var UPDATE_SOURCE = 'https://github.com/bubujun1/overtime-tracker';
 (function(){ var vi = $('verInline'); if (vi) vi.textContent = 'v' + APP_VERSION; })();
 (function(){ var vf = $('verBadgeFixed'); if (vf) vf.textContent = '记加班 v' + APP_VERSION; })();

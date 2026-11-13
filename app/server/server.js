@@ -21,7 +21,7 @@ const SOCKET_PATH = (process.env.MONITOR_SOCKET_PATH || '').trim();
 const BASE_PATH = (process.env.BASE_PATH || '/app/overtime-tracker').replace(/\/+$/, '');
 const PORT = parseInt(process.env.PORT || '8787', 10);
 const LOG_FILE = path.join(VAR_DIR, 'info.log');
-const APP_VERSION = '1.3.7';
+const APP_VERSION = '1.3.9';
 
 const UI_DIR = path.join(APP_DIR, 'ui');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
@@ -508,15 +508,23 @@ function normalizeRecord(r) {
   const date = normDateStr(r.date) || new Date().toISOString().slice(0, 10);
   const hours = round2(Number(r.hours) || 0);
   const note = (typeof r.note === 'string') ? r.note : '';
+  const type = (r.type === 'leave') ? 'leave' : 'overtime'; // 请假记录（缺省加班，旧数据兼容）
   const items = Array.isArray(r.items)
     ? r.items.map((it) => ({ name: String(it.name || '').trim(), amount: round2(Number(it.amount) || 0) }))
     : [];
+  // 加班费快照：rate=录入时薪（留空则计费时按当月费率）、dayType=录入时的日类型（决定倍率档）、mult=倍率
+  // 旧数据三者缺省 → 倍率按 1、时薪按当月费率，费用与原来一致
+  const dayType = ['weekday', 'weekend', 'holiday'].includes(r.dayType) ? r.dayType : null;
+  const mult = (Number(r.mult) > 0) ? round2(Number(r.mult)) : null;
+  const recRate = (Number(r.rate) > 0) ? round2(Number(r.rate)) : null;
   const createdAt = (typeof r.createdAt === 'number') ? r.createdAt : Date.now();
-  return { id, date, hours, note, items, createdAt };
+  return { id, date, hours, note, type, items, rate: recRate, dayType, mult, createdAt };
 }
 
+// 记录加班费 = 时长 × 时薪(优先快照，否则当月费率) × 倍率（无快照的旧记录按 1 倍，兼容原计费）
 function recordSubtotal(rec, rate) {
-  const base = (Number(rec.hours) || 0) * (Number(rate) || 0);
+  const effRate = (Number(rec.rate) > 0) ? Number(rec.rate) : (Number(rate) || 0);
+  const base = (Number(rec.hours) || 0) * effRate * (Number(rec.mult) || 1);
   const extra = (rec.items || []).reduce((s, it) => s + (Number(it.amount) || 0), 0);
   return round2(base + extra);
 }
@@ -1212,6 +1220,26 @@ async function handleApi(req, res, apiPath, method) {
     try { patch = JSON.parse((await readBody(req)) || '{}'); }
     catch { return sendJSON(res, 400, { error: 'invalid json' }); }
     if (typeof patch.hourlyRate === 'number') db.settings.hourlyRate = round2(patch.hourlyRate);
+    // 加班费倍率（按日类型三档，客户端可自定）
+    if (patch.mult && typeof patch.mult === 'object') {
+      if (!db.settings.mult) db.settings.mult = {};
+      for (const k of ['weekday', 'weekend', 'holiday']) {
+        if (patch.mult[k] !== undefined) {
+          const v = Number(patch.mult[k]);
+          if (!isNaN(v) && v > 0) db.settings.mult[k] = round2(v);
+        }
+      }
+    }
+    // 单日类型改写（应对公司特殊排班）：'YYYY-MM-DD' → 类型；值为 null/'' 则删除改写
+    if (patch.dayOverrides && typeof patch.dayOverrides === 'object') {
+      if (!db.settings.dayOverrides) db.settings.dayOverrides = {};
+      for (const k of Object.keys(patch.dayOverrides)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) continue;
+        const v = patch.dayOverrides[k];
+        if (['weekday', 'weekend', 'holiday'].includes(v)) db.settings.dayOverrides[k] = v;
+        else delete db.settings.dayOverrides[k];
+      }
+    }
     // 月度加班费率（按 "YYYY-MM": rate 格式存储）
     if (patch.monthlyRates && typeof patch.monthlyRates === 'object') {
       if (!db.settings.monthlyRates) db.settings.monthlyRates = {};
@@ -1253,9 +1281,13 @@ async function handleApi(req, res, apiPath, method) {
         date: normDateStr(r.date) || new Date().toISOString().slice(0, 10),
         hours: round2(Number(r.hours) || 0),
         note: typeof r.note === 'string' ? r.note : '',
+        type: r.type === 'leave' ? 'leave' : 'overtime',
         items: Array.isArray(r.items)
           ? r.items.map((it) => ({ name: String(it.name || '').trim(), amount: round2(Number(it.amount) || 0) }))
           : [],
+        dayType: ['weekday', 'weekend', 'holiday'].includes(r.dayType) ? r.dayType : null,
+        mult: (Number(r.mult) > 0) ? round2(Number(r.mult)) : null,
+        rate: (Number(r.rate) > 0) ? round2(Number(r.rate)) : null,
         createdAt: Date.now()
       };
       db.records.push(rec);
@@ -1278,9 +1310,16 @@ async function handleApi(req, res, apiPath, method) {
       if (typeof r.date === 'string' && normDateStr(r.date)) rec.date = normDateStr(r.date);
       if (typeof r.hours === 'number') rec.hours = round2(r.hours);
       if (typeof r.note === 'string') rec.note = r.note;
+      if (r.type === 'leave' || r.type === 'overtime') rec.type = r.type;
       if (Array.isArray(r.items)) {
         rec.items = r.items.map((it) => ({ name: String(it.name || '').trim(), amount: round2(Number(it.amount) || 0) }));
       }
+      // 日类型/倍率快照：合法值覆盖，null 显式清除（切回"自动"时用）
+      if (r.dayType === null || ['weekday', 'weekend', 'holiday'].includes(r.dayType)) {
+        rec.dayType = r.dayType === null ? null : r.dayType;
+      }
+      if (r.mult === null || (Number(r.mult) > 0)) rec.mult = r.mult === null ? null : round2(Number(r.mult));
+      if (r.rate === null || (Number(r.rate) > 0)) rec.rate = r.rate === null ? null : round2(Number(r.rate));
       saveDB();
       return sendJSON(res, 200, { ...rec, subtotal: recordSubtotal(rec, getMonthlyRate(rec.date)) });
     }
